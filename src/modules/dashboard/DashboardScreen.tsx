@@ -298,6 +298,7 @@ function DashboardScreen() {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
+
               <div className="flex items-center justify-end space-x-2">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -389,6 +390,7 @@ function DashboardScreen() {
                         </div>
                       </div>
                     </div>
+                    
                   </div>
                 ))}
               </div>
