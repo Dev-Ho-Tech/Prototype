@@ -168,7 +168,23 @@ function DashboardScreen() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Estado del día</h3>
+            <div className="flex justify-between">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 mr-4">Estado del día</h3>
+              <div className="mt-4 space-y-2">
+                {dashboardData.dayStatus.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center mr-2">
+                      <div 
+                        className="w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-gray-600">{item.name}</span>
+                    </div>
+                    <span className="font-medium">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -187,24 +203,28 @@ function DashboardScreen() {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-            <div className="mt-4 space-y-2">
-              {dashboardData.dayStatus.map((item, index) => (
-                <div key={index} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center">
-                    <div 
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-gray-600">{item.name}</span>
-                  </div>
-                  <span className="font-medium">{item.value}</span>
-                </div>
-              ))}
-            </div>
+
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Horas trabajadas</h3>
+            <div className="flex justify-between">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Horas trabajadas</h3>
+              <div className="mt-4 space-y-2">
+                {dashboardData.workingHours.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center mr-2">
+                      <div 
+                        className="w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-gray-600">{item.name}</span>
+                    </div>
+                    <span className="font-medium">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -223,24 +243,27 @@ function DashboardScreen() {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-            <div className="mt-4 space-y-2">
-              {dashboardData.workingHours.map((item, index) => (
-                <div key={index} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center">
-                    <div 
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-gray-600">{item.name}</span>
-                  </div>
-                  <span className="font-medium">{item.value}</span>
-                </div>
-              ))}
-            </div>
+
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Eventos de tiempo</h3>
+            <div className="flex justify-between">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Eventos de tiempo</h3>
+              <div className="mt-4 space-y-2">
+                {dashboardData.timeEvents.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center">
+                      <div 
+                        className="w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-gray-600 mr-2">{item.name}</span>
+                    </div>
+                    <span className="font-medium">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -259,20 +282,6 @@ function DashboardScreen() {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-            <div className="mt-4 space-y-2">
-              {dashboardData.timeEvents.map((item, index) => (
-                <div key={index} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center">
-                    <div 
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-gray-600">{item.name}</span>
-                  </div>
-                  <span className="font-medium">{item.value}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 

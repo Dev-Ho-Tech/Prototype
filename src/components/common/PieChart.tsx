@@ -85,6 +85,7 @@ export function CustomPieChart({ data, title }: CustomPieChartProps) {
           </div>
         </div>
       </div>
+      
       <div className="mt-4 space-y-2">
         {data.map((item, index) => (
           <div key={index} className="flex items-center justify-between text-sm">
