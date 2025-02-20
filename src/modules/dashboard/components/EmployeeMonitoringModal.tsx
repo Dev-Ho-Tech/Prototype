@@ -176,10 +176,10 @@ export function EmployeeMonitoringModal({ employee, onClose }: EmployeeMonitorin
                     </button>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    {/* <div className="bg-gray-50 rounded-lg p-4">
                       <p className="text-sm text-gray-500">Horas trabajadas hoy</p>
                       <p className="text-2xl font-semibold text-gray-900">6h 30m</p>
-                    </div>
+                    </div> */}
                     <div className="bg-gray-50 rounded-lg p-4">
                       <p className="text-sm text-gray-500">Horas restantes</p>
                       <p className="text-2xl font-semibold text-gray-900">1h 30m</p>

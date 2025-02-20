@@ -166,8 +166,9 @@ function DashboardScreen() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 h-auto">
+
+          <div className="bg-white rounded-lg shadow-sm p-6 h-[400px]">
             <div className="flex justify-between">
               <h3 className="text-lg font-medium text-gray-900 mb-4 mr-4">Estado del día</h3>
               <div className="mt-4 space-y-2">
@@ -203,10 +204,9 @@ function DashboardScreen() {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 h-[400px]">
             <div className="flex justify-between">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Horas trabajadas</h3>
               <div className="mt-4 space-y-2">
@@ -246,7 +246,7 @@ function DashboardScreen() {
 
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 ">
             <div className="flex justify-between">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Eventos de tiempo</h3>
               <div className="mt-4 space-y-2">
@@ -355,6 +355,7 @@ function DashboardScreen() {
                         </div>
                       </div>
                       <div className="mt-4 space-y-2">
+
                         <div className="flex items-center justify-between text-sm">
                           <div className="flex items-center text-gray-500">
                             <Clock className="w-4 h-4 mr-1" />
@@ -364,6 +365,7 @@ function DashboardScreen() {
                             {employee.schedule[0].startTime || 'N/A'}
                           </span>
                         </div>
+
                         <div className="flex items-center justify-between text-sm">
                           <div className="flex items-center text-gray-500">
                             <Clock className="w-4 h-4 mr-1" />
@@ -373,14 +375,32 @@ function DashboardScreen() {
                             {employee.schedule[0].endTime || 'N/A'}
                           </span>
                         </div>
+
+                        <div className="flex items-center text-sm text-gray-500 border-b border-gray-300">
+                            <span className="truncate">Horas en Tiempo Real</span>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center text-gray-500">
+                            <Clock className="w-4 h-4 mr-1" />
+                            <span>Horas trabajadas hoy</span>
+                          </div>
+                          <span className="font-medium">
+                            6h 30m
+                          </span>
+                        </div>
+
                       </div>
+
                       <div className="mt-auto pt-4 border-t border-gray-100">
                         <div className="flex items-center justify-between">
+
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             employee.status === 'working' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                           }`}>
                             {employee.status === 'working' ? 'Activo' : 'Inactivo'}
                           </span>
+
                           <button 
                             onClick={() => setSelectedEmployee(employee)}
                             className="text-blue-600 hover:text-blue-700 text-sm font-medium"
