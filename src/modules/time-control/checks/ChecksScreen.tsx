@@ -225,12 +225,216 @@ export function ChecksScreen() {
             </table>
           </div>
         </div>
+
       </div>
 
       {/* Form Modal */}
       {showForm && (
         <CheckForm onClose={() => setShowForm(false)} />
       )}
+      <div className="flex">
+        {/* Turnos de Trabajo */}
+        <div className="bg-white rounded-lg shadow p-6 ml-8 mb-8">
+            <h2 className="text-xl font-semibold mb-4">Turnos de trabajos</h2>
+            <div className="flex gap-4 mb-6">
+
+              <div className="flex-1 relative">
+                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="10" cy="10" r="7"></circle>
+                  <line x1="21" y1="21" x2="15" y2="15"></line>
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Buscar turnos..."
+                  className="pl-10 pr-4 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="border rounded-lg p-4 border-pink-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium text-lg text-pink-500">Turno A</h3>
+                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                    Mañana
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p>Horario: 07:00 - 15:00</p>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 border-orange-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium text-lg text-orange-500">Turno B</h3>
+                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                    Tarde
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p>Horario: 15:00 - 23:00</p>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 border-cyan-500 text-cyan-500 text-cyan-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium text-lg text-cyan-500">Turno D</h3>
+                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                    Noche
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p>Horario: 15:00 - 23:00</p>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 border-purple-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium text-lg text-purple-500">Turno A</h3>
+                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                    Mañana
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p>Horario: 07:00 - 15:00</p>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 border-rose-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium text-lg text-rose-500 text-rose-500">Turno B</h3>
+                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                    Tarde
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p>Horario: 15:00 - 23:00</p>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 border-blue-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium text-lg text-blue-500">Turno D</h3>
+                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                    Noche
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p>Horario: 15:00 - 23:00</p>
+                </div>
+              </div>
+            </div>
+        </div>
+
+        {/* Licencia y permisos */}
+        <div className="bg-white rounded-lg shadow p-6 m-8">
+            <h2 className="text-xl font-semibold mb-4">Licencias y permisos</h2>
+            <div className="flex gap-4 mb-6">
+
+              <div className="flex-1 relative">
+                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="10" cy="10" r="7"></circle>
+                  <line x1="21" y1="21" x2="15" y2="15"></line>
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Buscar turnos..."
+                  className="pl-10 pr-4 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-pink-200 border-pink-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-pink-500">Descanso</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-orange-50 border-orange-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-orange-500">Licencia por Maternidad</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-cyan-200 border-cyan-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-cyan-500">Licencia por Tramite</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-purple-200 border-purple-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-purple-500">Estudios</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-rose-200 border-rose-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-rose-500">Tramite Legal</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-zinc-200 border-zinc-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-zinc-500">Nacimiento de un Hijo</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-fuchsia-200 border-fuchsia-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-fuchsia-500">Matrimonio</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-indigo-200 border-indigo-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-indigo-500">Licencia por Fallecimiento</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-cyan-200 border-cyan-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-cyan-500">Elaboración de Exámenes</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-pink-200 border-pink-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-pink-500">Incapacidad por Accidentes</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+              <div className="border bg-blue-200 border-blue-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+                <div className="flex justify-space-around items-start">
+                  <h3 className="font-medium text-lg ml-2 text-blue-500">Vacation</h3>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
     </div>
   );
 }
