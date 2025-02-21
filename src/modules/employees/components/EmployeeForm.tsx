@@ -50,10 +50,12 @@ export function EmployeeForm({ onClose }: EmployeeFormProps) {
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Nuevo Empleado</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {employee ? 'Editar Empleado' : 'Nuevo Empleado'}
+            </h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-500"
@@ -62,8 +64,8 @@ export function EmployeeForm({ onClose }: EmployeeFormProps) {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid grid-cols-3 gap-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Left Column */}
               <div className="space-y-6">
                 <div>
