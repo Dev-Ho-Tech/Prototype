@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Plus, Filter, Download, ChevronDown, Settings, LogOut, Users, ArrowUpRight, ArrowDownRight, Fingerprint } from 'lucide-react';
 import { CustomPieChart } from '../../../components/common/PieChart';
 import { EmployeeForm } from '../components/EmployeeForm';
+import Formemploye from '../Form-employe/Formemploye.tsx'
 
 export function EmployeeManagementScreen() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -220,6 +221,7 @@ export function EmployeeManagementScreen() {
               ))}
             </tbody>
           </table>
+          <Formemploye />
         </div>
       </div>
 

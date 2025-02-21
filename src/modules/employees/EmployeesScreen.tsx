@@ -155,7 +155,9 @@ export function EmployeesScreen() {
                 </tr>
               ))}
             </tbody>
+              
           </table>
+
         </div>
       </div>
 
