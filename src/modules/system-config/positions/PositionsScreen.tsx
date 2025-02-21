@@ -80,7 +80,7 @@ export function PositionsScreen() {
                     </span>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-2 gap-4">
+                  {/* <div className="mt-6 grid grid-cols-2 gap-4">
                     <div className="flex items-center space-x-2">
                       <Users className="w-4 h-4 text-gray-400" />
                       <span className="text-sm text-gray-600">
@@ -116,7 +116,8 @@ export function PositionsScreen() {
                     >
                       Ver detalles
                     </button>
-                  </div>
+                  </div> */}
+
                 </div>
               </div>
             ))}
