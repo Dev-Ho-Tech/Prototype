@@ -6,7 +6,7 @@ export const menuItems: MenuItem[] = [
     id: 'dashboard',
     label: 'Panel de Monitoreo',
     icon: BarChart2,
-    path: 'dashboard'
+    path: '/dashboard'
   },
   {
     id: 'employees',

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { LogoutModal } from './modules/auth/components/LogoutModal';
+import { authService } from './modules/auth/services/authService';
 import { Sidebar } from './components/layout/Sidebar';
 import { EmployeesScreen } from './modules/employees/EmployeesScreen';
 import { EmployeeManagementScreen } from './modules/employees/management/EmployeeManagementScreen';
@@ -27,16 +29,66 @@ import { DoorsScreen } from './modules/access-control/doors/DoorsScreen';
 import { VisitorsScreen } from './modules/access-control/visitors/VisitorsScreen';
 import { PermissionsScreen } from './modules/access-control/permissions/PermissionsScreen';
 import { MonitoringScreen } from './modules/access-control/monitoring/MonitoringScreen';
+import { LoginScreen } from './modules/auth/login/LoginScreen';
 import DashboardScreen from './modules/dashboard/DashboardScreen';
 
 function App() {
-  const [currentView, setCurrentView] = useState('dashboard');
+  const [currentView, setCurrentView] = useState('/dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isViewTransitioning, setIsViewTransitioning] = useState(false);
+
+  const handleLogin = useCallback(() => {
+    setIsAuthenticated(true);
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      setIsLoggingOut(true);
+      await authService.logout();
+      setIsAuthenticated(false);
+      setShowLogoutModal(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }, []);
+
+  const handleLogoutClick = useCallback(() => {
+    setShowLogoutModal(true);
+  }, []);
+
+  const handleViewChange = useCallback((view: string) => {
+    setIsViewTransitioning(true);
+    // Clear any existing timeouts
+    setTimeout(() => {
+      setCurrentView(view);
+      setIsViewTransitioning(false);
+    }, 150); // Small delay for smooth transition
+  }, []);
+
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
-      <div className="flex-1 overflow-hidden">
-        {currentView === 'dashboard' && <DashboardScreen />}
+      <Sidebar 
+        currentView={currentView} 
+        setCurrentView={handleViewChange}
+        onLogout={handleLogoutClick}
+      />
+      {showLogoutModal && (
+        <LogoutModal
+          onConfirm={handleLogout}
+          onCancel={() => setShowLogoutModal(false)}
+          isLoading={isLoggingOut}
+        />
+      )}
+      <div className={`flex-1 overflow-hidden transition-opacity duration-150 ${isViewTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+        {currentView === '/dashboard' && <DashboardScreen />}
         {currentView === '/employees/management' && <EmployeeManagementScreen />}
         {currentView === '/employees/records' && <RecordsScreen />}
         {currentView === '/employees/schedule' && <SchedulingScreen />}

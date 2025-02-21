@@ -70,9 +70,10 @@ function MenuItemComponent({ item, currentView, setCurrentView, level = 0 }: Men
   );
 }
 
-export function Sidebar({ currentView, setCurrentView }: {
+export function Sidebar({ currentView, setCurrentView, onLogout }: {
   currentView: string;
   setCurrentView: (view: string) => void;
+  onLogout: () => void;
 }) {
   const { isExpanded, toggleExpanded } = useSidebarStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -139,16 +140,14 @@ export function Sidebar({ currentView, setCurrentView }: {
               setCurrentView={setCurrentView}
             />
           ))}
-        </nav>
-
-        <div className="mt-6 mb-6">
           <button
-            className="mx-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-10 transition-all flex items-center space-x-3 w-[calc(100%-24px)]"
+            onClick={onLogout}
+            className="w-full mt-4 px-3 py-2 rounded-lg text-sm hover:bg-white hover:bg-opacity-10 transition-all flex items-center"
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />
-            {isExpanded && <span className="text-sm">Cerrar sesión</span>}
+            {isExpanded && <span className="ml-3">Cerrar sesión</span>}
           </button>
-        </div>
+        </nav>
       </aside>
 
       {/* Mobile Menu Overlay */}

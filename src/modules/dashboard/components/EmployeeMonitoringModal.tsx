@@ -18,154 +18,94 @@ interface EmployeeMonitoringModalProps {
 }
 
 export function EmployeeMonitoringModal({ employee, onClose }: EmployeeMonitoringModalProps) {
-  const [activeTab, setActiveTab] = useState('technical');
-
   return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Monitoreo de Empleado
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col">
+        {/* Header - Fixed */}
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-white sticky top-0 z-10">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Monitoreo de Empleado
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-500"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
 
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6" aria-label="Tabs">
-              <button
-                onClick={() => setActiveTab('technical')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                  activeTab === 'technical'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Ficha Técnica
-              </button>
-              <button
-                onClick={() => setActiveTab('workTime')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                  activeTab === 'workTime'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Tiempos Trabajados
-              </button>
-              <button
-                onClick={() => setActiveTab('events')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                  activeTab === 'events'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Novedades
-              </button>
-              <button
-                onClick={() => setActiveTab('checks')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                  activeTab === 'checks'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Marcajes
-              </button>
-            </nav>
-          </div>
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          <div className="container mx-auto">
+            {/* Technical Info Section */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Ficha Técnica</h3>
 
-          {/* Content */}
-          <div className="flex-1 overflow-auto p-6">
-            {activeTab === 'technical' && (
-              <div className="grid grid-cols-3 gap-6">
-                {/* Basic Information */}
-                <div className="col-span-2 bg-white rounded-lg border border-gray-200 p-6">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <img
-                        src={employee.photo}
-                        alt={employee.name}
-                        className="w-20 h-20 rounded-full object-cover"
-                      />
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">{employee.name}</h3>
-                        <p className="text-sm text-gray-500">{employee.position}</p>
-                        <p className="text-sm text-gray-500">{employee.documentId}</p>
-                      </div>
-                    </div>
-                    <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
-                      <Edit className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-center space-x-4">
+                    <img
+                      src={employee.photo}
+                      alt={employee.name}
+                      className="w-20 h-20 rounded-full object-cover"
+                    />
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-4">Información laboral</h4>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm text-gray-500">Departamento</p>
-                          <p className="text-sm font-medium text-gray-900">{employee.department}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Ubicación</p>
-                          <p className="text-sm font-medium text-gray-900">{employee.location}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Turno actual</p>
-                          <p className="text-sm font-medium text-gray-900">
-                            {employee.schedule[0].shift} ({employee.schedule[0].startTime} - {employee.schedule[0].endTime})
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-4">Estado actual</h4>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm text-gray-500">Estado</p>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            employee.status === 'working'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {employee.status === 'working' ? 'Trabajando' : 'Ausente'}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Última actualización</p>
-                          <p className="text-sm font-medium text-gray-900">Hace 5 minutos</p>
-                        </div>
-                      </div>
+                      <h3 className="text-lg font-medium text-gray-900">{employee.name}</h3>
+                      <p className="text-sm text-gray-500">{employee.position}</p>
+                      <p className="text-sm text-gray-500">{employee.documentId}</p>
                     </div>
                   </div>
+                  <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
+                    <Edit className="w-5 h-5" />
+                  </button>
                 </div>
-
-                {/* Quick Actions */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h4 className="text-sm font-medium text-gray-900 mb-4">Acciones rápidas</h4>
-                  <div className="space-y-3">
-                    <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
-                      <Edit className="w-4 h-4" />
-                      <span>Editar información</span>
-                    </button>
-                    <button className="w-full px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
-                      <Refresh className="w-4 h-4" />
-                      <span>Actualizar estado</span>
-                    </button>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-4">Información laboral</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm text-gray-500">Departamento</p>
+                        <p className="text-sm font-medium text-gray-900">{employee.department}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Ubicación</p>
+                        <p className="text-sm font-medium text-gray-900">{employee.location}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Turno actual</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {employee.schedule[0].shift} ({employee.schedule[0].startTime} - {employee.schedule[0].endTime})
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-4">Estado actual</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm text-gray-500">Estado</p>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          employee.status === 'working'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {employee.status === 'working' ? 'Trabajando' : 'Ausente'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Última actualización</p>
+                        <p className="text-sm font-medium text-gray-900">Hace 5 minutos</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {activeTab === 'workTime' && (
+            {/* Work Time Section */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Tiempos Trabajados</h3>
+
               <div className="grid grid-cols-3 gap-6">
                 {/* Real-time Hours */}
                 <div className="col-span-2 bg-white rounded-lg border border-gray-200 p-6">
@@ -223,9 +163,12 @@ export function EmployeeMonitoringModal({ employee, onClose }: EmployeeMonitorin
                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {activeTab === 'events' && (
+            {/* Events Section */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Novedades</h3>
+
               <div className="grid grid-cols-3 gap-6">
                 {/* Events List */}
                 <div className="col-span-2 bg-white rounded-lg border border-gray-200 p-6">
@@ -274,9 +217,12 @@ export function EmployeeMonitoringModal({ employee, onClose }: EmployeeMonitorin
                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {activeTab === 'checks' && (
+            {/* Checks Section */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Marcajes</h3>
+
               <div className="grid grid-cols-3 gap-6">
                 {/* Check History */}
                 <div className="col-span-2 bg-white rounded-lg border border-gray-200 p-6">
@@ -346,7 +292,7 @@ export function EmployeeMonitoringModal({ employee, onClose }: EmployeeMonitorin
                   </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

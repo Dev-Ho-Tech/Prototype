@@ -7,6 +7,9 @@ import Formemploye from '../Form-employe/Formemploye.tsx'
 export function EmployeeManagementScreen() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Sample data for charts and stats
   const locationData = [
@@ -34,7 +37,87 @@ export function EmployeeManagementScreen() {
       method: 'Biométrico',
       initial: 'K'
     },
-    // Add more employees as needed
+    {
+      id: '1010008285',
+      name: 'Maria Rodriguez',
+      position: 'Recepcionista',
+      location: 'Hodelpa Garden',
+      department: 'Front Desk',
+      method: 'Biométrico',
+      initial: 'M'
+    },
+    {
+      id: '1010008286',
+      name: 'Juan Perez',
+      position: 'Mantenimiento',
+      location: 'Centro Plaza Hodelpa',
+      department: 'Mantenimiento',
+      method: 'Biométrico',
+      initial: 'J'
+    },
+    {
+      id: '1010008287',
+      name: 'Ana Martinez',
+      position: 'Camarera',
+      location: 'Hodelpa Gran Almirante',
+      department: 'Habitaciones',
+      method: 'Biométrico',
+      initial: 'A'
+    },
+    {
+      id: '1010008288',
+      name: 'Carlos Santos',
+      position: 'Bartender',
+      location: 'Hodelpa Garden',
+      department: 'Alimentos y Bebidas',
+      method: 'Biométrico',
+      initial: 'C'
+    },
+    {
+      id: '1010008289',
+      name: 'Laura Mendez',
+      position: 'Supervisora',
+      location: 'Centro Plaza Hodelpa',
+      department: 'Habitaciones',
+      method: 'Biométrico',
+      initial: 'L'
+    },
+    {
+      id: '1010008290',
+      name: 'Pedro Guzman',
+      position: 'Chef',
+      location: 'Hodelpa Gran Almirante',
+      department: 'Alimentos y Bebidas',
+      method: 'Biométrico',
+      initial: 'P'
+    },
+    {
+      id: '1010008291',
+      name: 'Sofia Ramirez',
+      position: 'Contadora',
+      location: 'Hodelpa Garden',
+      department: 'Generales y Adm.',
+      method: 'Biométrico',
+      initial: 'S'
+    },
+    {
+      id: '1010008292',
+      name: 'Roberto Diaz',
+      position: 'Seguridad',
+      location: 'Centro Plaza Hodelpa',
+      department: 'Generales y Adm.',
+      method: 'Biométrico',
+      initial: 'R'
+    },
+    {
+      id: '1010008293',
+      name: 'Isabel Torres',
+      position: 'Coordinadora',
+      location: 'Hodelpa Gran Almirante',
+      department: 'Front Desk',
+      method: 'Biométrico',
+      initial: 'I'
+    }
   ];
 
   return (
@@ -182,14 +265,22 @@ export function EmployeeManagementScreen() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {employees.map((employee) => (
+              {employees
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((employee) => (
                 <tr key={employee.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <input type="checkbox" className="rounded border-gray-300" />
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{employee.id}</td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center">
+                    <div 
+                      className="flex items-center cursor-pointer"
+                      onClick={() => {
+                        setSelectedEmployee(employee);
+                        setShowForm(true);
+                      }}
+                    >
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium">
                         {employee.initial}
                       </div>
@@ -209,7 +300,13 @@ export function EmployeeManagementScreen() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex space-x-2">
-                      <button className="text-gray-400 hover:text-blue-600">
+                      <button 
+                        className="text-gray-400 hover:text-blue-600"
+                        onClick={() => {
+                          setSelectedEmployee(employee);
+                          setShowForm(true);
+                        }}
+                      >
                         <Settings className="w-5 h-5" />
                       </button>
                       <button className="text-gray-400 hover:text-red-600">
@@ -221,13 +318,41 @@ export function EmployeeManagementScreen() {
               ))}
             </tbody>
           </table>
-          <Formemploye />
+          <div className="px-6 py-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                Mostrando {Math.min((currentPage - 1) * itemsPerPage + 1, employees.length)} a {Math.min(currentPage * itemsPerPage, employees.length)} de {employees.length} empleados
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Anterior
+                </button>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(employees.length / itemsPerPage)))}
+                  disabled={currentPage >= Math.ceil(employees.length / itemsPerPage)}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Employee Form Modal */}
       {showForm && (
-        <EmployeeForm onClose={() => setShowForm(false)} />
+        <EmployeeForm 
+          onClose={() => {
+            setShowForm(false);
+            setSelectedEmployee(null);
+          }} 
+          employee={selectedEmployee}
+        />
       )}
     </div>
   );

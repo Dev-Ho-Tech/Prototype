@@ -6,6 +6,8 @@ import { EmployeeMonitoringModal } from './components/EmployeeMonitoringModal';
 import type { Employee, KPISettings } from '../../types';
 
 function DashboardScreen() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showSettings, setShowSettings] = useState(false);
@@ -78,6 +80,26 @@ function DashboardScreen() {
   };
 
   React.useEffect(() => {
+    let mounted = true;
+
+    const initializeDashboard = async () => {
+      try {
+        setIsLoading(true);
+        // Simulate data loading - replace with actual data fetching
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (mounted) {
+          setIsLoading(false);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err instanceof Error ? err : new Error('Failed to load dashboard'));
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeDashboard();
+
     const handleClickOutside = (event: MouseEvent) => {
       if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
         setShowSettings(false);
@@ -86,9 +108,35 @@ function DashboardScreen() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
+      mounted = false;
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-2">Error loading dashboard</div>
+          <div className="text-gray-600">{error.message}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-auto bg-gray-50">
@@ -166,122 +214,188 @@ function DashboardScreen() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 h-auto">
-
-          <div className="bg-white rounded-lg shadow-sm p-6 h-[400px]">
-            <div className="flex justify-between">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 mr-4">Estado del día</h3>
-              <div className="mt-4 space-y-2">
-                {dashboardData.dayStatus.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center mr-2">
-                      <div 
-                        className="w-3 h-3 rounded-full mr-2"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="text-gray-600">{item.name}</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.05)] p-6 aspect-square transition-all duration-300 hover:shadow-lg">
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-start mb-6">
+                <h3 className="text-lg font-medium text-gray-900">Estado del día</h3>
+                <div className="space-y-2">
+                  {dashboardData.dayStatus.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm group cursor-pointer">
+                      <div className="flex items-center mr-3">
+                        <div 
+                          className="w-2 h-2 rounded-full mr-2 transition-transform group-hover:scale-125"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="text-gray-600">{item.name}</span>
+                      </div>
+                      <span className="font-medium">{item.value}</span>
                     </div>
-                    <span className="font-medium">{item.value}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+              <div className="relative flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={dashboardData.dayStatus}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="60%"
+                      outerRadius="80%"
+                      paddingAngle={2}
+                      dataKey="value"
+                      startAngle={90}
+                      endAngle={450}
+                    >
+                      {dashboardData.dayStatus.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color}
+                          className="transition-all duration-300 hover:opacity-80"
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{
+                        background: 'rgba(17, 24, 39, 0.95)',
+                        backdropFilter: 'blur(4px)',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-2xl font-bold text-gray-900">109</span>
+                  <span className="text-sm text-gray-500">Total</span>
+                </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={dashboardData.dayStatus}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {dashboardData.dayStatus.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 h-[400px]">
-            <div className="flex justify-between">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Horas trabajadas</h3>
-              <div className="mt-4 space-y-2">
-                {dashboardData.workingHours.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center mr-2">
-                      <div 
-                        className="w-3 h-3 rounded-full mr-2"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="text-gray-600">{item.name}</span>
+          <div className="bg-white rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.05)] p-6 aspect-square transition-all duration-300 hover:shadow-lg">
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-start mb-6">
+                <h3 className="text-lg font-medium text-gray-900">Horas trabajadas</h3>
+                <div className="space-y-2">
+                  {dashboardData.workingHours.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm group cursor-pointer">
+                      <div className="flex items-center mr-3">
+                        <div 
+                          className="w-2 h-2 rounded-full mr-2 transition-transform group-hover:scale-125"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="text-gray-600">{item.name}</span>
+                      </div>
+                      <span className="font-medium">{item.value}</span>
                     </div>
-                    <span className="font-medium">{item.value}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+              <div className="relative flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={dashboardData.workingHours}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="60%"
+                      outerRadius="80%"
+                      paddingAngle={2}
+                      dataKey="value"
+                      startAngle={90}
+                      endAngle={450}
+                    >
+                      {dashboardData.workingHours.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color}
+                          className="transition-all duration-300 hover:opacity-80"
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{
+                        background: 'rgba(17, 24, 39, 0.95)',
+                        backdropFilter: 'blur(4px)',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-2xl font-bold text-gray-900">48</span>
+                  <span className="text-sm text-gray-500">Total</span>
+                </div>
               </div>
             </div>
-
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={dashboardData.workingHours}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {dashboardData.workingHours.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 ">
-            <div className="flex justify-between">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Eventos de tiempo</h3>
-              <div className="mt-4 space-y-2">
-                {dashboardData.timeEvents.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center">
-                      <div 
-                        className="w-3 h-3 rounded-full mr-2"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="text-gray-600 mr-2">{item.name}</span>
+          <div className="bg-white rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.05)] p-6 aspect-square transition-all duration-300 hover:shadow-lg">
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-start mb-6">
+                <h3 className="text-lg font-medium text-gray-900">Eventos de tiempo</h3>
+                <div className="space-y-2">
+                  {dashboardData.timeEvents.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm group cursor-pointer">
+                      <div className="flex items-center mr-3">
+                        <div 
+                          className="w-2 h-2 rounded-full mr-2 transition-transform group-hover:scale-125"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="text-gray-600">{item.name}</span>
+                      </div>
+                      <span className="font-medium">{item.value}</span>
                     </div>
-                    <span className="font-medium">{item.value}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+              <div className="relative flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={dashboardData.timeEvents}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="60%"
+                      outerRadius="80%"
+                      paddingAngle={2}
+                      dataKey="value"
+                      startAngle={90}
+                      endAngle={450}
+                    >
+                      {dashboardData.timeEvents.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color}
+                          className="transition-all duration-300 hover:opacity-80"
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{
+                        background: 'rgba(17, 24, 39, 0.95)',
+                        backdropFilter: 'blur(4px)',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-2xl font-bold text-gray-900">67</span>
+                  <span className="text-sm text-gray-500">Total</span>
+                </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={dashboardData.timeEvents}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {dashboardData.timeEvents.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
           </div>
         </div>
 
