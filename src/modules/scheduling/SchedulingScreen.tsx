@@ -123,27 +123,45 @@ export function SchedulingScreen() {
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
       {/* Top Bar */}
-      <div className="p-4 border-b border-gray-200 bg-white">
+      <div className="p-4 border-gray-200 bg-white">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option>Semanal</option>
-              <option>Mensual</option>
-            </select>
-            <div className="relative">
-              <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-48 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
+          <div className="flex items-center space-x-8">
+              <div className="flex flex-col">
+                <label className="text-sm text-gray-500 mb-1">Buscar</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Buscar por nombre, cargo o departamento"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <label className="text-sm text-gray-500 mb-1">Periodo</label>
+                <select
+                  value={selectedPeriod}
+                  onChange={(e) => setSelectedPeriod(e.target.value)}
+                  className="px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option>Semanal</option>
+                  <option>Mensual</option>
+                </select>
+              </div>
+              <div className="relative">
+                <div className="flex flex-col">
+                  <label className="text-sm text-gray-500 mb-1">Fecha</label>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-48 pl-3 pr-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            <button className="px-4 py-2 mt-5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
               Hoy
             </button>
           </div>
@@ -170,18 +188,9 @@ export function SchedulingScreen() {
 
       <div className="flex-1 overflow-hidden flex">
         {/* Left Panel - Employee List */}
-        <div className="w-96 border-r border-gray-200 bg-white flex flex-col">
-          <div className="p-4 border-b border-gray-200">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre, cargo o departamento"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+        <div className="w-96 border border-gray-200 rounded-lg bg-white flex flex-col mr-4 ml-4">
+          <div className="p-4 border-b border-gray-200 flex justify-center">
+              <h3 className="font-medium text-gray-900 text-lg text-[#1d4ed8]">Empleados</h3>
           </div>
 
           <div className="flex-1 overflow-auto">
@@ -218,11 +227,11 @@ export function SchedulingScreen() {
         {/* Right Panel - Schedule Grid */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {selectedEmployee && <EmployeeInfo employee={selectedEmployee} />}
-          
-          <div className="flex-1 overflow-auto p-4">
+
+          <div className="flex-1 overflow-auto rounded-lg">
             <div className="bg-white rounded-lg shadow-sm">
               <div className="grid grid-cols-[auto,1fr] border border-gray-200 rounded-lg">
-                <div className="w-20 bg-gray-50 border-r border-gray-200"></div>
+                <div className="w-20 rounded-tl-lg bg-gray-50 border-r border-gray-200"></div>
                 <div className="grid grid-cols-[repeat(13,minmax(80px,1fr))]">
                   {timeSlots.map(time => (
                     <div key={time} className="px-2 py-1 text-xs text-gray-500 border-r border-gray-200 last:border-r-0">
@@ -239,7 +248,7 @@ export function SchedulingScreen() {
 
                   return (
                     <React.Fragment key={day}>
-                      <div className="w-20 px-2 py-3 text-xs border-t border-gray-200 bg-gray-50">
+                      <div className="rounded-bl-lg w-20 px-2 py-3 text-xs border-t border-gray-200 bg-gray-50">
                         <div className="font-medium">{day}</div>
                         <div className="text-gray-500">
                           {formattedDate.split('-').slice(1).join('/')}

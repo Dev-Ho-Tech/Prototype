@@ -8,13 +8,13 @@ interface EmployeeInfoProps {
 
 export function EmployeeInfo({ employee }: EmployeeInfoProps) {
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
-      <div className="flex items-start space-x-4">
-        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium text-xl">
+    <div className="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-200">
+      <div className="flex items-start space-x-4 ">
+        {/* <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium text-xl">
           {employee.name.charAt(0)}
-        </div>
+        </div> */}
         <div className="flex-1">
-          <h3 className="text-lg font-medium text-gray-900">{employee.name}</h3>
+          <h3 className="text-lg font-medium text-gray-900 text-[#1d4ed8]">{employee.name}</h3>
           <div className="mt-2 grid grid-cols-2 gap-4">
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <FileText className="w-4 h-4" />
