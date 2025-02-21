@@ -146,7 +146,6 @@ function Formemploye() {
               </table>
             </form>
           </div>
-
           <div className="w-44 flex-shrink-0">
             <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
               <div className="aspect-square w-full bg-gray-200 rounded-md overflow-hidden mb-2">
@@ -172,7 +171,6 @@ function Formemploye() {
             </div>
           </div>
         </div>
-
         <div className="mt-6 flex justify-end space-x-4">
           <button type="button" className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
             Cancelar
@@ -184,6 +182,124 @@ function Formemploye() {
       </div>
     </div>
   );
+}
+return (
+  <div className="min-h-screen bg-gray-100 p-6">
+    <div className="max-w-[90rem] mx-auto bg-white rounded-lg shadow-md p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-6">
+        <div className="flex-grow">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-500">Primer Nombre</label>
+                <input type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Segundo Nombre</label>
+                <input type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Primer Apellido</label>
+                <input type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Segundo Apellido</label>
+                <input type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2" />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-500">Tipo de Documento</label>
+                <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                  <option>DNI</option>
+                  <option>Carné de Extranjería</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">N° de Documento</label>
+                <input type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Correo Principal</label>
+                <input type="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Celular</label>
+                <div className="flex">
+                  <div className="w-24 flex items-center bg-gray-50 border border-gray-300 rounded-l-md px-3">
+                    <img src="https://flagcdn.com/w20/co.png" alt="Colombia" className="w-5 h-auto mr-1" />
+                    <span className="text-sm">+57</span>
+                  </div>
+                  <input type="tel" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-r-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-500">Perfiles de Marcaje</label>
+                <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                  <option>Perfil 1</option>
+                  <option>Perfil 2</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Fecha de Nacimiento</label>
+                <input type="date" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Género</label>
+                <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                  <option>Mujer</option>
+                  <option>Hombre</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Empresa</label>
+                <input type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2" />
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div className="w-full lg:w-44">
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div className="aspect-square w-full bg-gray-200 rounded-md overflow-hidden mb-4">
+              {photoPreview ? (
+                <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <Camera size={48} />
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col space-y-2">
+              <label className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+                <Upload className="w-5 h-5 mr-2" />
+                Subir Foto
+                <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+              </label>
+              <button type="button" className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                <Camera className="w-5 h-5 mr-2" />
+                Tomar Foto
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 flex justify-end space-x-4">
+        <button type="button" className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          Cancelar
+        </button>
+        <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+);
 }
 
 export default Formemploye;
