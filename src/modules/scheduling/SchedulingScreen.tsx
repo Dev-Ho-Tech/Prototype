@@ -22,7 +22,7 @@ export function SchedulingScreen() {
   } | null>(null);
 
   const timeSlots = Array.from({ length: 14 }, (_, i) => {
-    const hour = (i + 5).toString().padStart(2, '0');
+    const hour = (i + 6).toString().padStart(2, '0');
     return `${hour}:00`;
   });
 
@@ -123,7 +123,7 @@ export function SchedulingScreen() {
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
       {/* Top Bar */}
-      <div className="p-4 border-gray-200 bg-white">
+      <div className="p-4 border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-8">
               <div className="flex flex-col">
@@ -189,8 +189,8 @@ export function SchedulingScreen() {
       <div className="flex-1 overflow-hidden flex">
         {/* Left Panel - Employee List */}
         <div className="w-96 border border-gray-200 rounded-lg bg-white flex flex-col mr-4 ml-4">
-          <div className="p-4 border-b border-gray-200 flex justify-center">
-              <h3 className="font-medium text-gray-900 text-lg text-[#1d4ed8]">Empleados</h3>
+          <div className="p-2 bg-[#1d4ed8] border-b border-gray-200 flex justify-center rounded-tl-lg rounded-tr-lg">
+              <h3 className="font-medium text-gray-900 text-md text-white">Empleados</h3>
           </div>
 
           <div className="flex-1 overflow-auto">
@@ -228,12 +228,13 @@ export function SchedulingScreen() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {selectedEmployee && <EmployeeInfo employee={selectedEmployee} />}
 
-          <div className="flex-1 overflow-auto rounded-lg">
+          {/* flex-1 */}
+          <div className="overflow-auto rounded-lg mr-4">
             <div className="bg-white rounded-lg shadow-sm">
               <div className="grid grid-cols-[auto,1fr] border border-gray-200 rounded-lg">
                 <div className="w-20 rounded-tl-lg bg-gray-50 border-r border-gray-200"></div>
                 <div className="grid grid-cols-[repeat(13,minmax(80px,1fr))]">
-                  {timeSlots.map(time => (
+                  {timeSlots.slice(0, -1).map(time => (
                     <div key={time} className="px-2 py-1 text-xs text-gray-500 border-r border-gray-200 last:border-r-0">
                       {time}
                     </div>
@@ -248,7 +249,7 @@ export function SchedulingScreen() {
 
                   return (
                     <React.Fragment key={day}>
-                      <div className="rounded-bl-lg w-20 px-2 py-3 text-xs border-t border-gray-200 bg-gray-50">
+                      <div className="rounded-bl-lg w-20 px-2 py-3 text-xs border-t border-gray-200 bg-gray-50 ">
                         <div className="font-medium">{day}</div>
                         <div className="text-gray-500">
                           {formattedDate.split('-').slice(1).join('/')}
@@ -298,17 +299,22 @@ export function SchedulingScreen() {
           </div>
 
           {/* Legends */}
-          <div className="border-t border-gray-200 bg-white">
-            <div className="p-4">
-              <div className="flex space-x-6">
+          {/* bg-white */}
+          <div className="border-t border-gray-200">
+            <div>
+            {/* grid sm:grid-cols-1 lg:grid-cols-2 */}
+              {/* flex space-x-6 */}
+              <div className="grid sm:grid-cols-1 lg:grid-cols-2 mt-4">
                 {showShifts && (
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">Turnos de trabajo</h4>
-                    <div className="grid grid-cols-3 gap-2">
+                  <div className="flex-1 border bg-white p-4 rounded-lg mb-4 mr-4">
+                    <h4 className="text-md font-medium text-gray-900 mb-4">Turnos de trabajo</h4>
+                    {/* grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 */}
+                    {/* grid grid-cols-3 gap-2 */}
+                    <div className="grid sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
                       {workShifts.map(shift => (
                         <div
                           key={shift.id}
-                          className="flex items-center space-x-2 text-sm"
+                          className="flex items-center space-x-2 text-sm mb-2 mr-2"
                         >
                           <div className={`w-6 h-6 rounded-full flex items-center justify-center ${shift.color}`}>
                             {shift.label}
@@ -323,13 +329,13 @@ export function SchedulingScreen() {
                 )}
 
                 {showLicenses && (
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">Licencias y permisos</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                  <div className="flex-1 border bg-white p-4 rounded-lg mb-4 mr-4">
+                    <h4 className="text-md font-medium text-gray-900 mb-2 mb-4">Licencias y permisos</h4>
+                    <div className="grid sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
                       {licenses.slice(0, 6).map(license => (
                         <div
                           key={license.code}
-                          className={`px-2 py-1 rounded text-xs ${license.color}`}
+                          className={`px-2 py-1 rounded text-xs mb-2 mr-2 ${license.color}`}
                         >
                           {license.label}
                         </div>
