@@ -4,9 +4,10 @@ import type { Employee } from '../interface/types';
 
 interface EmployeeCardProps {
   empleado: Employee;
+  onSelect?: (empleado: Employee) => void;
 }
 
-export const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado }) => {
+const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
   const getEstadoClase = (estado: string) => {
     switch(estado) {
       case 'trabajando':
@@ -66,8 +67,17 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado }) => {
     }
   };
 
+  const handleCardClick = () => {
+    if (onSelect) {
+      onSelect(empleado);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden flex flex-col h-full">
+    <div 
+      className="bg-white rounded-lg shadow overflow-hidden flex flex-col h-full cursor-pointer transition-transform hover:scale-105"
+      onClick={handleCardClick}
+    >
       <div className={`p-3.5 flex-grow ${getCardBackgroundColor(empleado.estado)}`}>
         <div className="flex items-center gap-3 mb-2">
           <div className="relative">

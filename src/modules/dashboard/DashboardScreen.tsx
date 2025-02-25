@@ -1,17 +1,20 @@
-import  { useState, useEffect } from 'react';
-import { Search, Grid, List, Clock, Users, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Grid, List, Clock, Users, AlertTriangle, ChevronLeft, Calendar, MapPin, ArrowRightCircle, Smartphone, Laptop } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { empleadosData, estadoDelDiaData, tiemposData} from './temp/data_temp';
+import { empleadosData, estadoDelDiaData, tiemposData } from './temp/data_temp';
 import EmployeeCard from './components/EmployeCardUser';
-// import Pagination from './components/PaginationProps';
+import { Employee } from './interface/types';
 
-function DashboardScreen() {
+
+const DashboardScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [showEmployeeDetail, setShowEmployeeDetail] = useState(false);
+  
   const itemsPerPage = viewMode === 'grid' ? 18 : 8; 
 
-  
   const filteredEmpleados = empleadosData.filter(empleado => 
     empleado.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     empleado.pais.toLowerCase().includes(searchTerm.toLowerCase())
@@ -36,11 +39,6 @@ function DashboardScreen() {
   useEffect(() => {
     setCurrentPage(1);
   }, [viewMode, searchTerm]);
-
-  // Función para manejar cambios de página
-  // const handlePageChange = (page: number) => {
-  //   setCurrentPage(page);
-  // };
 
   // Función para obtener clase CSS basada en estado para vista de lista
   const getEstadoClase = (estado: string) => {
@@ -77,6 +75,242 @@ function DashboardScreen() {
         return estado;
     }
   };
+
+  const handleEmployeeSelect = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setShowEmployeeDetail(true);
+  };
+
+  const handleBackToDashboard = () => {
+    setShowEmployeeDetail(false);
+    setSelectedEmployee(null);
+  };
+
+  if (showEmployeeDetail && selectedEmployee) {
+    return (
+      <div className="flex-1 overflow-auto bg-gray-50">
+        <div className="p-4">
+          {/* Cabecera con botón de regreso */}
+          <div className="flex items-center mb-4 bg-white p-3 rounded-lg shadow">
+            <button 
+              onClick={handleBackToDashboard}
+              className="p-2 mr-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
+              title="Volver al dashboard"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div className="text-xl font-bold text-gray-800">
+              Información del Empleado
+            </div>
+          </div>
+
+          {/* Información del empleado */}
+          <div className="bg-white rounded-lg shadow mb-4 p-6">
+            <div className="flex items-start mb-6">
+              <div className="mr-4">
+                {selectedEmployee.foto ? (
+                  <img 
+                    src={selectedEmployee.foto} 
+                    alt={selectedEmployee.nombre} 
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-3xl text-gray-400">
+                      {selectedEmployee.nombre.charAt(0)}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-1">
+                  {selectedEmployee.nombre}
+                </h3>
+                <div className="text-gray-600 flex items-center mb-1">
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold mr-2">
+                    Analista De Soporte
+                  </span>
+                  <span className="text-gray-500 text-sm">Soporte</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  <span>{selectedEmployee.pais}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Planificación */}
+          <div className="bg-white rounded-lg shadow mb-4 p-6">
+            <div className="flex items-center mb-4">
+              <Calendar className="w-5 h-5 text-blue-600 mr-2" />
+              <h4 className="text-lg font-semibold text-blue-600">Planificación</h4>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div>
+                <p className="text-sm text-gray-500">Turno</p>
+                <p className="font-medium">Administrativo Sede2 (08:00 Am - 05:00 Pm)</p>
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-500">Planificadas</p>
+                <p className="font-medium">9 Hrs 0 Min</p>
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-500">Descansos</p>
+                <p className="font-medium">1 Hrs 0 Min</p>
+              </div>
+              
+              <div className="col-span-3">
+                <p className="text-sm text-gray-500">Estatus</p>
+                <span className={`px-3 py-1 inline-flex text-sm font-semibold rounded-full ${getEstadoClase(selectedEmployee.estado)}`}>
+                  {getEstadoTexto(selectedEmployee.estado)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Tiempos */}
+          <div className="bg-white rounded-lg shadow mb-4 p-6">
+            <div className="flex items-center mb-4">
+              <Clock className="w-5 h-5 text-blue-600 mr-2" />
+              <h4 className="text-lg font-semibold text-blue-600">Tiempos</h4>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div>
+                <p className="text-sm text-gray-500">Trabajadas</p>
+                <p className="font-medium">3 Hrs 25 Min</p>
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-500">Extras</p>
+                <p className="font-medium">0 Hrs 0 Min</p>
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-500">Ausencias</p>
+                <p className="font-medium">0 Hrs 0 Min</p>
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-500">Permiso</p>
+                <p className="font-medium">--</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Marcajes */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center mb-4">
+              <ArrowRightCircle className="w-5 h-5 text-blue-600 mr-2" />
+              <h4 className="text-lg font-semibold text-blue-600">Marcajes</h4>
+            </div>
+            
+            <div className="overflow-x-auto bg-gray-50 rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Día</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Hora</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tipo de marcaje</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Dispositivo</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Método</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Localización</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  <tr>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center">
+                        <img 
+                          src={selectedEmployee.foto || "https://via.placeholder.com/40"} 
+                          alt="" 
+                          className="w-8 h-8 rounded-full mr-2"
+                        />
+                        <span>2 Agosto 2024</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">11:35 am</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Entrada</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Smartphone className="w-5 h-5 text-gray-500" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <img src="/api/placeholder/20/20" alt="facial" className="w-5 h-5" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center">
+                        <span>{selectedEmployee.pais}</span>
+                        <MapPin className="w-4 h-4 ml-1 text-blue-500" />
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-2">
+                          <span>C</span>
+                        </div>
+                        <span>2 Agosto 2024</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">11:00 am</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Salida</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Smartphone className="w-5 h-5 text-gray-500" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <Smartphone className="w-5 h-5 text-gray-500" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center">
+                        <span>{selectedEmployee.pais}</span>
+                        <MapPin className="w-4 h-4 ml-1 text-blue-500" />
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-2">
+                          <span>C</span>
+                        </div>
+                        <span>2 Agosto 2024</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">07:00 am</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Entrada</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Smartphone className="w-5 h-5 text-gray-500" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <Laptop className="w-5 h-5 text-gray-500" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center">
+                        <span>{selectedEmployee.pais}</span>
+                        <MapPin className="w-4 h-4 ml-1 text-blue-500" />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-auto bg-gray-50">
@@ -286,7 +520,11 @@ function DashboardScreen() {
             <div className="p-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {currentEmpleados.map(empleado => (
-                  <EmployeeCard key={empleado.id} empleado={empleado} />
+                  <EmployeeCard 
+                    key={empleado.id} 
+                    empleado={empleado} 
+                    onSelect={handleEmployeeSelect} 
+                  />
                 ))}
               </div>
             </div>
@@ -330,7 +568,8 @@ function DashboardScreen() {
                     return (
                       <tr 
                         key={empleado.id}
-                        className={bgColorClass}
+                        className={`${bgColorClass} cursor-pointer hover:bg-gray-100`}
+                        onClick={() => handleEmployeeSelect(empleado)}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -373,17 +612,12 @@ function DashboardScreen() {
                   })}
                 </tbody>
               </table>
-
             </div>
           )}
-          
-
         </div>
-
       </div>
-
     </div>
   );
-}
+};
 
 export default DashboardScreen;
