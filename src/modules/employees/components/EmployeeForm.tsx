@@ -1,535 +1,445 @@
 import React, { useState } from 'react';
-import { X, Upload, Building2, Users, MapPin, Calendar, Phone, Mail, Briefcase, FileText, User, Settings, Clock, Camera } from 'lucide-react';
+import { X, Upload, Building2, Users, MapPin, Calendar, Phone, Mail, Briefcase, FileText, User, Settings, Clock, Camera, HelpCircle } from 'lucide-react';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const TooltipProvider = TooltipPrimitive.Provider;
+const Tooltip = TooltipPrimitive.Root;
+const TooltipTrigger = TooltipPrimitive.Trigger;
+const TooltipContent = TooltipPrimitive.Content;
+
+const employeeSchema = z.object({
+  firstName: z.string().min(1, 'El primer nombre es requerido'),
+  middleName: z.string().optional(),
+  lastName: z.string().min(1, 'El primer apellido es requerido'),
+  secondLastName: z.string().optional(),
+  documentId: z.string().min(1, 'El número de documento es requerido'),
+  documentType: z.string(),
+  birthDate: z.string().min(1, 'La fecha de nacimiento es requerida'),
+  gender: z.string().min(1, 'El género es requerido'),
+  email: z.string().email('Correo electrónico inválido'),
+  phone: z.string().min(1, 'El número de teléfono es requerido'),
+  company: z.string().min(1, 'La empresa es requerida'),
+  location: z.string().min(1, 'La sede es requerida'),
+  department: z.string().min(1, 'El departamento es requerido'),
+  employeeCode: z.string().min(1, 'El código de empleado es requerido'),
+  position: z.string().min(1, 'El cargo es requerido'),
+  contractType: z.string().min(1, 'El tipo de contrato es requerido'),
+  startDate: z.string().min(1, 'La fecha de inicio es requerida'),
+  endDate: z.string().optional(),
+  scheduleType: z.string().min(1, 'El tipo de horario es requerido'),
+  checkProfile: z.string(),
+  status: z.boolean(),
+  allowVisits: z.boolean(),
+  photo: z.any().optional()
+});
+
+type EmployeeFormData = z.infer<typeof employeeSchema>;
 
 interface EmployeeFormProps {
-  employee?: any;
+  employee?: EmployeeFormData;
   onClose: () => void;
 }
 
 export function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
-  const [formData, setFormData] = useState(employee || {
-    // Personal Information
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    secondLastName: '',
-    documentId: '',
-    documentType: 'cedula',
-    birthDate: '',
-    gender: '',
-    email: '',
-    
-    // Contact Information
-    phone: '',
-    
-    // Employment Information
-    company: '',
-    location: '',
-    department: '',
-    employeeCode: '',
-    position: '',
-    contractType: '',
-    startDate: '',
-    endDate: '',
-    scheduleType: '',
-    
-    // Attendance Configuration
-    checkProfile: 'primary',
-    
-    // Status and Controls
-    status: true,
-    allowVisits: false,
-    
-    photo: null as File | null
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch
+  } = useForm<EmployeeFormData>({
+    resolver: zodResolver(employeeSchema),
+    defaultValues: employee || {
+      // Personal Information
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      secondLastName: '',
+      documentId: '',
+      documentType: 'cedula',
+      birthDate: '',
+      gender: '',
+      email: '',
+      
+      // Contact Information
+      phone: '',
+      
+      // Employment Information
+      company: '',
+      location: '',
+      department: '',
+      employeeCode: '',
+      position: '',
+      contractType: '',
+      startDate: '',
+      endDate: '',
+      scheduleType: '',
+      
+      // Attendance Configuration
+      checkProfile: 'primary',
+      
+      // Status and Controls
+      status: true,
+      allowVisits: false,
+      photo: null
+    }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = (data: EmployeeFormData) => {
     // Handle form submission
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">
+    <div className="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div className="p-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-medium text-gray-700">
               {employee ? 'Editar Empleado' : 'Nuevo Empleado'}
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
+              className="text-gray-400 hover:text-gray-600 transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="flex gap-6">
-              <div className="flex-grow">
-                <table className="w-full">
-                  <tbody>
-                    <tr>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Primer Nombre</label>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="flex gap-8">
+              <div className="flex-1 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Personal Information Section */}
+                  <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl space-y-4 lg:col-span-2 border border-gray-100">
+                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Información Personal
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <label className="block text-sm text-gray-500">Primer Nombre <span className="text-red-500">*</span></label>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="w-4 h-4 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-sm">Ingrese el primer nombre del empleado</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        {errors.firstName && (
+                          <p className="mt-1 text-sm text-red-500" id="firstName-error">
+                            {errors.firstName.message}
+                          </p>
+                        )}
                         <input
                           type="text"
-                          value={formData.firstName}
-                          onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
+                          {...register('firstName')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          required
                         />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Segundo Nombre</label>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Segundo Nombre</label>
                         <input
                           type="text"
-                          value={formData.middleName}
-                          onChange={(e) => setFormData({ ...formData, middleName: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
+                          {...register('middleName')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Primer Apellido</label>
+                      </div>
+                    </div>
+                
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500">Primer Apellido <span className="text-red-500">*</span></label>
                         <input
                           type="text"
-                          value={formData.lastName}
-                          onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
+                          {...register('lastName')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Segundo Apellido</label>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Segundo Apellido</label>
                         <input
                           type="text"
-                          value={formData.secondLastName}
-                          onChange={(e) => setFormData({ ...formData, secondLastName: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
+                          {...register('secondLastName')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Tipo de Documento</label>
+                      </div>
+                    </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Fecha de Nacimiento <span className="text-red-500">*</span></label>
+                        <input
+                          type="date"
+                          {...register('birthDate')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Género <span className="text-red-500">*</span></label>
                         <select
-                          value={formData.documentType}
-                          onChange={(e) => setFormData({ ...formData, documentType: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
+                          {...register('gender')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        >
+                          <option value="">Seleccionar...</option>
+                          <option value="M">Masculino</option>
+                          <option value="F">Femenino</option>
+                          <option value="O">Otro</option>
+                        </select>
+                      </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500">Tipo de Documento</label>
+                        <select
+                          {...register('documentType')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         >
                           <option value="dni">DNI</option>
                           <option value="extranjeria">Carné de Extranjería</option>
                         </select>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">N° de Documento</label>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">N° de Documento</label>
                         <input
                           type="text"
-                          value={formData.documentId}
-                          onChange={(e) => setFormData({ ...formData, documentId: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
+                          {...register('documentId')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Correo Principal</label>
+                      </div>
+                    </div>
+                  </div>
+                
+                  {/* Contact Information Section */}
+                  <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl space-y-4 lg:col-span-2 border border-gray-100">
+                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      Información de Contacto
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500">Correo Principal</label>
                         <input
                           type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
+                          {...register('email')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Celular</label>
-                        <div className="flex">
-                          <div className="w-24 flex items-center bg-gray-50 border border-gray-300 rounded-l-md px-3">
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Celular</label>
+                        <div className="mt-1 flex rounded-md shadow-sm">
+                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
                             <img src="https://flagcdn.com/w20/co.png" alt="Colombia" className="w-5 h-auto mr-1" />
-                            <span className="text-sm">+57</span>
-                          </div>
+                            +57
+                          </span>
                           <input
                             type="tel"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-tr-lg rounded-br-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
+                            {...register('phone')}
+                            className="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                           />
                         </div>
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Perfiles de Marcaje</label>
-                        <select
-                          value={formData.checkProfile}
-                          onChange={(e) => setFormData({ ...formData, checkProfile: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        >
-                          <option value="primary">Perfil 1</option>
-                          <option value="secondary">Perfil 2</option>
-                        </select>
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Fecha de Nacimiento</label>
-                        <input
-                          type="date"
-                          value={formData.birthDate}
-                          onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Género</label>
-                        <select
-                          value={formData.gender}
-                          onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        >
-                          <option value="F">Mujer</option>
-                          <option value="M">Hombre</option>
-                        </select>
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Empresa</label>
-                        <input
-                          type="text"
-                          value={formData.company}
-                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Sede</label>
-                        <input
-                          type="text"
-                          value={formData.location}
-                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Departamento</label>
-                        <input
-                          type="text"
-                          value={formData.department}
-                          onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Cargo</label>
-                        <input
-                          type="text"
-                          value={formData.position}
-                          onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Contrato</label>
-                        <input
-                          type="text"
-                          value={formData.contractType}
-                          onChange={(e) => setFormData({ ...formData, contractType: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Fecha Inicial de Contrato</label>
-                        <input
-                          type="date"
-                          value={formData.startDate}
-                          onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Fecha Final de Contrato</label>
-                        <input
-                          type="date"
-                          value={formData.endDate}
-                          onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Código</label>
-                        <input
-                          type="text"
-                          value={formData.employeeCode}
-                          onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <label className="text-sm text-gray-500">Tipo de Planificación</label>
-                        <input
-                          type="text"
-                          value={formData.scheduleType}
-                          onChange={(e) => setFormData({ ...formData, scheduleType: e.target.value })}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="w-44 flex-shrink-0">
-                <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                  <div className="aspect-square w-full bg-gray-200 rounded-md overflow-hidden mb-2">
-                    {formData.photo ? (
-                      <img
-                        src={URL.createObjectURL(formData.photo)}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <Camera size={48} />
                       </div>
-                    )}
+                    </div>
                   </div>
-                  <div className="flex flex-col space-y-2">
-                    <label className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-                      <Upload className="w-5 h-5 mr-2" />
-                      Subir Foto
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setFormData({ ...formData, photo: file });
-                          }
-                        }}
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      <Camera className="w-5 h-5 mr-2" />
-                      Tomar Foto
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4 mt-6">
-              {/* Employment Information */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Empresa <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                  <option value="">Seleccionar empresa</option>
-                  <option value="hodelpa">Hodelpa Hotels & Resorts</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sede <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                  <option value="">Seleccionar sede</option>
-                  <option value="gran_almirante">Hodelpa Gran Almirante</option>
-                  <option value="garden_court">Hodelpa Garden Court</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Departamento <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                  <option value="">Seleccionar departamento</option>
-                  <option value="lavanderia">Lavandería</option>
-                  <option value="housekeeping">Housekeeping</option>
-                  <option value="front_desk">Front Desk</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Código de empleado <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.employeeCode}
-                  onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cargo <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.position}
-                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contrato <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={formData.contractType}
-                  onChange={(e) => setFormData({ ...formData, contractType: e.target.value })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                  <option value="">Seleccionar contrato</option>
-                  <option value="operativo">Operativo</option>
-                  <option value="administrativo">Administrativo</option>
-                  <option value="temporal">Temporal</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha inicio <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha fin
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo de planificación
-                </label>
-                <select
-                  value={formData.scheduleType}
-                  onChange={(e) => setFormData({ ...formData, scheduleType: e.target.value })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                  <option value="">Seleccionar tipo</option>
-                  <option value="fixed">Horario fijo</option>
-                  <option value="rotating">Turnos rotativos</option>
-                  <option value="flexible">Horario flexible</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Bottom Section */}
-            <div className="grid grid-cols-3 gap-8 pt-6 border-t border-gray-200">
-              {/* Attendance Configuration */}
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                  <Clock className="w-5 h-5 mr-2 text-gray-400" />
-                  Configuración de Asistencia
-                </h3>
                 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Perfil de marcaje
-                    </label>
-                    <select
-                      value={formData.checkProfile}
-                      onChange={(e) => setFormData({ ...formData, checkProfile: e.target.value })}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    >
-                      <option value="primary">Principal</option>
-                      <option value="secondary">Secundario</option>
-                    </select>
+                  {/* Employment Information Section */}
+                  <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl space-y-4 lg:col-span-3 border border-gray-100">
+                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <Briefcase className="w-4 h-4" />
+                      Información Laboral
+                    </h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500">Empresa</label>
+                        <input
+                          type="text"
+                          {...register('company')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Sede</label>
+                        <input
+                          type="text"
+                          {...register('location')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Departamento</label>
+                        <input
+                          type="text"
+                          {...register('department')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500">Código de Empleado</label>
+                        <input
+                          type="text"
+                          {...register('employeeCode')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Cargo</label>
+                        <input
+                          type="text"
+                          {...register('position')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Tipo de Contrato</label>
+                        <select
+                          {...register('contractType')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        >
+                          <option value="">Seleccionar...</option>
+                          <option value="indefinido">Indefinido</option>
+                          <option value="temporal">Temporal</option>
+                          <option value="practicas">Prácticas</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                
+                  {/* Schedule Information Section */}
+                  <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl space-y-4 lg:col-span-3 border border-gray-100">
+                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Horario y Asistencia
+                    </h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500">Fecha de Inicio</label>
+                        <input
+                          type="date"
+                          {...register('startDate')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Fecha de Fin</label>
+                        <input
+                          type="date"
+                          {...register('endDate')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500">Tipo de Horario</label>
+                        <select
+                          {...register('scheduleType')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        >
+                          <option value="">Seleccionar...</option>
+                          <option value="fullTime">Tiempo Completo</option>
+                          <option value="partTime">Medio Tiempo</option>
+                          <option value="flexible">Flexible</option>
+                        </select>
+                      </div>
+                    </div>
+                
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500">Perfil de Marcación</label>
+                        <select
+                          {...register('checkProfile')}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        >
+                          <option value="primary">Principal</option>
+                          <option value="secondary">Secundario</option>
+                          <option value="special">Especial</option>
+                        </select>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="flex items-center space-x-4 mt-6">
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              {...register('status')}
+                              className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            <span className="ml-2 text-sm text-gray-500">Activo</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              {...register('allowVisits')}
+                              className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            <span className="ml-2 text-sm text-gray-500">Permitir Visitas</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Status and Controls */}
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                  <Settings className="w-5 h-5 mr-2 text-gray-400" />
-                  Estado y Controles
-                </h3>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={formData.status}
-                        onChange={(e) => setFormData({ ...formData, status: e.target.checked })}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Empleado activo</span>
-                    </label>
-                  </div>
-
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={formData.allowVisits}
-                        onChange={(e) => setFormData({ ...formData, allowVisits: e.target.checked })}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Permitir visitas</span>
-                    </label>
+              {/* Photo Upload Section */}
+              <div className="w-64 space-y-6">
+                <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl border border-gray-100">
+                  <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-4">
+                    <Camera className="w-4 h-4" />
+                    Foto de Perfil
+                  </h3>
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="relative w-40 h-40 bg-gray-50 rounded-full overflow-hidden border-2 border-gray-100 shadow-sm">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        {watch('photo') ? (
+                          <img
+                            src={URL.createObjectURL(watch('photo'))}
+                            alt="Employee"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-20 h-20 text-gray-300" />
+                        )}
+                      </div>
+                      <label className="absolute bottom-0 inset-x-0 bg-black/40 backdrop-blur-sm text-white text-xs py-2 text-center cursor-pointer hover:bg-black/50 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setValue('photo', file);
+                          }}
+                        />
+                        <Camera className="w-4 h-4 mx-auto" />
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-500 text-center">
+                      Haga clic en la imagen para cargar una foto
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-
-            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <div className="flex justify-end space-x-3 pt-6 border-t">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                {employee ? 'Guardar cambios' : 'Registrar empleado'}
+                Guardar
               </button>
             </div>
           </form>

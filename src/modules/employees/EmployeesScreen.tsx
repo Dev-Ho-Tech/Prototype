@@ -81,15 +81,17 @@ export function EmployeesScreen() {
             </div>
             <div className="flex space-x-3">
               <div className="relative">
-                <button 
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
-                  onClick={() => {
-                    // Add dropdown functionality
-                  }}
+                <select
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 appearance-none pr-8"
                 >
-                  <span>Departamento</span>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
+                  <option value="Todos">Todos los departamentos</option>
+                  {departmentData.map((dept) => (
+                    <option key={dept.name} value={dept.name}>{dept.name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none" />
               </div>
               <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 <Filter className="w-5 h-5 text-gray-500" />
@@ -98,73 +100,55 @@ export function EmployeesScreen() {
                 <Download className="w-5 h-5 text-gray-500" />
               </button>
               <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                <Plus className="w-5 h-5" />
+                <Settings className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                  <input type="checkbox" className="rounded border-gray-300" />
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Identificación</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Empleado</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Sede</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Departamento</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Método</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredEmployees.map((employee, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <input type="checkbox" className="rounded border-gray-300" />
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">{employee.id}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium">
-                        {employee.initial}
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">{employee.name}</p>
-                        <p className="text-sm text-gray-500">{employee.position}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{employee.location}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{employee.department}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-100 text-green-700 text-xs">
-                      {employee.method}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex space-x-2">
-                      <button className="text-gray-400 hover:text-blue-600">
-                        <Settings className="w-5 h-5" />
-                      </button>
-                      <button className="text-gray-400 hover:text-red-600">
-                        <LogOut className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  {['ID', 'Nombre', 'Departamento', 'Sede', 'Estado', 'Acciones'].map((header) => (
+                    <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {header}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-              
-          </table>
-
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredEmployees.map((employee) => (
+                  <tr key={employee.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <img className="h-10 w-10 rounded-full" src={employee.avatar} alt="" />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{employee.name}</div>
+                          <div className="text-sm text-gray-500">{employee.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.department}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.location}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${employee.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {employee.status === 'active' ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button className="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
+                      <button className="text-red-600 hover:text-red-900">Eliminar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-
-      {/* Employee Form Modal */}
-      {showForm && (
-        <EmployeeForm onClose={() => setShowForm(false)} />
-      )}
-    </main>
-  );
+    </div>
+  </div>
 }

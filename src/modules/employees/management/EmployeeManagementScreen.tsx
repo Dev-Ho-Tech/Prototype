@@ -120,6 +120,10 @@ export function EmployeeManagementScreen() {
     }
   ];
 
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setSelectedEmployee(null);
+  };
   return (
     <div className="flex-1 overflow-auto bg-gray-50 p-8">
       {/* Stats Section */}
@@ -347,10 +351,7 @@ export function EmployeeManagementScreen() {
       {/* Employee Form Modal */}
       {showForm && (
         <EmployeeForm 
-          onClose={() => {
-            setShowForm(false);
-            setSelectedEmployee(null);
-          }} 
+          onClose={handleCloseForm}
           employee={selectedEmployee}
         />
       )}

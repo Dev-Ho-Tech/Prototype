@@ -40,28 +40,6 @@ export function CustomPieChart({ data, title }: CustomPieChartProps) {
               paddingAngle={2}
               dataKey="value"
               stroke="none"
-              label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
-                const RADIAN = Math.PI / 180;
-                const radius = 25 + innerRadius + (outerRadius - innerRadius);
-                const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-                return (
-                  <text
-                    x={x}
-                    y={y}
-                    className="fill-current text-gray-600 font-medium"
-                    textAnchor={x > cx ? 'start' : 'end'}
-                    dominantBaseline="central"
-                    style={{
-                      fontSize: '14px',
-                      fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-                    }}
-                  >
-                    {value}
-                  </text>
-                );
-              }}
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
