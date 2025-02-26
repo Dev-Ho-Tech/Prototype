@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock, Users, AlertTriangle } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
@@ -6,19 +6,39 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 interface DataEntry {
   value: number;
   color: string;
+  name: string;
+  details?: string;
+}
+
+interface NovedadesTiempoEntry {
+  name: string;
+  value: number;
+  color: string;
+  details: string;
 }
 
 interface StatisticsPanelsProps {
   estadoDelDiaData: DataEntry[];
   tiemposData: DataEntry[];
+  novedadesTiempoData?: NovedadesTiempoEntry[];
 }
+
+
 
 const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({ 
   estadoDelDiaData, 
-  tiemposData 
+  tiemposData,
+  novedadesTiempoData = [
+    { name: 'Tardanzas', value: 30, color: '#10b981', details: '0h 32m' },
+    { name: 'Intempestivas', value: 15, color: '#3b82f6', details: '1h 27m' },
+    { name: 'Permisos', value: 20, color: '#f59e0b', details: '47h 58m' },
+    { name: 'Ausencias', value: 25, color: '#ef4444', details: '84h 0m' },
+  ]
 }) => {
+  const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
       {/* Panel de personas con novedades */}
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="font-bold text-gray-700 mb-3">Personas con novedades</h2>
@@ -100,9 +120,16 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
                   outerRadius={40}
                   paddingAngle={2}
                   dataKey="value"
+                  onMouseEnter={(_, index) => setHoveredSegment(`estado_${index}`)}
+                  onMouseLeave={() => setHoveredSegment(null)}
                 >
                   {estadoDelDiaData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell 
+                      key={`cell-estado-${index}`} 
+                      fill={entry.color} 
+                      stroke={hoveredSegment === `estado_${index}` ? '#333' : 'none'}
+                      strokeWidth={hoveredSegment === `estado_${index}` ? 2 : 0}
+                    />
                   ))}
                 </Pie>
               </PieChart>
@@ -147,9 +174,16 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
                   outerRadius={40}
                   paddingAngle={2}
                   dataKey="value"
+                  onMouseEnter={(_, index) => setHoveredSegment(`tiempo_${index}`)}
+                  onMouseLeave={() => setHoveredSegment(null)}
                 >
                   {tiemposData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell 
+                      key={`cell-tiempo-${index}`} 
+                      fill={entry.color} 
+                      stroke={hoveredSegment === `tiempo_${index}` ? '#333' : 'none'}
+                      strokeWidth={hoveredSegment === `tiempo_${index}` ? 2 : 0}
+                    />
                   ))}
                 </Pie>
               </PieChart>
@@ -167,6 +201,50 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
               <div className="w-3 h-3 rounded-full bg-blue-400"></div>
               <span className="text-sm">Planificadas: 132h 15m</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Novedades de tiempos (Nuevo panel) */}
+      <div className="bg-white p-4 rounded-lg shadow">
+        <h2 className="font-bold text-gray-700 mb-3">Novedades de tiempos</h2>
+        <div className="flex items-center justify-center">
+          <div className="h-32 w-32 relative">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={novedadesTiempoData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={30}
+                  outerRadius={40}
+                  paddingAngle={2}
+                  dataKey="value"
+                  onMouseEnter={(_, index) => setHoveredSegment(`novedad_${index}`)}
+                  onMouseLeave={() => setHoveredSegment(null)}
+                >
+                  {novedadesTiempoData.map((entry, index) => (
+                    <Cell 
+                      key={`cell-novedad-${index}`} 
+                      fill={entry.color} 
+                      stroke={hoveredSegment === `novedad_${index}` ? '#333' : 'none'}
+                      strokeWidth={hoveredSegment === `novedad_${index}` ? 2 : 0}
+                    />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-lg font-bold text-gray-800">149hs</div>
+            </div>
+          </div>
+          <div className="space-y-2 ml-4 max-h-32 overflow-y-auto">
+            {novedadesTiempoData.map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                <span className="text-sm">{`${item.name}: ${item.details}`}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
