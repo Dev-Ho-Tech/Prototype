@@ -1,14 +1,36 @@
-import React, { useState } from 'react';
-import { X, Upload, Building2, Users, MapPin, Calendar, Phone, Mail, Briefcase, FileText, User, Settings, Clock, Camera, HelpCircle } from 'lucide-react';
-import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import { X, Phone, Briefcase, User, Clock, Camera } from 'lucide-react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-const TooltipProvider = TooltipPrimitive.Provider;
-const Tooltip = TooltipPrimitive.Root;
-const TooltipTrigger = TooltipPrimitive.Trigger;
-const TooltipContent = TooltipPrimitive.Content;
+// Datos de ejemplo para los selectores
+const empresas = [
+  { id: 1, nombre: "Empresa ABC" },
+  { id: 2, nombre: "Corporación XYZ" },
+  { id: 3, nombre: "Grupo Innovación" },
+  { id: 4, nombre: "Tecnología Aplicada S.A." }
+];
+
+const sedes = [
+  { id: 1, nombre: "Sede Principal" },
+  { id: 2, nombre: "Sucursal Norte" },
+  { id: 3, nombre: "Oficina Central" },
+  { id: 4, nombre: "Centro Operativo" }
+];
+
+const departamentos = [
+  { id: 1, nombre: "Recursos Humanos" },
+  { id: 2, nombre: "Tecnología" },
+  { id: 3, nombre: "Contabilidad" },
+  { id: 4, nombre: "Operaciones" },
+  { id: 5, nombre: "Ventas" },
+  { id: 6, nombre: "Marketing" }
+];
+
+// Estilos personalizados
+const inputStyles = "mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-8";
+const selectStyles = "mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-8 bg-white";
+const labelStyles = "block text-xs text-gray-500";
 
 const employeeSchema = z.object({
   firstName: z.string().min(1, 'El primer nombre es requerido'),
@@ -88,314 +110,37 @@ export function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
     }
   });
 
-  const onSubmit = (data: EmployeeFormData) => {
-    // Handle form submission
+  const onSubmit = () => {
     onClose();
   };
 
   return (
     <div className="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-medium text-gray-700">
+      <div className="bg-white rounded-xl shadow-lg w-full max-h-screen">
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-gray-700">
               {employee ? 'Editar Empleado' : 'Nuevo Empleado'}
             </h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="flex gap-8">
-              <div className="flex-1 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Personal Information Section */}
-                  <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl space-y-4 lg:col-span-2 border border-gray-100">
-                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Información Personal
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <label className="block text-sm text-gray-500">Primer Nombre <span className="text-red-500">*</span></label>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <HelpCircle className="w-4 h-4 text-gray-400" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-sm">Ingrese el primer nombre del empleado</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                        {errors.firstName && (
-                          <p className="mt-1 text-sm text-red-500" id="firstName-error">
-                            {errors.firstName.message}
-                          </p>
-                        )}
-                        <input
-                          type="text"
-                          {...register('firstName')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Segundo Nombre</label>
-                        <input
-                          type="text"
-                          {...register('middleName')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                    </div>
-                
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500">Primer Apellido <span className="text-red-500">*</span></label>
-                        <input
-                          type="text"
-                          {...register('lastName')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Segundo Apellido</label>
-                        <input
-                          type="text"
-                          {...register('secondLastName')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                    </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Fecha de Nacimiento <span className="text-red-500">*</span></label>
-                        <input
-                          type="date"
-                          {...register('birthDate')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Género <span className="text-red-500">*</span></label>
-                        <select
-                          {...register('gender')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        >
-                          <option value="">Seleccionar...</option>
-                          <option value="M">Masculino</option>
-                          <option value="F">Femenino</option>
-                          <option value="O">Otro</option>
-                        </select>
-                      </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500">Tipo de Documento</label>
-                        <select
-                          {...register('documentType')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        >
-                          <option value="dni">DNI</option>
-                          <option value="extranjeria">Carné de Extranjería</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">N° de Documento</label>
-                        <input
-                          type="text"
-                          {...register('documentId')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                
-                  {/* Contact Information Section */}
-                  <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl space-y-4 lg:col-span-2 border border-gray-100">
-                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <Phone className="w-4 h-4" />
-                      Información de Contacto
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500">Correo Principal</label>
-                        <input
-                          type="email"
-                          {...register('email')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Celular</label>
-                        <div className="mt-1 flex rounded-md shadow-sm">
-                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                            <img src="https://flagcdn.com/w20/co.png" alt="Colombia" className="w-5 h-auto mr-1" />
-                            +57
-                          </span>
-                          <input
-                            type="tel"
-                            {...register('phone')}
-                            className="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                
-                  {/* Employment Information Section */}
-                  <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl space-y-4 lg:col-span-3 border border-gray-100">
-                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <Briefcase className="w-4 h-4" />
-                      Información Laboral
-                    </h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500">Empresa</label>
-                        <input
-                          type="text"
-                          {...register('company')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Sede</label>
-                        <input
-                          type="text"
-                          {...register('location')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Departamento</label>
-                        <input
-                          type="text"
-                          {...register('department')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                    </div>
-                
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500">Código de Empleado</label>
-                        <input
-                          type="text"
-                          {...register('employeeCode')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Cargo</label>
-                        <input
-                          type="text"
-                          {...register('position')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Tipo de Contrato</label>
-                        <select
-                          {...register('contractType')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        >
-                          <option value="">Seleccionar...</option>
-                          <option value="indefinido">Indefinido</option>
-                          <option value="temporal">Temporal</option>
-                          <option value="practicas">Prácticas</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                
-                  {/* Schedule Information Section */}
-                  <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl space-y-4 lg:col-span-3 border border-gray-100">
-                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      Horario y Asistencia
-                    </h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500">Fecha de Inicio</label>
-                        <input
-                          type="date"
-                          {...register('startDate')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Fecha de Fin</label>
-                        <input
-                          type="date"
-                          {...register('endDate')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500">Tipo de Horario</label>
-                        <select
-                          {...register('scheduleType')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        >
-                          <option value="">Seleccionar...</option>
-                          <option value="fullTime">Tiempo Completo</option>
-                          <option value="partTime">Medio Tiempo</option>
-                          <option value="flexible">Flexible</option>
-                        </select>
-                      </div>
-                    </div>
-                
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500">Perfil de Marcación</label>
-                        <select
-                          {...register('checkProfile')}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        >
-                          <option value="primary">Principal</option>
-                          <option value="secondary">Secundario</option>
-                          <option value="special">Especial</option>
-                        </select>
-                      </div>
-                      <div className="col-span-2">
-                        <div className="flex items-center space-x-4 mt-6">
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              {...register('status')}
-                              className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            />
-                            <span className="ml-2 text-sm text-gray-500">Activo</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              {...register('allowVisits')}
-                              className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            />
-                            <span className="ml-2 text-sm text-gray-500">Permitir Visitas</span>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Photo Upload Section */}
-              <div className="w-64 space-y-6">
-                <div className="bg-gray-50/50 backdrop-blur-[2px] p-6 rounded-xl border border-gray-100">
-                  <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-4">
-                    <Camera className="w-4 h-4" />
+            <div className="flex">
+              {/* Left Column - Photo Upload */}
+              <div className="w-48 px-2">
+                <div className="bg-gray-50/50 p-4 rounded-lg border border-gray-300 mb-4">
+                  <h3 className="text-xs font-medium text-gray-700 flex items-center gap-1 mb-2">
+                    <Camera className="w-3 h-3" />
                     Foto de Perfil
                   </h3>
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="relative w-40 h-40 bg-gray-50 rounded-full overflow-hidden border-2 border-gray-100 shadow-sm">
+                  <div className="flex flex-col items-center">
+                    <div className="relative w-32 h-32 bg-gray-50 rounded-full overflow-hidden border-2 border-gray-300 shadow-sm">
                       <div className="absolute inset-0 flex items-center justify-center">
                         {watch('photo') ? (
                           <img
@@ -404,10 +149,10 @@ export function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <User className="w-20 h-20 text-gray-300" />
+                          <User className="w-16 h-16 text-gray-300" />
                         )}
                       </div>
-                      <label className="absolute bottom-0 inset-x-0 bg-black/40 backdrop-blur-sm text-white text-xs py-2 text-center cursor-pointer hover:bg-black/50 transition-colors">
+                      <label className="absolute bottom-0 inset-x-0 bg-black/40 backdrop-blur-sm text-white text-xs py-1 text-center cursor-pointer hover:bg-black/50 transition-colors">
                         <input
                           type="file"
                           accept="image/*"
@@ -417,30 +162,314 @@ export function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
                             if (file) setValue('photo', file);
                           }}
                         />
-                        <Camera className="w-4 h-4 mx-auto" />
+                        <Camera className="w-3 h-3 mx-auto" />
                       </label>
                     </div>
-                    <p className="text-xs text-gray-500 text-center">
-                      Haga clic en la imagen para cargar una foto
+                    <p className="text-xs text-gray-500 text-center mt-2">
+                      Cargar foto
                     </p>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="flex justify-end space-x-3 pt-6 border-t">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Guardar
-              </button>
+
+              {/* Main Content - Form Fields */}
+              <div className="flex-1 flex flex-col">
+                <div className="grid grid-cols-4 gap-3">
+                  {/* Personal Information Row */}
+                  <div className="col-span-4">
+                    <h3 className="text-xs font-medium text-gray-700 flex items-center gap-1 mb-2 px-2">
+                      <User className="w-3 h-3" />
+                      Datos personales
+                    </h3>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Primer Nombre <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      {...register('firstName')}
+                      className={inputStyles}
+                    />
+                    {errors.firstName && (
+                      <p className="text-xs text-red-500" id="firstName-error">
+                        {errors.firstName.message}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Segundo Nombre</label>
+                    <input
+                      type="text"
+                      {...register('middleName')}
+                      className={inputStyles}
+                    />
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Primer Apellido <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      {...register('lastName')}
+                      className={inputStyles}
+                    />
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Segundo Apellido</label>
+                    <input
+                      type="text"
+                      {...register('secondLastName')}
+                      className={inputStyles}
+                    />
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Género <span className="text-red-500">*</span></label>
+                    <select
+                      {...register('gender')}
+                      className={selectStyles}
+                    >
+                      <option value="">Seleccionar...</option>
+                      <option value="M">Masculino</option>
+                      <option value="F">Femenino</option>
+                      <option value="O">Otro</option>
+                    </select>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Tipo de Documento</label>
+                    <select
+                      {...register('documentType')}
+                      className={selectStyles}
+                    >
+                      <option value="dni">DNI</option>
+                      <option value="extranjeria">Carné de Extranjería</option>
+                    </select>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>N° de Documento</label>
+                    <input
+                      type="text"
+                      {...register('documentId')}
+                      className={inputStyles}
+                    />
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Fecha de Nacimiento</label>
+                    <input
+                      type="date"
+                      {...register('birthDate')}
+                      className={`px-1 ${inputStyles}`}
+                    />
+                  </div>
+
+                  {/* Contact Information Row */}
+                  <div className="col-span-4 mt-2">
+                    <h3 className="text-xs font-medium text-gray-700 flex items-center gap-1 mb-2 px-2">
+                      <Phone className="w-3 h-3" />
+                      Información de Contacto
+                    </h3>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Correo Principal</label>
+                    <input
+                      type="email"
+                      {...register('email')}
+                      className={inputStyles}
+                    />
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Celular</label>
+                    <div className="mt-1 flex rounded-md shadow-sm">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm h-8">
+                        <img src="https://flagcdn.com/w20/co.png" alt="Colombia" className="w-4 h-auto mr-1" />
+                        +57
+                      </span>
+                      <input
+                        type="tel"
+                        {...register('phone')}
+                        className="flex-1 block w-full rounded-none rounded-r-md border border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-8"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Employment Information Row */}
+                  <div className="col-span-4 mt-2">
+                    <h3 className="text-xs font-medium text-gray-700 flex items-center gap-1 mb-2 px-2">
+                      <Briefcase className="w-3 h-3" />
+                      Información Laboral
+                    </h3>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Empresa</label>
+                    <select
+                      {...register('company')}
+                      className={selectStyles}
+                    >
+                      <option value="">Seleccionar...</option>
+                      {empresas.map(empresa => (
+                        <option key={empresa.id} value={empresa.id.toString()}>
+                          {empresa.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Sede</label>
+                    <select
+                      {...register('location')}
+                      className={selectStyles}
+                    >
+                      <option value="">Seleccionar...</option>
+                      {sedes.map(sede => (
+                        <option key={sede.id} value={sede.id.toString()}>
+                          {sede.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Departamento</label>
+                    <select
+                      {...register('department')}
+                      className={selectStyles}
+                    >
+                      <option value="">Seleccionar...</option>
+                      {departamentos.map(departamento => (
+                        <option key={departamento.id} value={departamento.id.toString()}>
+                          {departamento.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Código de Empleado</label>
+                    <input
+                      type="text"
+                      {...register('employeeCode')}
+                      className={inputStyles}
+                    />
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Cargo</label>
+                    <input
+                      type="text"
+                      {...register('position')}
+                      className={inputStyles}
+                    />
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Tipo de Contrato</label>
+                    <select
+                      {...register('contractType')}
+                      className={selectStyles}
+                    >
+                      <option value="">Seleccionar...</option>
+                      <option value="indefinido">Indefinido</option>
+                      <option value="temporal">Temporal</option>
+                      <option value="practicas">Prácticas</option>
+                    </select>
+                  </div>
+
+                  {/* Schedule Information Row */}
+                  <div className="col-span-4 mt-2">
+                    <h3 className="text-xs font-medium text-gray-700 flex items-center gap-1 mb-2 px-2">
+                      <Clock className="w-3 h-3" />
+                      Horario y Asistencia
+                    </h3>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Fecha de Inicio</label>
+                    <input
+                      type="date"
+                      {...register('startDate')}
+                      className={`px-1 ${inputStyles}`}
+                    />
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Fecha de Fin</label>
+                    <input
+                      type="date"
+                      {...register('endDate')}
+                      className={`px-1 ${inputStyles}`}
+                    />
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Tipo de Horario</label>
+                    <select
+                      {...register('scheduleType')}
+                      className={selectStyles}
+                    >
+                      <option value="">Seleccionar...</option>
+                      <option value="fullTime">Tiempo Completo</option>
+                      <option value="partTime">Medio Tiempo</option>
+                      <option value="flexible">Flexible</option>
+                    </select>
+                  </div>
+                  
+                  <div className="px-2">
+                    <label className={labelStyles}>Perfil de Marcación</label>
+                    <select
+                      {...register('checkProfile')}
+                      className={selectStyles}
+                    >
+                      <option value="primary">Principal</option>
+                      <option value="secondary">Secundario</option>
+                      <option value="special">Especial</option>
+                    </select>
+                  </div>
+                  
+                  <div className="px-2 flex items-center space-x-4 mt-3">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        {...register('status')}
+                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-xs text-gray-500">Activo</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        {...register('allowVisits')}
+                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-xs text-gray-500">Permitir Visitas</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Form Actions */}
+                <div className="flex justify-end space-x-3 mt-4 pt-3 border-t">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </div>
             </div>
           </form>
         </div>
