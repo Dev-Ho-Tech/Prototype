@@ -1,4 +1,5 @@
-import type { Device, BiometricData } from '../../../types';
+import { BiometricData } from "./interfaces/BiometricData";
+import { Device } from "./interfaces/device";
 
 export const deviceTypes = [
   { value: 'biometric', label: 'Marcaje Biométrico' },
@@ -158,5 +159,74 @@ export const deviceEvents = [
     timestamp: '2025-02-14T10:20:00',
     description: 'Acceso autorizado - María González',
     status: 'success'
+  }
+];
+
+export const eventosDetallados = [
+  {
+    id: 'EVT001',
+    deviceId: 'DEV001',
+    timestamp: '2025-02-14T10:28:00',
+    employeeName: 'Juan Pérez',
+    employeeId: 'EMP001',
+    eventType: 'ENTRADA',
+    verificationType: 'VERIFICADO',
+    verificationMethod: 'HUELLA_DIGITAL',
+    details: 'Marcaje exitoso - Entrada registrada'
+  },
+  {
+    id: 'EVT002',
+    deviceId: 'DEV001',
+    timestamp: '2025-02-14T10:25:00',
+    employeeName: 'María González',
+    employeeId: 'EMP002',
+    eventType: 'ENTRADA',
+    verificationType: 'NO_VERIFICADO',
+    verificationMethod: 'HUELLA_DIGITAL',
+    details: 'Error de lectura biométrica - Segundo intento exitoso'
+  },
+  {
+    id: 'EVT003',
+    deviceId: 'DEV002',
+    timestamp: '2025-02-14T10:20:00',
+    employeeName: 'María González',
+    employeeId: 'EMP002',
+    eventType: 'ENTRADA',
+    verificationType: 'VERIFICADO',
+    verificationMethod: 'ROSTRO',
+    details: 'Acceso autorizado - Entrada registrada'
+  },
+  {
+    id: 'EVT004',
+    deviceId: 'DEV001',
+    timestamp: '2025-02-14T17:35:00',
+    employeeName: 'Juan Pérez',
+    employeeId: 'EMP001',
+    eventType: 'SALIDA',
+    verificationType: 'VERIFICADO',
+    verificationMethod: 'HUELLA_DIGITAL',
+    details: 'Marcaje exitoso - Salida registrada'
+  },
+  {
+    id: 'EVT005',
+    deviceId: 'DEV001',
+    timestamp: '2025-02-14T17:40:00',
+    employeeName: 'María González',
+    employeeId: 'EMP002',
+    eventType: 'SALIDA',
+    verificationType: 'VERIFICADO',
+    verificationMethod: 'TARJETA',
+    details: 'Marcaje exitoso - Salida registrada'
+  },
+  {
+    id: 'EVT006',
+    deviceId: 'DEV003',
+    timestamp: '2025-02-14T12:15:00',
+    employeeName: 'Carlos Rodríguez',
+    employeeId: 'EMP003',
+    eventType: 'COMEDOR',
+    verificationType: 'VERIFICADO',
+    verificationMethod: 'TARJETA',
+    details: 'Acceso a comedor autorizado'
   }
 ];

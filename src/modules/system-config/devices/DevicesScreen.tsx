@@ -1,298 +1,384 @@
-import React, { useState } from 'react';
-import { Search, Plus, Filter, Wifi, WifiOff, AlertTriangle, RefreshCcw, Settings, Fingerprint, DoorClosed, Coffee, RotateCcw, Users, Activity, CheckCircle } from 'lucide-react';
-import { devicesData, deviceEvents, biometricData } from './data';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Filter, MoreVertical, RefreshCw, Power, AlertCircle, CheckCircle, Clock, Activity } from 'lucide-react';
+import { devicesData } from './data';
+import { Device } from './interfaces/device';
 import { DeviceForm } from './components/DeviceForm';
-import { BiometricRegistration } from './components/BiometricRegistration';
-import type { Device, BiometricData as BiometricDataType } from '../../../types';
+import { BiometricOperations } from './components/BiometricOperations';
+import { EventosDetallados } from './components/EventosDetallados';
+import DevicesSummary from './components/DevicesSummaryProps';
 
-export function DevicesScreen() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedType, setSelectedType] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [showDeviceForm, setShowDeviceForm] = useState(false);
-  const [showBiometricForm, setShowBiometricForm] = useState(false);
+export const DevicesScreen: React.FC = () => {
+  const [devices, setDevices] = useState<Device[]>(devicesData);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [showDeviceForm, setShowDeviceForm] = useState<boolean>(false);
+  const [editingDevice, setEditingDevice] = useState<Device | undefined>(undefined);
+  const [showBiometricOperations, setShowBiometricOperations] = useState<boolean>(false);
+  const [showEventosDetallados, setShowEventosDetallados] = useState<boolean>(false);
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
-  const [selectedEmployee, setSelectedEmployee] = useState<BiometricDataType | null>(null);
 
-  const handleRestart = (deviceId: string) => {
-    // Handle device restart
-    console.log('Restarting device:', deviceId);
+  // Filtrar dispositivos
+  useEffect(() => {
+    let filtered = devicesData;
+
+    // Filtrar por término de búsqueda
+    if (searchTerm) {
+      filtered = filtered.filter(device => 
+        device.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        device.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        device.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filtrar por estado
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(device => device.status === filterStatus);
+    }
+
+    // Filtrar por tipo
+    if (filterType !== 'all') {
+      filtered = filtered.filter(device => device.type === filterType);
+    }
+
+    setDevices(filtered);
+  }, [searchTerm, filterStatus, filterType]);
+
+  // Función para abrir el formulario en modo edición
+  const handleEditDevice = (device: Device) => {
+    setEditingDevice(device);
+    setShowDeviceForm(true);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  // Función para abrir el formulario en modo creación
+  const handleAddDevice = () => {
+    setEditingDevice(undefined);
+    setShowDeviceForm(true);
+  };
+
+  // Función para manejar el cierre del formulario
+  const handleCloseForm = () => {
+    setShowDeviceForm(false);
+    setEditingDevice(undefined);
+  };
+
+  // Función para abrir operaciones biométricas
+  const handleOpenOperations = (device: Device) => {
+    setSelectedDevice(device);
+    setShowBiometricOperations(true);
+  };
+
+  // Función para abrir el panel de eventos detallados
+  const handleOpenEventos = (device: Device) => {
+    setSelectedDevice(device);
+    setShowEventosDetallados(true);
+  };
+
+  // Función para reiniciar dispositivo
+  const handleRestart = (deviceId: string | number) => {
+    // En una implementación real, aquí iría la lógica para reiniciar el dispositivo
+    console.log('Reiniciando dispositivo:', deviceId);
+  };
+
+  // Obtener la clase CSS para el estado del dispositivo
+  const getStatusClass = (status: string) => {
+    switch(status) {
       case 'online':
         return 'bg-green-100 text-green-800';
       case 'offline':
         return 'bg-red-100 text-red-800';
       case 'warning':
         return 'bg-yellow-100 text-yellow-800';
+      case 'maintenance':
+        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'biometric':
-        return <Fingerprint className="w-5 h-5" />;
-      case 'access':
-        return <DoorClosed className="w-5 h-5" />;
-      case 'dining':
-        return <Coffee className="w-5 h-5" />;
+  // Obtener el icono para el estado del dispositivo
+  const getStatusIcon = (status: string) => {
+    switch(status) {
+      case 'online':
+        return <CheckCircle className="w-4 h-4 mr-1" />;
+      case 'offline':
+        return <Power className="w-4 h-4 mr-1" />;
+      case 'warning':
+        return <AlertCircle className="w-4 h-4 mr-1" />;
+      case 'maintenance':
+        return <Clock className="w-4 h-4 mr-1" />;
       default:
-        return <Settings className="w-5 h-5" />;
+        return <Activity className="w-4 h-4 mr-1" />;
     }
   };
 
   return (
-    <div className="flex-1 overflow-auto bg-gray-50">
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Dispositivos</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Gestiona los dispositivos de control de acceso y marcaje
-            </p>
-          </div>
-          <button
-            onClick={() => setShowDeviceForm(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Nuevo Dispositivo</span>
-          </button>
-        </div>
+    <div className="p-4 max-w-7xl mx-auto">
+      {/* Cabecera */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Dispositivos</h1>
+        <button
+          onClick={handleAddDevice}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
+        >
+          <Plus className="mr-2 h-5 w-5" />
+          Nuevo dispositivo
+        </button>
+      </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Total Dispositivos</p>
-                <p className="text-2xl font-semibold text-gray-900">48</p>
-              </div>
-              <Settings className="w-8 h-8 text-gray-400" />
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">En línea</p>
-                <p className="text-2xl font-semibold text-green-600">42</p>
-              </div>
-              <Wifi className="w-8 h-8 text-green-400" />
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Fuera de línea</p>
-                <p className="text-2xl font-semibold text-red-600">6</p>
-              </div>
-              <WifiOff className="w-8 h-8 text-red-400" />
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Alertas</p>
-                <p className="text-2xl font-semibold text-yellow-600">3</p>
-              </div>
-              <AlertTriangle className="w-8 h-8 text-yellow-400" />
-            </div>
-          </div>
-        </div>
+      {/* Resumen de dispositivos */}
+      <DevicesSummary devices={devices} />
 
-        {/* Device List */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center space-x-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Buscar por nombre, IP o ubicación"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+      {/* Filtros y búsqueda */}
+      <div className="bg-white p-4 rounded-lg shadow mb-6">
+        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por nombre, ubicación o serie"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div className="flex space-x-4">
+            <div>
               <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="all">Todos los estados</option>
+                <option value="online">En línea</option>
+                <option value="offline">Fuera de línea</option>
+                <option value="warning">Advertencia</option>
+                <option value="maintenance">Mantenimiento</option>
+              </select>
+            </div>
+            <div>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">Todos los tipos</option>
                 <option value="biometric">Biométrico</option>
                 <option value="access">Control de Acceso</option>
                 <option value="dining">Comedor</option>
               </select>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">Todos los estados</option>
-                <option value="online">En línea</option>
-                <option value="offline">Fuera de línea</option>
-                <option value="warning">Con alertas</option>
-              </select>
-              <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-lg">
-                <Filter className="w-5 h-5" />
-              </button>
-              <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-lg">
-                <RefreshCcw className="w-5 h-5" />
-              </button>
             </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-6 p-6">
-            {devicesData.map((device) => (
-              <div
-                key={device.id}
-                className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-              >
-                <div className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        {getTypeIcon(device.type)}
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">
-                          {device.name}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          {device.location}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      getStatusColor(device.status)
-                    }`}>
-                      {device.status === 'online' ? 'En línea' : 
-                       device.status === 'offline' ? 'Fuera de línea' : 
-                       'Alerta'}
-                    </span>
-                  </div>
-
-                  <div className="mt-6 space-y-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Serial</span>
-                      <span className="font-medium">{device.serialNumber}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">IP</span>
-                      <span className="font-medium">{device.ip}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">MAC</span>
-                      <span className="font-medium">{device.mac}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Firmware</span>
-                      <span className="font-medium">{device.firmware}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Capacidad</span>
-                      <span className="font-medium">{device.capacity.used}/{device.capacity.total} {device.capacity.type}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 pt-6 border-t border-gray-200 grid grid-cols-4 gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedDevice(device);
-                        setShowDeviceForm(true);
-                      }}
-                      className="flex flex-col items-center justify-center p-2 text-gray-700 hover:bg-gray-50 rounded-lg"
-                    >
-                      <Settings className="w-5 h-5 mb-1" />
-                      <span className="text-xs">Configurar</span>
-                    </button>
-                    <button
-                      onClick={() => setShowBiometricForm(true)}
-                      className="flex flex-col items-center justify-center p-2 text-gray-700 hover:bg-gray-50 rounded-lg"
-                    >
-                      <Users className="w-5 h-5 mb-1" />
-                      <span className="text-xs">Empleados</span>
-                    </button>
-                    <button
-                      onClick={() => handleRestart(device.id)}
-                      className="flex flex-col items-center justify-center p-2 text-gray-700 hover:bg-gray-50 rounded-lg"
-                    >
-                      <RotateCcw className="w-5 h-5 mb-1" />
-                      <span className="text-xs">Reiniciar</span>
-                    </button>
-                    <button className="flex flex-col items-center justify-center p-2 text-gray-700 hover:bg-gray-50 rounded-lg">
-                      <Activity className="w-5 h-5 mb-1" />
-                      <span className="text-xs">Eventos</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Events */}
-        <div className="mt-8 bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Eventos recientes</h2>
-          </div>
-          <div className="p-4">
-            <div className="space-y-4">
-              {deviceEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg"
-                >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    event.status === 'success' ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    {event.status === 'success' ? (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                    ) : (
-                      <AlertTriangle className="w-5 h-5 text-red-600" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900">{event.description}</p>
-                      <span className="text-sm text-gray-500">
-                        {new Date(event.timestamp).toLocaleTimeString()}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      Dispositivo: {devicesData.find(d => d.id === event.deviceId)?.name}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <button
+              className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg flex items-center hover:bg-gray-200"
+            >
+              <Filter className="mr-2 h-5 w-5" />
+              Más filtros
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Device Form Modal */}
+      {/* Lista de dispositivos */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nombre
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tipo/Modelo
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  IP/Ubicación
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Estado
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Última sincronización
+                </th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {devices.map((device) => (
+                <tr key={device.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        {device.brand === 'zkteco' && (
+                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold">
+                            ZK
+                          </div>
+                        )}
+                        {device.brand === 'suprema' && (
+                          <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-800 font-bold">
+                            SP
+                          </div>
+                        )}
+                        {device.brand === 'hikvision' && (
+                          <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-800 font-bold">
+                            HK
+                          </div>
+                        )}
+                        {device.brand === 'dahua' && (
+                          <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-800 font-bold">
+                            DH
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{device.name}</div>
+                        <div className="text-sm text-gray-500">SN: {device.serialNumber}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900 capitalize">{device.type}</div>
+                    <div className="text-sm text-gray-500">{device.model}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{device.ip}</div>
+                    <div className="text-sm text-gray-500">{device.location}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClass(device.status || '')}`}>
+                      {getStatusIcon(device.status || '')}
+                      {device.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {device.lastSync ? new Date(device.lastSync).toLocaleString() : 'Sin sincronizar'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex space-x-2 justify-end">
+                      <button
+                        onClick={() => handleOpenOperations(device)}
+                        className="text-blue-600 hover:text-blue-900"
+                        title="Operaciones biométricas"
+                      >
+                        <Activity className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleOpenEventos(device)}
+                        className="text-green-600 hover:text-green-900"
+                        title="Ver eventos"
+                      >
+                        <Clock className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleRestart(device.id || '')}
+                        className="text-orange-600 hover:text-orange-900"
+                        title="Reiniciar dispositivo"
+                      >
+                        <RefreshCw className="h-5 w-5" />
+                      </button>
+                      <div className="relative group">
+                        <button
+                          className="text-gray-500 hover:text-gray-700"
+                          title="Más acciones"
+                        >
+                          <MoreVertical className="h-5 w-5" />
+                        </button>
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block z-10">
+                          <div className="py-1">
+                            <button 
+                              onClick={() => handleEditDevice(device)} 
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              Editar dispositivo
+                            </button>
+                            <button 
+                              onClick={() => handleOpenOperations(device)}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              Operaciones biométricas
+                            </button>
+                            <button 
+                              onClick={() => handleOpenEventos(device)}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              Ver eventos
+                            </button>
+                            <button 
+                              onClick={() => handleRestart(device.id || '' )}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              Reiniciar dispositivo
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {devices.length === 0 && (
+          <div className="py-8 text-center">
+            <p className="text-gray-500">No se encontraron dispositivos con los filtros seleccionados.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Paginación */}
+      <div className="mt-4 flex justify-between items-center">
+        <p className="text-sm text-gray-500">
+          Mostrando {devices.length} de {devicesData.length} dispositivos
+        </p>
+        <div className="flex space-x-2">
+          <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700">
+            Anterior
+          </button>
+          <button className="px-3 py-1 bg-blue-50 border border-blue-300 rounded-lg text-sm text-blue-700">
+            1
+          </button>
+          <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700">
+            Siguiente
+          </button>
+        </div>
+      </div>
+
+      {/* Modal de formulario */}
       {showDeviceForm && (
         <DeviceForm
-          device={selectedDevice}
+          device={editingDevice}
+          onClose={handleCloseForm}
+        />
+      )}
+
+      {/* Modal de operaciones biométricas */}
+      {showBiometricOperations && selectedDevice && (
+        <BiometricOperations
+          deviceId={selectedDevice.id || ''}
+          deviceName={selectedDevice.name}
           onClose={() => {
-            setShowDeviceForm(false);
+            setShowBiometricOperations(false);
             setSelectedDevice(null);
           }}
         />
       )}
 
-      {/* Biometric Registration Modal */}
-      {showBiometricForm && biometricData[0] && (
-        <BiometricRegistration
-          employeeData={biometricData[0]}
-          onClose={() => setShowBiometricForm(false)}
+      {/* Modal de eventos detallados */}
+      {showEventosDetallados && selectedDevice && (
+        <EventosDetallados
+          deviceId={selectedDevice.id as string}
+          deviceName={selectedDevice.name}
+          onClose={() => {
+            setShowEventosDetallados(false);
+            setSelectedDevice(null);
+          }}
         />
       )}
     </div>
   );
-}
+};
+
+export default DevicesScreen;

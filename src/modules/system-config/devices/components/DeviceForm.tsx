@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { X, Upload } from 'lucide-react';
+import { X } from 'lucide-react';
 import { deviceTypes, deviceBrands } from '../data';
-import type { Device } from '../../../../types';
+import { Device } from '../interfaces/device';
 
 interface DeviceFormProps {
   device?: Device;
@@ -230,7 +230,7 @@ export function DeviceForm({ device, onClose }: DeviceFormProps) {
                           value={formData.capacity?.type}
                           onChange={(e) => setFormData({
                             ...formData,
-                            capacity: { ...formData.capacity!, type: e.target.value as any }
+                            capacity: { ...formData.capacity!, type: e.target.value as unknown as Device['capacity']['type'] }
                           })}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         >
