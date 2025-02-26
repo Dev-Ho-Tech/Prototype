@@ -50,23 +50,6 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
       : <Smartphone className="w-4 h-4 text-gray-600" />;
   };
 
-  const getCardBackgroundColor = (estado: string) => {
-    switch(estado) {
-      case 'trabajando':
-        return 'bg-green-50';
-      case 'permiso':
-        return 'bg-orange-50';
-      case 'ausencia':
-        return 'bg-red-50';
-      case 'planificado':
-        return 'bg-blue-50';
-      case 'trabajó':
-        return 'bg-gray-50';
-      default:
-        return 'bg-gray-50';
-    }
-  };
-
   const handleCardClick = () => {
     if (onSelect) {
       onSelect(empleado);
@@ -75,10 +58,10 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
 
   return (
     <div 
-      className="bg-white rounded-lg shadow overflow-hidden flex flex-col h-full cursor-pointer transition-transform hover:scale-105"
+  className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-full cursor-pointer transition-transform hover:scale-105 "
       onClick={handleCardClick}
     >
-      <div className={`p-3.5 flex-grow ${getCardBackgroundColor(empleado.estado)}`}>
+      <div className={`p-3.5 flex-grow bg-white`}>
         <div className="flex items-center gap-3 mb-2">
           <div className="relative">
             {empleado.foto ? (
