@@ -1,19 +1,45 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users } from 'lucide-react';
 import EmployeeCard from './EmployeCardUser';
 import { Employee } from '../interface/types';
+import SimplePagination from '../components/Pagination'; 
 
 interface EmployeeListViewProps {
   currentEmpleados: Employee[];
   viewMode: 'grid' | 'list';
   onEmployeeSelect: (employee: Employee) => void;
+  itemsPerPage?: number;
 }
 
 export const EmployeeListView: React.FC<EmployeeListViewProps> = ({ 
   currentEmpleados, 
   viewMode, 
-  onEmployeeSelect 
+  onEmployeeSelect,
+  itemsPerPage = 18
 }) => {
+  // Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paginatedEmpleados, setPaginatedEmpleados] = useState<Employee[]>([]);
+  
+  // Calcular paginación cada vez que cambian los empleados o la página actual
+  useEffect(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    setPaginatedEmpleados(currentEmpleados.slice(indexOfFirstItem, indexOfLastItem));
+    
+    // Si la página actual ya no tiene elementos (excepto página 1), regresar a la página anterior
+    if (currentPage > 1 && indexOfFirstItem >= currentEmpleados.length) {
+      setCurrentPage(Math.max(1, Math.ceil(currentEmpleados.length / itemsPerPage)));
+    }
+  }, [currentEmpleados, currentPage, itemsPerPage]);
+  
+  // Cambiar página
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    // Opcionalmente, hacer scroll al inicio de la lista
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Función para obtener clase CSS basada en estado para vista de lista
   const getEstadoClase = (estado: string) => {
     switch(estado) {
@@ -50,12 +76,26 @@ export const EmployeeListView: React.FC<EmployeeListViewProps> = ({
     }
   };
 
+  // Renderizar mensaje de "No hay empleados" si la lista está vacía
+  if (currentEmpleados.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow p-8 text-center">
+        <Users className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+        <h3 className="text-lg font-medium text-gray-900 mb-1">No hay empleados disponibles</h3>
+        <p className="text-gray-500">No se encontraron empleados que coincidan con los criterios de búsqueda.</p>
+      </div>
+    );
+  }
+
+  // Calcular el número total de páginas (para debugging)
+  const totalPages = Math.ceil(currentEmpleados.length / itemsPerPage);
+
   return (
     <div className="bg-white rounded-lg shadow mb-4">
       {viewMode === 'grid' ? (
         <div className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {currentEmpleados.map(empleado => (
+            {paginatedEmpleados.map(empleado => (
               <EmployeeCard 
                 key={empleado.id} 
                 empleado={empleado} 
@@ -87,7 +127,7 @@ export const EmployeeListView: React.FC<EmployeeListViewProps> = ({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {currentEmpleados.map(empleado => {
+              {paginatedEmpleados.map(empleado => {
                 const estadoClase = getEstadoClase(empleado.estado);
                 const estadoTexto = getEstadoTexto(empleado.estado);
                 const bgColorClass = 
@@ -150,6 +190,21 @@ export const EmployeeListView: React.FC<EmployeeListViewProps> = ({
           </table>
         </div>
       )}
+      
+      {/* Mensaje de debugging para verificar que la paginación debería mostrarse */}
+      {/* {totalPages > 1 && (
+        <div className="px-4 py-2 text-sm text-gray-500 border-t border-gray-200">
+          Mostrando página {currentPage} de {totalPages}
+        </div>
+      )} */}
+      
+      {/* Componente de paginación simplificado */}
+      <SimplePagination 
+        totalItems={currentEmpleados.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };

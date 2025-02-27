@@ -9,27 +9,21 @@ import { Employee } from './interface/types';
 const DashboardScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showEmployeeDetail, setShowEmployeeDetail] = useState(false);
   
+  // Definir itemsPerPage según el modo de vista
   const itemsPerPage = viewMode === 'grid' ? 18 : 8;
 
+  // Filtrar empleados según el término de búsqueda
   const filteredEmpleados = empleadosData.filter(empleado => 
     empleado.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     empleado.pais.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // const totalPages = Math.ceil(filteredEmpleados.length / itemsPerPage);
-  
-  const currentEmpleados = filteredEmpleados.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
   
   // Reiniciar a la primera página cuando cambie el modo de vista o el término de búsqueda
   useEffect(() => {
-    setCurrentPage(1);
+    // No necesitamos manejar la página actual aquí, ya que ahora lo hace el componente EmployeeListView
   }, [viewMode, searchTerm]);
 
   const handleEmployeeSelect = (employee: Employee) => {
@@ -105,9 +99,10 @@ const DashboardScreen: React.FC = () => {
 
         {/* Vista de lista/cuadrícula de empleados */}
         <EmployeeListView 
-          currentEmpleados={currentEmpleados}
+          currentEmpleados={filteredEmpleados}
           viewMode={viewMode}
           onEmployeeSelect={handleEmployeeSelect}
+          itemsPerPage={itemsPerPage}
         />
       </div>
     </div>
