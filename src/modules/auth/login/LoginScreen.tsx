@@ -54,56 +54,51 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     <div className="relative w-screen h-screen flex items-center bg-gradient-to-b from-blue-500 to-blue-700">
       {/* Background with wave patterns */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1200 800">
-          <defs>
-            <style>
-              {`
-                @keyframes waveAnimation {
-                  0% { transform: translateX(0); }
-                  100% { transform: translateX(-100%); }
-                }
-                .wave {
-                  animation: waveAnimation 25s linear infinite;
-                  width: 200%;
-                  left: 0;
-                  position: absolute;
-                  transform-origin: 0 0;
-                }
-                .wave-1 { fill: #3B82F6; opacity: 0.3; }
-                .wave-2 { fill: #2563EB; opacity: 0.4; }
-                .wave-3 { fill: #1D4ED8; opacity: 0.3; }
-                .wave-4 { fill: #1E40AF; opacity: 0.2; }
-                .wave-5 { fill: #1E3A8A; opacity: 0.1; }
-              `}
-            </style>
-          </defs>
-          <path
-            className="wave wave-1"
-            d="M-100 300 Q 150 200, 400 300 Q 650 400, 900 300 Q 1150 200, 1400 300 L 1400 800 L -100 800 Z"
-            style={{ animationDuration: '20s' }}
-          />
-          <path
-            className="wave wave-2"
-            d="M-100 400 Q 150 300, 400 400 Q 650 500, 900 400 Q 1150 300, 1400 400 L 1400 800 L -100 800 Z"
-            style={{ animationDuration: '15s' }}
-          />
-          <path
-            className="wave wave-3"
-            d="M-100 500 Q 150 400, 400 500 Q 650 600, 900 500 Q 1150 400, 1400 500 L 1400 800 L -100 800 Z"
-            style={{ animationDuration: '25s' }}
-          />
-          <path
-            className="wave wave-4"
-            d="M-100 600 Q 150 500, 400 600 Q 650 700, 900 600 Q 1150 500, 1400 600 L 1400 800 L -100 800 Z"
-            style={{ animationDuration: '30s' }}
-          />
-          <path
-            className="wave wave-5"
-            d="M-100 700 Q 150 600, 400 700 Q 650 800, 900 700 Q 1150 600, 1400 700 L 1400 800 L -100 800 Z"
-            style={{ animationDuration: '35s' }}
-          />
-        </svg>
-      </div>
+      <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1440 800">
+        <defs>
+          <style>
+            {`
+              .wave {
+                position: absolute;
+                left: 0;
+                width: 200%;
+                height: 100%;
+                transform-origin: 0% 50%;
+              }
+              .wave-1 { fill: #3B82F6; opacity: 0.3; animation: wave 25s linear infinite; }
+              .wave-2 { fill: #2563EB; opacity: 0.4; animation: wave 20s linear infinite; }
+              .wave-3 { fill: #1D4ED8; opacity: 0.3; animation: wave 15s linear infinite; }
+              .wave-4 { fill: #1E40AF; opacity: 0.2; animation: wave 30s linear infinite; }
+              .wave-5 { fill: #1E3A8A; opacity: 0.1; animation: wave 35s linear infinite; }
+              @keyframes wave {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+              }
+            `}
+          </style>
+        </defs>
+        <path
+          className="wave wave-1"
+          d="M0 300 Q 360 200, 720 300 Q 1080 400, 1440 300 Q 1800 200, 2160 300 Q 2520 400, 2880 300 L 2880 800 L 0 800 Z"
+        />
+        <path
+          className="wave wave-2"
+          d="M0 400 Q 360 300, 720 400 Q 1080 500, 1440 400 Q 1800 300, 2160 400 Q 2520 500, 2880 400 L 2880 800 L 0 800 Z"
+        />
+        <path
+          className="wave wave-3"
+          d="M0 500 Q 360 400, 720 500 Q 1080 600, 1440 500 Q 1800 400, 2160 500 Q 2520 600, 2880 500 L 2880 800 L 0 800 Z"
+        />
+        <path
+          className="wave wave-4"
+          d="M0 600 Q 360 500, 720 600 Q 1080 700, 1440 600 Q 1800 500, 2160 600 Q 2520 700, 2880 600 L 2880 800 L 0 800 Z"
+        />
+        <path
+          className="wave wave-5"
+          d="M0 700 Q 360 600, 720 700 Q 1080 800, 1440 700 Q 1800 600, 2160 700 Q 2520 800, 2880 700 L 2880 800 L 0 800 Z"
+        />
+      </svg>
+    </div>
 
       {/* Form container - Left aligned */}
       <div className="relative z-10 bg-white shadow-lg rounded-lg p-8 w-96 m-8">
