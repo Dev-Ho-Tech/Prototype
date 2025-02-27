@@ -1,105 +1,116 @@
-interface EmployeeType {
-  id: string;
-  code: string;
-  name: string;
-  description: string;
-  status: 'active' | 'inactive';
-  checkMethod: string;
-  accessLevel: string;
-  diningAccess: boolean;
-  overtimeAllowed: boolean;
-  maxHoursPerDay: number;
-  maxHoursPerWeek: number;
-  benefits: string[];
-}
+// interface EmployeeType {
+//   id: string;
+//   code: string;
+//   name: string;
+//   description: string;
+//   status: 'active' | 'inactive';
+//   checkMethod: string;
+//   accessLevel: string;
+//   diningAccess: boolean;
+//   overtimeAllowed: boolean;
+//   maxHoursPerDay: number;
+//   maxHoursPerWeek: number;
+//   benefits: string[];
+// }
+
+import { EmployeeType } from "./interface/EmployeeType";
 
 export const employeeTypesData: EmployeeType[] = [
   {
-    id: 'ET001',
-    code: 'ADM',
-    name: 'Administrativo',
-    description: 'Personal administrativo y gerencial',
+    id: '1',
+    name: 'Empleado',
+    code: 'EMP',
     status: 'active',
+    intelliTime: true,
+    intelliLunch: false,
+    emailRequired: true,
+    signatureRequired: true,
+    requiredFields: [
+      'Huella', 
+      'Rostro', 
+      'Perfil De Marcaje', 
+      'Estructura', 
+      'Contrato', 
+      'Fecha Inicial Contrato', 
+      'Fecha Final Contrato', 
+      'Código', 
+      'Cargo', 
+      'Departamento', 
+      'Sección', 
+      'Sede', 
+      'Contenedor', 
+      'Empresa'
+    ],
     checkMethod: 'Biométrico',
     accessLevel: 'Total',
     diningAccess: true,
-    overtimeAllowed: true,
-    maxHoursPerDay: 8,
-    maxHoursPerWeek: 44,
-    benefits: [
-      'Seguro médico complementario',
-      'Bonificación anual',
-      'Vacaciones extendidas'
-    ]
+    overtimeAllowed: true
   },
   {
-    id: 'ET002',
-    code: 'OPE',
-    name: 'Operativo',
-    description: 'Personal de operaciones y servicios',
+    id: '2',
+    name: 'Proveedor',
+    code: 'PRV',
     status: 'active',
-    checkMethod: 'Biométrico/Tarjeta',
-    accessLevel: 'Restringido',
-    diningAccess: true,
-    overtimeAllowed: true,
-    maxHoursPerDay: 8,
-    maxHoursPerWeek: 44,
-    benefits: [
-      'Seguro médico básico',
-      'Bonificación anual'
-    ]
-  },
-  {
-    id: 'ET003',
-    code: 'TMP',
-    name: 'Temporal',
-    description: 'Personal contratado por tiempo definido',
-    status: 'active',
-    checkMethod: 'Tarjeta',
-    accessLevel: 'Básico',
-    diningAccess: true,
-    overtimeAllowed: false,
-    maxHoursPerDay: 8,
-    maxHoursPerWeek: 44,
-    benefits: [
-      'Seguro médico básico'
-    ]
-  },
-  {
-    id: 'ET004',
-    code: 'PRA',
-    name: 'Practicante',
-    description: 'Estudiantes en prácticas profesionales',
-    status: 'active',
-    checkMethod: 'Tarjeta',
+    intelliTime: false,
+    intelliLunch: false,
+    emailRequired: false,
+    signatureRequired: false,
+    requiredFields: ['Código', 'Empresa', 'Contrato'],
+    checkMethod: 'Manual',
     accessLevel: 'Limitado',
-    diningAccess: true,
-    overtimeAllowed: false,
-    maxHoursPerDay: 6,
-    maxHoursPerWeek: 30,
-    benefits: [
-      'Seguro contra accidentes',
-      'Alimentación'
-    ]
+    diningAccess: false,
+    overtimeAllowed: false
   },
   {
-    id: 'ET005',
-    code: 'EJE',
-    name: 'Ejecutivo',
-    description: 'Personal de alta dirección',
+    id: '3',
+    name: 'Visitante',
+    code: 'VIS',
     status: 'active',
-    checkMethod: 'Biométrico',
-    accessLevel: 'Total Plus',
-    diningAccess: true,
-    overtimeAllowed: true,
-    maxHoursPerDay: 8,
-    maxHoursPerWeek: 44,
-    benefits: [
-      'Seguro médico internacional',
-      'Bonificación anual',
-      'Vacaciones extendidas',
-      'Seguro de vida',
-      'Plan de retiro'
-    ]
-  }
+    intelliTime: false,
+    intelliLunch: false,
+    emailRequired: false,
+    signatureRequired: true,
+    requiredFields: ['Huella', 'Empresa Visitada', 'Motivo'],
+    checkMethod: 'QR',
+    accessLevel: 'Visitante',
+    diningAccess: false,
+    overtimeAllowed: false
+  },
+];
+
+// Lista de todos los posibles campos disponibles para un tipo de empleado
+export const availableFields = [
+  'Huella',
+  'Rostro',
+  'Perfil De Marcaje',
+  'Estructura',
+  'Contrato',
+  'Fecha Inicial Contrato',
+  'Fecha Final Contrato',
+  'Código',
+  'Cargo',
+  'Departamento',
+  'Sección',
+  'Sede',
+  'Contenedor',
+  'Empresa',
+  'Segundo Nombre',
+  'Segundo Apellido',
+  'Género',
+  'Fecha De Nacimiento',
+  'País',
+  'Estado',
+  'Teléfono',
+  'Email',
+  'Dirección',
+  'Ciudad',
+  'Zona',
+  'Salario',
+  'Número De Cuenta',
+  'Banco',
+  'Tipo De Contrato',
+  'Empresa Visitada',
+  'Motivo',
+  'Hora De Entrada',
+  'Hora De Salida'
 ];

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Filter, Building2, Users, Briefcase, GraduationCap, Clock } from 'lucide-react';
+import { Search, Plus, Filter, Briefcase } from 'lucide-react';
 import { positionsData } from './data';
 
 export function PositionsScreen() {
