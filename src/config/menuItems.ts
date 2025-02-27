@@ -174,12 +174,7 @@ export const menuItems: MenuItem[] = [
         icon: UserCheck,
         path: '/administration/users'
       },
-      {
-        id: 'general-config',
-        label: 'Configuración General',
-        icon: Settings,
-        path: '/administration/config'
-      }
+     
     ]
   },
   {
@@ -229,6 +224,12 @@ export const menuItems: MenuItem[] = [
         label: 'Correo electronico',
         icon: Mail,
         path: '/system-config/email'
+      },
+      {
+        id: 'general-config',
+        label: 'Configuración General',
+        icon: Settings,
+        path: '/administration/config'
       }
     ]
   }

@@ -92,8 +92,8 @@ export const EmployeeTypeForm: React.FC<EmployeeTypeFormProps> = ({ employeeType
 
       <div className="grid grid-cols-4 gap-6 mb-6">
         <ToggleSwitch label="Estatus" isChecked={status} onChange={setStatus} />
-        <ToggleSwitch label="¿Intelli Time?" isChecked={intelliTime} onChange={setIntelliTime} />
-        <ToggleSwitch label="¿Intelli Lunch?" isChecked={intelliLunch} onChange={setIntelliLunch} />
+        <ToggleSwitch label="Control de Tiempo" isChecked={intelliTime} onChange={setIntelliTime} />
+        <ToggleSwitch label="Comedor" isChecked={intelliLunch} onChange={setIntelliLunch} />
         <ToggleSwitch label="Email requerido" isChecked={emailRequired} onChange={setEmailRequired} />
         <ToggleSwitch label="Firma por habeas data" isChecked={signatureRequired} onChange={setSignatureRequired} />
       </div>

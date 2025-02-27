@@ -140,8 +140,8 @@ export function EmployeeTypesScreen() {
             <div className="w-8"></div>
             <span className="flex-1 font-medium text-sm">Tipo de persona</span>
             <div className="flex items-center space-x-8">
-              <div className="w-24 text-center text-sm font-medium">¿Intelli Time?</div>
-              <div className="w-24 text-center text-sm font-medium">¿Intelli Lunch?</div>
+              <div className="w-24 text-center text-sm font-medium">Control de Tiempo</div>
+              <div className="w-24 text-center text-sm font-medium">Comedor</div>
               <div className="w-6"></div>
             </div>
           </div>

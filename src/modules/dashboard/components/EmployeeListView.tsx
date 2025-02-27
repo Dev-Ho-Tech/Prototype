@@ -88,7 +88,7 @@ export const EmployeeListView: React.FC<EmployeeListViewProps> = ({
   }
 
   // Calcular el número total de páginas (para debugging)
-  const totalPages = Math.ceil(currentEmpleados.length / itemsPerPage);
+  // const totalPages = Math.ceil(currentEmpleados.length / itemsPerPage);
 
   return (
     <div className="bg-white rounded-lg shadow mb-4">
