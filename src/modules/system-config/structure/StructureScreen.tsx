@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Search, Plus, Filter, Building2, Users, MapPin, Phone, Mail, Globe2, ChevronDown, MoreVertical, Edit, Trash, Settings, FolderTree, Briefcase, ChevronRight, Building } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Building2, Users, MapPin, Phone, Mail, Edit, Trash, Settings, FolderTree, Briefcase, ChevronRight, Building } from 'lucide-react';
 import { OrganizationalTree } from './components/OrganizationalTree';
 import { NodeForm } from './components/NodeForm';
+import { SearchComponent } from './components/SearchComponentProps';
 import { organizationalStructureData } from './data';
 import type { OrganizationalNode } from '../../../types';
 
@@ -10,6 +11,48 @@ export function StructureScreen() {
   const [selectedNode, setSelectedNode] = useState<OrganizationalNode | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
+
+  // Función recursiva para buscar nodos que coincidan con el término de búsqueda
+  const searchNodes = (nodes: OrganizationalNode[], term: string): OrganizationalNode[] => {
+    if (!term) return [];
+    
+    const results: OrganizationalNode[] = [];
+    
+    const search = (nodeArray: OrganizationalNode[]) => {
+      nodeArray.forEach(node => {
+        // Buscar en el nombre del nodo, responsable o tipo
+        if (node.name.toLowerCase().includes(term.toLowerCase()) ||
+            node.metadata?.contact?.managerFullName?.toLowerCase().includes(term.toLowerCase()) ||
+            node.type.toLowerCase().includes(term.toLowerCase())) {
+          results.push(node);
+        }
+        
+        // Buscar recursivamente en los hijos
+        if (node.children && node.children.length > 0) {
+          search(node.children);
+        }
+      });
+    };
+    
+    search(nodes);
+    return results;
+  };
+  
+  // Memorizar los resultados de búsqueda para evitar cálculos innecesarios
+  const searchResults = useMemo(() => {
+    if (!searchTerm) return [];
+    
+    const allRoots = [organizationalStructureData.root, ...(organizationalStructureData.children || [])];
+    return searchNodes(allRoots, searchTerm);
+  }, [searchTerm]);
+
+  // Expandir automáticamente los nodos padres de los resultados de búsqueda
+  useEffect(() => {
+    if (searchResults.length > 0 && searchTerm) {
+      // Seleccionar automáticamente el primer resultado si hay una búsqueda activa
+      setSelectedNode(searchResults[0]);
+    }
+  }, [searchResults, searchTerm]);
 
   const handleNodeToggle = (nodeId: string) => {
     setExpandedNodes(prev => 
@@ -32,7 +75,19 @@ export function StructureScreen() {
 
   const handleSubmitNode = (data: Partial<OrganizationalNode>) => {
     console.log('Submitting node:', data);
-    // Here would go the logic to update the organizational structure
+    // Aquí iría la lógica para actualizar la estructura organizacional
+    setShowForm(false);
+  };
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+  };
+
+  const handleSelectSearchResult = (node: OrganizationalNode) => {
+    setSelectedNode(node);
+    
+    // Expandir todos los nodos necesarios para mostrar este nodo
+    // Esta funcionalidad requeriría tener una referencia del padre de cada nodo
   };
 
   const renderTreeNodes = (nodes: OrganizationalNode[]) => {
@@ -49,44 +104,46 @@ export function StructureScreen() {
   };
 
   return (
-    <div className="flex-1 overflow-hidden flex">
-      {/* Left Panel - Tree View */}
-      <div className="w-96 border-r border-gray-200 bg-white flex flex-col">
+    <div className="flex h-full w-full overflow-hidden">
+      {/* Panel izquierdo - Vista de árbol */}
+      <div className="w-1/4 min-w-80 max-w-96 border-r border-gray-200 bg-white flex flex-col h-full">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium text-gray-900">Estructura</h2>
             <button
               onClick={handleAddNode}
               className="p-1.5 text-gray-400 hover:bg-gray-50 rounded-lg"
+              title="Agregar nuevo nodo"
             >
               <Plus className="w-5 h-5" />
             </button>
           </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+          
+          {/* Componente de búsqueda separado */}
+          <SearchComponent 
+            onSearch={handleSearch}
+            searchResults={searchResults}
+            onSelectNode={handleSelectSearchResult}
+            searchTerm={searchTerm}
+          />
         </div>
 
-        <div className="flex-1 overflow-auto p-4">
-          <OrganizationalTree
-            node={organizationalStructureData.root}
-            onSelect={setSelectedNode}
-            selectedNode={selectedNode}
-            expandedNodes={expandedNodes}
-            onToggleExpand={handleNodeToggle}
-          />
-          {organizationalStructureData.children && renderTreeNodes(organizationalStructureData.children)}
+        {/* Contenedor con scroll para el árbol de organización */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4">
+            <OrganizationalTree
+              node={organizationalStructureData.root}
+              onSelect={setSelectedNode}
+              selectedNode={selectedNode}
+              expandedNodes={expandedNodes}
+              onToggleExpand={handleNodeToggle}
+            />
+            {organizationalStructureData.children && renderTreeNodes(organizationalStructureData.children)}
+          </div>
         </div>
       </div>
 
-      {/* Right Panel - Details */}
+      {/* Panel derecho - Detalles */}
       <div className="flex-1 overflow-auto bg-gray-50">
         {selectedNode ? (
           <div className="p-8">
@@ -120,13 +177,13 @@ export function StructureScreen() {
                   <Settings className="w-4 h-4" />
                   <span>Configuración</span>
                 </button>
-                <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg">
+                <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Eliminar">
                   <Trash className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-sm font-medium text-gray-900 mb-4">
                   Información de contacto
@@ -223,6 +280,8 @@ export function StructureScreen() {
                     <div key={child.id} className="px-6 py-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
+                          {child.type === 'company' && <Building2 className="w-5 h-5 text-blue-500" />}
+                          {child.type === 'branch' && <Building className="w-5 h-5 text-green-500" />}
                           {child.type === 'department' && <Users className="w-5 h-5 text-purple-500" />}
                           {child.type === 'section' && <FolderTree className="w-5 h-5 text-amber-500" />}
                           {child.type === 'unit' && <Briefcase className="w-5 h-5 text-indigo-500" />}
@@ -264,14 +323,13 @@ export function StructureScreen() {
         )}
       </div>
 
-      {/* Form Modal */}
+      {/* Formulario Modal */}
       {showForm && (
         <NodeForm
           node={selectedNode}
           parentType={selectedNode?.type}
           onClose={() => {
             setShowForm(false);
-            setSelectedNode(null);
           }}
           onSubmit={handleSubmitNode}
         />

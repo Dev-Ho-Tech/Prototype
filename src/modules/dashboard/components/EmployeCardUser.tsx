@@ -61,7 +61,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
   className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-full cursor-pointer transition-transform hover:scale-105 "
       onClick={handleCardClick}
     >
-      <div className={`p-3.5 flex-grow bg-white`}>
+      <div className={`p-3.5 flex-grow bg-white`}>  
         <div className="flex items-center gap-3 mb-2">
           <div className="relative">
             {empleado.foto ? (

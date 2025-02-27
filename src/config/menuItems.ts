@@ -1,4 +1,4 @@
-import { BarChart2, Users, Clock, Coffee, DoorClosed, Settings, Building2, Briefcase, Fingerprint, UserCheck, FileText } from 'lucide-react';
+import { BarChart2, Users, Clock, Coffee, DoorClosed, Settings, Building2, Briefcase, Fingerprint, UserCheck, FileText, Mail, Utensils } from 'lucide-react';
 import type { MenuItem } from '../types';
 
 export const menuItems: MenuItem[] = [
@@ -189,16 +189,10 @@ export const menuItems: MenuItem[] = [
     path: '/system-config',
     children: [
       {
-        id: 'structure',
-        label: 'Estructura',
+        id: 'companies',
+        label: 'Compañías',
         icon: Building2,
         path: '/system-config/structure'
-      },
-      {
-        id: 'positions',
-        label: 'Puestos de Trabajo',
-        icon: Briefcase,
-        path: '/system-config/positions'
       },
       {
         id: 'devices',
@@ -213,10 +207,28 @@ export const menuItems: MenuItem[] = [
         path: '/system-config/employee-types'
       },
       {
+        id: 'positions',
+        label: 'Tipos de Acceso',
+        icon: Briefcase,
+        path: '/system-config/positions'
+      },
+      {
         id: 'contracts',
         label: 'Contratos',
         icon: FileText,
         path: '/system-config/contracts'
+      },
+      {
+        id: 'diner',
+        label: 'Comdedor',
+        icon: Utensils,
+        path: '/system-config/diner'
+      },
+      {
+        id: 'email',
+        label: 'Correo electronico',
+        icon: Mail,
+        path: '/system-config/email'
       }
     ]
   }

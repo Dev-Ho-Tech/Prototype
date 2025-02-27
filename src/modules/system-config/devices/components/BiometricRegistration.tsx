@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Fingerprint, Camera, CreditCard, Key } from 'lucide-react';
-import type { BiometricData } from '../../../../types';
+import { BiometricData } from '../interfaces/BiometricData';
 
 interface BiometricRegistrationProps {
   employeeData: BiometricData;
