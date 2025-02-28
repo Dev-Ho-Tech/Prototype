@@ -1,4 +1,4 @@
-import { Employee, WorkShift, License } from '../../types';
+import { Employee, WorkShift, License } from './interfaces/types';
 
 export const workShifts: WorkShift[] = [
   { id: 'A', label: 'A', startTime: '08:00', endTime: '16:00', color: 'bg-indigo-600 text-white' },
@@ -29,12 +29,60 @@ export const employees: Employee[] = [
     position: 'Recepcionista',
     department: 'Front Desk',
     location: 'Hodelpa Gran Almirante',
+    code: '1001',
+    contractType: 'Indefinido',
     schedule: [
-      { date: '2025-02-10', shift: 'M', startTime: '06:00', endTime: '14:00' },
-      { date: '2025-02-11', shift: 'M', startTime: '06:00', endTime: '14:00' },
-      { date: '2025-02-12', shift: 'D', startTime: '', endTime: '' },
-      { date: '2025-02-13', shift: 'M', startTime: '06:00', endTime: '14:00' },
-      { date: '2025-02-14', shift: 'M', startTime: '06:00', endTime: '14:00' },
+      { 
+        date: '2025-02-10', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:05',
+        actualExitTime: '14:02',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:15',
+        actualExitTime: '14:05',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:03',
+        actualExitTime: '13:45',
+        status: 'early'
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
     ]
   },
   {
@@ -43,12 +91,58 @@ export const employees: Employee[] = [
     position: 'Chef Ejecutivo',
     department: 'Cocina',
     location: 'Hodelpa Garden Court',
+    code: '1002',
+    contractType: 'Indefinido',
     schedule: [
-      { date: '2025-02-10', shift: 'S', startTime: '08:00', endTime: '19:00' },
-      { date: '2025-02-11', shift: 'S', startTime: '08:00', endTime: '19:00' },
-      { date: '2025-02-12', shift: 'S', startTime: '08:00', endTime: '19:00' },
-      { date: '2025-02-13', shift: 'D', startTime: '', endTime: '' },
-      { date: '2025-02-14', shift: 'D', startTime: '', endTime: '' },
+      { 
+        date: '2025-02-10', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00',
+        actualEntryTime: '07:55',
+        actualExitTime: '19:10',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00',
+        actualEntryTime: '08:00',
+        actualExitTime: '19:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00',
+        status: 'absent'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00' 
+      },
     ]
   },
   {
@@ -57,12 +151,16 @@ export const employees: Employee[] = [
     position: 'Camarera',
     department: 'Housekeeping',
     location: 'Hodelpa Gran Almirante',
+    code: '1003',
+    contractType: 'Temporal',
     schedule: [
       { date: '2025-02-10', shift: 'LPM', startTime: '', endTime: '' },
       { date: '2025-02-11', shift: 'LPM', startTime: '', endTime: '' },
       { date: '2025-02-12', shift: 'LPM', startTime: '', endTime: '' },
       { date: '2025-02-13', shift: 'LPM', startTime: '', endTime: '' },
       { date: '2025-02-14', shift: 'LPM', startTime: '', endTime: '' },
+      { date: '2025-02-15', shift: 'LPM', startTime: '', endTime: '' },
+      { date: '2025-02-16', shift: 'LPM', startTime: '', endTime: '' },
     ]
   },
   {
@@ -71,12 +169,60 @@ export const employees: Employee[] = [
     position: 'Seguridad',
     department: 'Seguridad',
     location: 'Hodelpa Garden Court',
+    code: '1004',
+    contractType: 'Indefinido',
     schedule: [
-      { date: '2025-02-10', shift: 'N', startTime: '16:00', endTime: '00:00' },
-      { date: '2025-02-11', shift: 'N', startTime: '16:00', endTime: '00:00' },
-      { date: '2025-02-12', shift: 'N', startTime: '16:00', endTime: '00:00' },
-      { date: '2025-02-13', shift: 'D', startTime: '', endTime: '' },
-      { date: '2025-02-14', shift: 'N', startTime: '16:00', endTime: '00:00' },
+      { 
+        date: '2025-02-10', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '15:55',
+        actualExitTime: '00:05',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '15:50',
+        actualExitTime: '00:10',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '16:20',
+        actualExitTime: '00:05',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
     ]
   },
   {
@@ -85,12 +231,60 @@ export const employees: Employee[] = [
     position: 'Bartender',
     department: 'Bar',
     location: 'Hodelpa Gran Almirante',
+    code: '1005',
+    contractType: 'Indefinido',
     schedule: [
-      { date: '2025-02-10', shift: 'T', startTime: '02:00', endTime: '10:00' },
-      { date: '2025-02-11', shift: 'T', startTime: '02:00', endTime: '10:00' },
-      { date: '2025-02-12', shift: 'D', startTime: '', endTime: '' },
-      { date: '2025-02-13', shift: 'T', startTime: '02:00', endTime: '10:00' },
-      { date: '2025-02-14', shift: 'T', startTime: '02:00', endTime: '10:00' },
+      { 
+        date: '2025-02-10', 
+        shift: 'T', 
+        startTime: '02:00', 
+        endTime: '10:00',
+        actualEntryTime: '02:10',
+        actualExitTime: '10:05',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'T', 
+        startTime: '02:00', 
+        endTime: '10:00',
+        actualEntryTime: '02:05',
+        actualExitTime: '10:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'T', 
+        startTime: '02:00', 
+        endTime: '10:00',
+        actualEntryTime: '02:00',
+        actualExitTime: '09:45',
+        status: 'early'
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'T', 
+        startTime: '02:00', 
+        endTime: '10:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'T', 
+        startTime: '02:00', 
+        endTime: '10:00' 
+      },
     ]
   },
   {
@@ -99,12 +293,61 @@ export const employees: Employee[] = [
     position: 'Mantenimiento',
     department: 'Mantenimiento',
     location: 'Hodelpa Garden Court',
+    code: '1006',
+    contractType: 'Por Proyecto',
     schedule: [
-      { date: '2025-02-10', shift: 'A', startTime: '08:00', endTime: '16:00' },
-      { date: '2025-02-11', shift: 'A', startTime: '08:00', endTime: '16:00' },
-      { date: '2025-02-12', shift: 'A', startTime: '08:00', endTime: '16:00' },
-      { date: '2025-02-13', shift: 'A', startTime: '08:00', endTime: '16:00' },
-      { date: '2025-02-14', shift: 'D', startTime: '', endTime: '' },
+      { 
+        date: '2025-02-10', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:00',
+        actualExitTime: '16:05',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:10',
+        actualExitTime: '16:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:05',
+        actualExitTime: '15:30',
+        status: 'early'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        status: 'absent'
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00' 
+      },
     ]
   },
   {
@@ -113,12 +356,60 @@ export const employees: Employee[] = [
     position: 'Recepcionista',
     department: 'Front Desk',
     location: 'Hodelpa Garden Court',
+    code: '1007',
+    contractType: 'Indefinido',
     schedule: [
-      { date: '2025-02-10', shift: 'E', startTime: '', endTime: '' },
-      { date: '2025-02-11', shift: 'M', startTime: '06:00', endTime: '14:00' },
-      { date: '2025-02-12', shift: 'M', startTime: '06:00', endTime: '14:00' },
-      { date: '2025-02-13', shift: 'M', startTime: '06:00', endTime: '14:00' },
-      { date: '2025-02-14', shift: 'D', startTime: '', endTime: '' },
+      { 
+        date: '2025-02-10', 
+        shift: 'E', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:00',
+        actualExitTime: '14:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:05',
+        actualExitTime: '14:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:25',
+        actualExitTime: '14:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00' 
+      },
     ]
   },
   {
@@ -127,12 +418,60 @@ export const employees: Employee[] = [
     position: 'Chef de Partida',
     department: 'Cocina',
     location: 'Hodelpa Gran Almirante',
+    code: '1008',
+    contractType: 'Indefinido',
     schedule: [
-      { date: '2025-02-10', shift: 'S', startTime: '08:00', endTime: '19:00' },
-      { date: '2025-02-11', shift: 'S', startTime: '08:00', endTime: '19:00' },
-      { date: '2025-02-12', shift: 'D', startTime: '', endTime: '' },
-      { date: '2025-02-13', shift: 'S', startTime: '08:00', endTime: '19:00' },
-      { date: '2025-02-14', shift: 'S', startTime: '08:00', endTime: '19:00' },
+      { 
+        date: '2025-02-10', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00',
+        actualEntryTime: '08:05',
+        actualExitTime: '19:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00',
+        actualEntryTime: '08:15',
+        actualExitTime: '19:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00',
+        actualEntryTime: '08:00',
+        actualExitTime: '18:30',
+        status: 'early'
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
     ]
   },
   {
@@ -141,12 +480,54 @@ export const employees: Employee[] = [
     position: 'Camarera',
     department: 'Housekeeping',
     location: 'Hodelpa Garden Court',
+    code: '1009',
+    contractType: 'Temporal',
     schedule: [
-      { date: '2025-02-10', shift: 'M', startTime: '06:00', endTime: '14:00' },
-      { date: 'V', shift: 'V', startTime: '', endTime: '' },
-      { date: 'V', shift: 'V', startTime: '', endTime: '' },
-      { date: 'V', shift: 'V', startTime: '', endTime: '' },
-      { date: 'V', shift: 'V', startTime: '', endTime: '' },
+      { 
+        date: '2025-02-10', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:10',
+        actualExitTime: '14:05',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'V', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'V', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'V', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'V', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'V', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'V', 
+        startTime: '', 
+        endTime: '' 
+      },
     ]
   },
   {
@@ -155,13 +536,58 @@ export const employees: Employee[] = [
     position: 'Seguridad',
     department: 'Seguridad',
     location: 'Hodelpa Gran Almirante',
+    code: '1010',
+    contractType: 'Indefinido',
     schedule: [
-      { date: '2025-02-10', shift: 'N', startTime: '16:00', endTime: '00:00' },
-      { date: '2025-02-11', shift: 'N', startTime: '16:00', endTime: '00:00' },
-      { date: '2025-02-12', shift: 'D', startTime: '', endTime: '' },
-      { date: '2025-02-13', shift: 'N', startTime: '16:00', endTime: '00:00' },
-      { date: '2025-02-14', shift: 'N', startTime: '16:00', endTime: '00:00' },
+      { 
+        date: '2025-02-10', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '16:05',
+        actualExitTime: '00:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '16:00',
+        actualExitTime: '00:05',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        status: 'absent'
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
     ]
   }
-  // ... más empleados con diferentes escenarios
 ];
