@@ -1,0 +1,124 @@
+export interface Employee {
+  id: string;
+  nombre: string;
+  apellidos: string;
+  position: string;
+  department: string;
+  location: string;
+  section: string;
+  company: string;
+  photoUrl?: string;
+  containerType?: string;
+}
+
+export interface Dispositivo {
+  id: string;
+  nombre: string;
+  tipo: string;
+  ubicacion: string;
+  ip: string;
+  sn: string;
+  estado: string;
+  ultimaSincronizacion: string;
+}
+
+export enum TipoVerificacion {
+  ROSTRO = 'Rostro',
+  HUELLA = 'Huella',
+  TARJETA = 'Tarjeta',
+  MANUAL = 'Manual'
+}
+
+export enum TipoMarcaje {
+  ENTRADA = 'Entrada',
+  SALIDA = 'Salida',
+  BREAK_INICIO = 'Inicio de Descanso',
+  BREAK_FIN = 'Fin de Descanso',
+  OTRO = 'Otro'
+}
+
+export interface Marcaje {
+  id: string;
+  fecha: string;
+  hora: string;
+  empleadoId: string;
+  dispositivo: string;
+  tipoVerificacion: TipoVerificacion;
+  tipoMarcaje: TipoMarcaje;
+  esManual: boolean;
+  usuarioRegistro?: string;
+  timestampRegistro?: string;
+  observaciones?: string;
+}
+
+export interface Incidencia {
+  id: string;
+  empleadoId: string;
+  fecha: string;
+  tipo: 'Falta' | 'Tardanza' | 'Salida Temprana' | 'Sin Marcar Salida' | 'Sin Marcar Entrada' | 'Otro';
+  estado: 'Pendiente' | 'Justificada' | 'Injustificada';
+  descripcion?: string;
+  marcajeId?: string;
+  justificacion?: string;
+}
+
+// Tipo para el formulario de nuevo marcaje
+export interface MarcajeFormData {
+  fecha: string;
+  hora: string;
+  dispositivo: string;
+  tipoVerificacion: TipoVerificacion;
+  tipoMarcaje: TipoMarcaje;
+  observaciones?: string;
+}
+
+export interface Employee {
+  id: string;
+  nombre: string;
+  apellidos: string;
+  position: string;
+  department: string;
+  location: string;
+  section: string;
+  company: string;
+  photoUrl?: string;
+  containerType?: string;
+}
+
+// export enum TipoVerificacion {
+//   ROSTRO = 'Rostro',
+//   HUELLA = 'Huella',
+//   TARJETA = 'Tarjeta',
+//   MANUAL = 'Manual'
+// }
+
+// export enum TipoMarcaje {
+//   ENTRADA = 'Entrada',
+//   SALIDA = 'Salida',
+//   BREAK_INICIO = 'Inicio de Descanso',
+//   BREAK_FIN = 'Fin de Descanso',
+//   OTRO = 'Otro'
+// }
+
+export interface Marcaje {
+  id: string;
+  fecha: string;
+  hora: string;
+  empleadoId: string;
+  dispositivo: string;
+  tipoVerificacion: TipoVerificacion;
+  tipoMarcaje: TipoMarcaje;
+  esManual: boolean;
+  usuarioRegistro?: string;
+  timestampRegistro?: string;
+  observaciones?: string;
+}
+
+export interface MarcajeFormData {
+  fecha: string;
+  hora: string;
+  dispositivo: string;
+  tipoVerificacion: TipoVerificacion;
+  tipoMarcaje: TipoMarcaje;
+  observaciones?: string;
+}

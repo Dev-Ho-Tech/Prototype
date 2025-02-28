@@ -133,7 +133,7 @@ export const BiometricOperations: React.FC<BiometricOperationsProps> = ({
               >
                 Horarios y Tiempo
               </button>
-              <button
+              {/* <button
                 onClick={() => setActiveTab('advanced')}
                 className={`py-2 px-4 border-b-2 font-medium text-sm ${
                   activeTab === 'advanced'
@@ -142,7 +142,7 @@ export const BiometricOperations: React.FC<BiometricOperationsProps> = ({
                 }`}
               >
                 Operaciones Avanzadas
-              </button>
+              </button> */}
             </div>
           </div>
 

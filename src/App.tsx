@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { LogoutModal } from './modules/auth/components/LogoutModal';
 import { authService } from './modules/auth/services/authService';
 import { Sidebar } from './components/layout/Sidebar';
-import { EmployeesScreen } from './modules/employees/EmployeesScreen';
+// import { EmployeesScreen } from './modules/employees/EmployeesScreen';
 import { EmployeeManagementScreen } from './modules/employees/management/EmployeeManagementScreen';
 import { ReportsScreen } from './modules/reports/ReportsScreen';
 import { SchedulingScreen } from './modules/scheduling/SchedulingScreen';
@@ -17,6 +17,8 @@ import { ContractsScreen } from './modules/system-config/contracts/ContractsScre
 import { RecordsScreen } from './modules/employees/records/RecordsScreen';
 import { CheckProfilesScreen } from './modules/employees/check-profiles/CheckProfilesScreen';
 import { BiometricScreen } from './modules/employees/biometric/BiometricScreen';
+import IncidenciasScreen from './modules/employees/incidents/IncidentsScreen';
+
 import { CalendarScreen } from './modules/time-control/calendar/CalendarScreen';
 import { ChecksScreen } from './modules/time-control/checks/ChecksScreen';
 import { HoursApprovalScreen } from './modules/time-control/hours/HoursApprovalScreen';
@@ -31,6 +33,8 @@ import { PermissionsScreen } from './modules/access-control/permissions/Permissi
 import { MonitoringScreen } from './modules/access-control/monitoring/MonitoringScreen';
 import { LoginScreen } from './modules/auth/login/LoginScreen';
 import DashboardScreen from './modules/dashboard/DashboardScreen';
+import TestScreen from './modules/employees/incidents/test';
+// import IncidenciasScreen from './modules/incidents/IncidentsScreen';
 
 function App() {
   const [currentView, setCurrentView] = useState('/dashboard');
@@ -72,7 +76,7 @@ function App() {
   if (!isAuthenticated) {
     return <LoginScreen onLogin={handleLogin} />;
   }
-
+  try {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar 
@@ -94,6 +98,8 @@ function App() {
         {currentView === '/employees/schedule' && <SchedulingScreen />}
         {currentView === '/employees/check-profiles' && <CheckProfilesScreen />}
         {currentView === '/employees/biometric' && <BiometricScreen />}
+        {/* {currentView === '/employees/incidencias' && <TestScreen/>} */}
+        {currentView === '/employees/incidencias' && <IncidenciasScreen/>}
         {currentView === '/administration/licenses' && <LicensesScreen />}
         {currentView === '/administration/users' && <UsersScreen />}
         {currentView === '/administration/config' && <ConfigScreen />}
@@ -118,6 +124,10 @@ function App() {
       </div>
     </div>
   );
+} catch (error) {
+  console.error("Error rendering view:", error);
+  return <div>Error loading view. See console for details.</div>;
+}
 }
 
 export default App;

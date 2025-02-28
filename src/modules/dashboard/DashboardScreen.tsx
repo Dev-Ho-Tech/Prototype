@@ -1,35 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Grid, List } from 'lucide-react';
+import { Search, Grid, List, ArrowLeft } from 'lucide-react';
 import { empleadosData, estadoDelDiaData, tiemposData } from './temp/data_temp';
 import EmployeeListView from './components/EmployeeListView';
 import StatisticsPanels from './components/StatisticsPanels';
 import EmployeeDetailView from './components/EmployeeDetailViewProps';
 import { Employee } from './interface/types';
+import DashboardScreenTemp from './DashboardScreen_temp';
 
 const DashboardScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showEmployeeDetail, setShowEmployeeDetail] = useState(false);
+  const [showOldDashboard, setShowOldDashboard] = useState(false); 
   
+  // Definir itemsPerPage según el modo de vista
   const itemsPerPage = viewMode === 'grid' ? 18 : 8;
 
+  // Filtrar empleados según el término de búsqueda
   const filteredEmpleados = empleadosData.filter(empleado => 
     empleado.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     empleado.pais.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // const totalPages = Math.ceil(filteredEmpleados.length / itemsPerPage);
-  
-  const currentEmpleados = filteredEmpleados.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
   
   // Reiniciar a la primera página cuando cambie el modo de vista o el término de búsqueda
   useEffect(() => {
-    setCurrentPage(1);
+    // No necesitamos manejar la página actual aquí, ya que ahora lo hace el componente EmployeeListView
   }, [viewMode, searchTerm]);
 
   const handleEmployeeSelect = (employee: Employee) => {
@@ -41,6 +37,10 @@ const DashboardScreen: React.FC = () => {
     setShowEmployeeDetail(false);
     setSelectedEmployee(null);
   };
+
+  if (showOldDashboard) {
+    return <DashboardScreenTemp />;
+  }
 
   if (showEmployeeDetail && selectedEmployee) {
     return (
@@ -72,6 +72,13 @@ const DashboardScreen: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-2">
+          <button
+              onClick={() => setShowOldDashboard(true)}
+              className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
+              title="Panel anterior"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
             <button
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-lg ${
@@ -105,9 +112,10 @@ const DashboardScreen: React.FC = () => {
 
         {/* Vista de lista/cuadrícula de empleados */}
         <EmployeeListView 
-          currentEmpleados={currentEmpleados}
+          currentEmpleados={filteredEmpleados}
           viewMode={viewMode}
           onEmployeeSelect={handleEmployeeSelect}
+          itemsPerPage={itemsPerPage}
         />
       </div>
     </div>

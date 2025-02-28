@@ -43,8 +43,15 @@ export const menuItems: MenuItem[] = [
         label: 'Información Biométrica',
         icon: Fingerprint,
         path: '/employees/biometric'
+      },
+      {
+        id: 'incidencias',
+        label: 'Gestión de Incidencias',
+        icon: Fingerprint,
+        path: '/employees/incidencias'
       }
-    ]
+    ],
+    
   },
   {
     id: 'time-control',
@@ -174,12 +181,7 @@ export const menuItems: MenuItem[] = [
         icon: UserCheck,
         path: '/administration/users'
       },
-      {
-        id: 'general-config',
-        label: 'Configuración General',
-        icon: Settings,
-        path: '/administration/config'
-      }
+     
     ]
   },
   {
@@ -229,6 +231,12 @@ export const menuItems: MenuItem[] = [
         label: 'Correo electronico',
         icon: Mail,
         path: '/system-config/email'
+      },
+      {
+        id: 'general-config',
+        label: 'Configuración General',
+        icon: Settings,
+        path: '/administration/config'
       }
     ]
   }
