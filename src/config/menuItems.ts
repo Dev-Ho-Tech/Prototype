@@ -43,8 +43,15 @@ export const menuItems: MenuItem[] = [
         label: 'Información Biométrica',
         icon: Fingerprint,
         path: '/employees/biometric'
+      },
+      {
+        id: 'incidencias',
+        label: 'Gestión de Incidencias',
+        icon: Fingerprint,
+        path: '/employees/incidencias'
       }
-    ]
+    ],
+    
   },
   {
     id: 'time-control',
