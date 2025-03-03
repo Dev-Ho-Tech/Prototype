@@ -5,6 +5,7 @@ export interface Employee {
   department?: string;
   location?: string;
   id?: string;
+  profileImage?: string;
 }
 
 export interface EmployeeHeaderProps {
@@ -23,6 +24,15 @@ export interface PersonalData {
   fechaNacimiento: string;
   telefono: string;
   correo: string;
+  laborData?: {
+    codigo?: string;
+    modalidadTiempo?: string;
+    fechaInicialContrato?: string;
+    fechaFinalContrato?: string;
+    empresa?: string;
+    sede?: string;
+
+  };
 }
 
 // Interface para datos laborales del formulario
@@ -36,6 +46,17 @@ export interface LaborData {
   tipoPlanificacion: string;
   cargo: string;
   perfilesMarcaje: string;
+}
+
+export interface TreeNodeData {
+  name: string;
+  manager: string;
+  employeeCount: number;
+  icon: JSX.Element;
+  color: string;
+  type: string;
+  expanded?: boolean;
+  children: TreeNodeData[];
 }
 
 // Props para los componentes de formulario
@@ -71,4 +92,5 @@ export interface ActionButtonsProps {
 export interface ExtendedHeaderProps extends EmployeeProfileHeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onProfileImageChange?: (file: File, imageUrl: string) => void;
 }

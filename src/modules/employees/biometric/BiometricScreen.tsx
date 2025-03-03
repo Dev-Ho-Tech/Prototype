@@ -137,7 +137,7 @@ export function BiometricScreen() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-4 gap-4">
                       <div>
                         <div className="flex items-center space-x-2 mb-2">
                           <Camera className="w-4 h-4 text-gray-400" />
@@ -191,6 +191,23 @@ export function BiometricScreen() {
                           </div>
                         )}
                       </div>
+                      <div>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Fingerprint className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-700">Huella</span>
+                      </div>
+                      {record.registrationStatus.fingerprints.registered > 0 ? (
+                        <div className="flex items-center text-green-600">
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          <span className="text-xs">{record.registrationStatus.fingerprints.quality}%</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-red-600">
+                          <XCircle className="w-4 h-4 mr-1" />
+                          <span className="text-xs">No registrada</span>
+                        </div>
+                      )}
+                    </div>
                     </div>
 
                     {record.devices.length > 0 && (
