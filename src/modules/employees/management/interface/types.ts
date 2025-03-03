@@ -63,7 +63,6 @@ export interface LaborDataFormProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
 }
 
-// Props para los botones de acción
 export interface ActionButtonsProps {
   onSave: () => void;
   onCancel: () => void;

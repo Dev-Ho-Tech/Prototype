@@ -1,111 +1,168 @@
-interface Position {
-  id: string;
-  name: string;
-  department: string;
-  level: string;
-  employeeCount: number;
-  status: 'active' | 'inactive';
-  education: string;
-  experience: string;
-  requirements: string[];
-  description: string;
-}
+import { 
+  AccessType, 
+  AccessProfile, 
+  AccessTypeDetail, 
+  AccessSchedule,
+  AssociatedDevice,
+  DeviceType 
+} from './interfaces/types';
 
-export const positionsData: Position[] = [
+// Perfiles de acceso disponibles
+export const accessProfiles: AccessProfile[] = [
   {
-    id: 'POS001',
-    name: 'Gerente de Recursos Humanos',
-    department: 'Recursos Humanos',
-    level: 'Gerencial',
-    employeeCount: 3,
-    status: 'active',
-    education: 'Licenciatura',
-    experience: '5+ años',
-    requirements: [
-      'Licenciatura en RRHH o afines',
-      'Experiencia en gestión de personal',
-      'Conocimientos de legislación laboral'
-    ],
-    description: 'Responsable de la gestión del talento humano y políticas de personal'
+    id: 'profile-1',
+    name: 'Principal',
+    description: 'Perfil de acceso principal con permisos completos',
+    isDefault: true
   },
   {
-    id: 'POS002',
-    name: 'Recepcionista',
-    department: 'Front Desk',
-    level: 'Operativo',
-    employeeCount: 12,
-    status: 'active',
-    education: 'Técnico',
-    experience: '1-2 años',
-    requirements: [
-      'Técnico en hotelería',
-      'Inglés avanzado',
-      'Experiencia en atención al cliente'
-    ],
-    description: 'Atención a huéspedes y gestión de reservas'
+    id: 'profile-2',
+    name: 'Visitante',
+    description: 'Perfil de acceso limitado para visitantes'
   },
   {
-    id: 'POS003',
-    name: 'Chef Ejecutivo',
-    department: 'Alimentos y Bebidas',
-    level: 'Gerencial',
-    employeeCount: 1,
-    status: 'active',
-    education: 'Profesional',
-    experience: '8+ años',
-    requirements: [
-      'Graduado de escuela culinaria',
-      'Experiencia en gestión de cocina',
-      'Certificaciones internacionales'
-    ],
-    description: 'Dirección de operaciones culinarias y menús'
+    id: 'profile-3',
+    name: 'Proveedor',
+    description: 'Perfil de acceso para proveedores con acceso a áreas específicas'
   },
   {
-    id: 'POS004',
-    name: 'Camarera',
-    department: 'Housekeeping',
-    level: 'Operativo',
-    employeeCount: 25,
-    status: 'active',
-    education: 'Básica',
-    experience: '1+ años',
-    requirements: [
-      'Experiencia en limpieza',
-      'Atención al detalle',
-      'Trabajo en equipo'
-    ],
-    description: 'Limpieza y mantenimiento de habitaciones'
+    id: 'profile-4',
+    name: 'Contratista',
+    description: 'Perfil de acceso para contratistas temporales'
+  }
+];
+
+// Tipos de acceso
+export const accessTypes: AccessType[] = [
+  {
+    id: 'access-type-1',
+    name: 'Visitante',
+    description: 'Acceso temporal para visitantes de la empresa',
+    isActive: true,
+    createdAt: '2023-05-15T10:30:00',
+    updatedAt: '2023-06-20T14:45:00'
   },
   {
-    id: 'POS005',
-    name: 'Supervisor de Seguridad',
-    department: 'Seguridad',
-    level: 'Supervisión',
-    employeeCount: 4,
-    status: 'active',
-    education: 'Técnico',
-    experience: '3+ años',
-    requirements: [
-      'Formación en seguridad',
-      'Licencia de portación',
-      'Experiencia en supervisión'
-    ],
-    description: 'Coordinación de equipo de seguridad y protocolos'
+    id: 'access-type-2',
+    name: 'Proveedor',
+    description: 'Acceso para proveedores regulares',
+    isActive: true,
+    createdAt: '2023-05-15T11:20:00',
+    updatedAt: '2023-07-10T09:15:00'
   },
   {
-    id: 'POS006',
-    name: 'Contador General',
-    department: 'Finanzas',
-    level: 'Gerencial',
-    employeeCount: 1,
-    status: 'active',
-    education: 'Licenciatura',
-    experience: '5+ años',
-    requirements: [
-      'Licenciatura en Contabilidad',
-      'Conocimiento de normas NIIF',
-      'Experiencia en hotelería'
-    ],
-    description: 'Gestión contable y financiera'
+    id: 'access-type-3',
+    name: 'Contratista',
+    description: 'Acceso para contratistas con proyectos en curso',
+    isActive: true,
+    createdAt: '2023-06-05T09:00:00',
+    updatedAt: '2023-07-15T16:30:00'
+  },
+  {
+    id: 'access-type-4',
+    name: 'Transporte',
+    description: 'Acceso para personal de transporte y logística',
+    isActive: false,
+    createdAt: '2023-07-01T08:45:00',
+    updatedAt: '2023-07-20T11:10:00'
+  }
+];
+
+// Horarios de acceso disponibles
+export const accessSchedules: AccessSchedule[] = [
+  {
+    id: 'schedule-1',
+    name: 'Horario Laboral',
+    timeStart: '08:00',
+    timeEnd: '18:00',
+    daysOfWeek: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
+  },
+  {
+    id: 'schedule-2',
+    name: 'Horario Extendido',
+    timeStart: '07:00',
+    timeEnd: '22:00',
+    daysOfWeek: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+  },
+  {
+    id: 'schedule-3',
+    name: 'Fin de Semana',
+    timeStart: '09:00',
+    timeEnd: '17:00',
+    daysOfWeek: ['Sábado', 'Domingo']
+  }
+];
+
+// Dispositivos disponibles
+export const associatedDevices: AssociatedDevice[] = [
+  {
+    id: 'device-1',
+    name: 'Transporte Salida 2',
+    model: 'SpeedFace-5-td',
+    serialNumber: 'CKVD10269149',
+    location: 'Puerta principal',
+    type: DeviceType.EXIT
+  },
+  {
+    id: 'device-2',
+    name: 'Entrada De Personal',
+    model: 'SpeedFace-5-rfid',
+    serialNumber: 'CKVF21150464',
+    location: 'Entrada de empleados',
+    type: DeviceType.ENTRY
+  },
+  {
+    id: 'device-3',
+    name: 'Transporte Entrada 1',
+    model: 'SpeedFace-5-rfid',
+    serialNumber: 'CKVF21150496',
+    location: 'Entrada de carga',
+    type: DeviceType.ENTRY
+  },
+  {
+    id: 'device-4',
+    name: 'Transporte Entrada 2',
+    model: 'SpeedFace-5-td',
+    serialNumber: 'CKVD10269126',
+    location: 'Entrada secundaria',
+    type: DeviceType.ENTRY
+  },
+  {
+    id: 'device-5',
+    name: 'Transporte 1 Salida',
+    model: 'SpeedFace-5-td',
+    serialNumber: 'CKVD10269029',
+    location: 'Salida principal',
+    type: DeviceType.EXIT
+  },
+  {
+    id: 'device-6',
+    name: 'Salida De Personal',
+    model: 'SpeedFace-5-rfid',
+    serialNumber: 'CKVF21160410',
+    location: 'Salida de empleados',
+    type: DeviceType.EXIT
+  }
+];
+
+// Detalles de los tipos de acceso
+export const accessTypeDetails: AccessTypeDetail[] = [
+  {
+    id: 'detail-1',
+    accessTypeId: 'access-type-1',
+    schedule: accessSchedules[0],
+    associatedDevices: [associatedDevices[1], associatedDevices[5]]
+  },
+  {
+    id: 'detail-2',
+    accessTypeId: 'access-type-2',
+    schedule: accessSchedules[1],
+    associatedDevices: [associatedDevices[0], associatedDevices[2], associatedDevices[4]]
+  },
+  {
+    id: 'detail-3',
+    accessTypeId: 'access-type-3',
+    schedule: accessSchedules[0],
+    associatedDevices: [associatedDevices[1], associatedDevices[2], associatedDevices[5]]
   }
 ];

@@ -2,7 +2,6 @@ import React from 'react';
 import { User, Fingerprint } from 'lucide-react';
 import { PersonalDataFormProps } from '../../interface/types';
 
-// Opciones de biometría mejoradas con íconos específicos
 const biometricOptions = [
   { 
     id: 'rostro', 
