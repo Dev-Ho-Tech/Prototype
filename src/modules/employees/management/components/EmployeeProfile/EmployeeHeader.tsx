@@ -1,28 +1,73 @@
-import React from 'react';
-import { User, Briefcase } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { User, Briefcase, Upload } from 'lucide-react';
 import { ExtendedHeaderProps } from '../../interface/types';
 
+export const EmployeeHeader: React.FC<ExtendedHeaderProps> = ({ 
+  employee, 
+  onClose, 
+  onProfileImageChange 
+}) => {
+  const [profileImage, setProfileImage] = useState(employee?.profileImage || null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-export const EmployeeHeader: React.FC<ExtendedHeaderProps> = ({ employee, onClose, activeTab, onTabChange }) => {
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target?.result as string;
+        setProfileImage(imageUrl);
+        
+        // Si existe la función de callback, la llamamos con el archivo
+        if (onProfileImageChange) {
+          onProfileImageChange(file, imageUrl);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="bg-white border-b border-gray-200">
-      {/* Barra de navegación superior */}
-      {/* <div className="px-6 py-3 flex items-center border-b border-gray-200">
-        <button 
-          onClick={onClose}
-          className="flex items-center text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          Volver a la lista de empleados
-        </button>
-      </div> */}
-      
       {/* Información del empleado */}
       <div className="px-6 py-4 flex justify-between items-center">
         <div className="flex items-center">
-          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-medium text-2xl mr-4">
-            {employee?.initial || 'K'}
+          {/* Área de imagen de perfil clicable */}
+          <div 
+            className="w-16 h-16 rounded-full mr-4 relative cursor-pointer group overflow-hidden"
+            onClick={handleImageClick}
+          >
+            {profileImage ? (
+              <img 
+                src={profileImage} 
+                alt="Perfil" 
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <div className="w-full h-full bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium text-2xl">
+                {employee?.initial || 'K'}
+              </div>
+            )}
+            
+            {/* Overlay con ícono de subir cuando se hace hover */}
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+              <Upload className="w-6 h-6 text-white" />
+            </div>
+            
+            {/* Input de archivo oculto */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
           </div>
+          
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
               {employee ? employee.name : 'Nuevo Empleado'}
@@ -42,28 +87,6 @@ export const EmployeeHeader: React.FC<ExtendedHeaderProps> = ({ employee, onClos
           </div>
         </div>
         <div className="flex space-x-3">
-          <button
-            onClick={() => onTabChange('personal')}
-            className={`px-4 py-2 rounded-lg transition-colors flex items-center ${
-              activeTab === 'personal' 
-                ? 'bg-purple-600 text-white' 
-                : 'bg-white text-gray-700 border border-gray-300'
-            }`}
-          >
-            <User className="w-4 h-4 mr-2" />
-            Datos personales
-          </button>
-          <button
-            onClick={() => onTabChange('laboral')}
-            className={`px-4 py-2 rounded-lg transition-colors flex items-center ${
-              activeTab === 'laboral' 
-                ? 'bg-purple-600 text-white' 
-                : 'bg-white text-gray-700 border border-gray-300'
-            }`}
-          >
-            <Briefcase className="w-4 h-4 mr-2" />
-            Datos laborales
-          </button>
           <button
             onClick={onClose}
             className="p-2 text-gray-500 hover:text-gray-700"

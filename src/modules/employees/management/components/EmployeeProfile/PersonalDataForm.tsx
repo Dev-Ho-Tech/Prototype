@@ -1,6 +1,7 @@
-import React from 'react';
-import { User, Fingerprint } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Fingerprint, Eye  } from 'lucide-react';
 import { PersonalDataFormProps } from '../../interface/types';
+import { StructureModal } from './TreeNode';
 
 const biometricOptions = [
   { 
@@ -27,28 +28,8 @@ const biometricOptions = [
     )
   },
   { 
-    id: 'palma', 
-    label: 'Palma', 
-    active: false,
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13 3c-4.97 0-9 4.03-9 9 0 .05.01.09.01.14C2.7 11.18 2 10.21 2 9c0-1.86 1.28-3.41 3-3.86V4c0-.55.45-1 1-1s1 .45 1 1v1.14c.6.16 1.15.5 1.57.97.46-.35 1.02-.56 1.63-.56.56 0 1.08.16 1.52.45.43-.29.93-.45 1.45-.45.66 0 1.26.21 1.75.57.46-.35 1.02-.57 1.64-.57 1.38 0 2.5 1.12 2.5 2.5 0 .95-.53 1.77-1.31 2.18.32.73.49 1.54.49 2.39 0 2.97-2.16 5.43-5 5.91V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.91C10.2 18.73 9 17.27 9 15.5c0-.95.53-1.77 1.31-2.18-.32-.73-.49-1.54-.49-2.39C9.84 10.95 10 11 10 11c0 0-.16-.05-.16-.07 0-.07.06-.13.06-.19 0-1.69 1.37-3.06 3.06-3.06.15 0 .29.01.43.03C13.56 6.93 13.76 6 14.75 6c1.07 0 1.92.96 1.92 2.16 0 1.27-.87 2.32-2.02 2.65.21.42.32.89.32 1.38 0 1.71-1.39 3.09-3.1 3.09-.32 0-.63-.05-.91-.14.34-.39.55-.89.55-1.45 0-1.21-.98-2.18-2.18-2.18-.54 0-1.04.2-1.41.54.41.91 1.28 1.57 2.35 1.6.51.93 1.49 1.57 2.65 1.57 1.67 0 3.01-1.36 3.01-3.03 0-1.33-.83-2.46-2-2.91.57-.38.96-1.02.96-1.75 0-.89-.64-1.62-1.49-1.77.31-.34.49-.79.49-1.29 0-1.07-.86-1.94-1.93-1.94-.47 0-.9.17-1.24.45.04-.88.29-1.71.74-2.43-.35.08-.7.19-1.04.31-.04.72-.15 1.39-.31 2.04-.6.21-1.17.47-1.7.79.04-.22.08-.43.13-.63-1.19.25-2.3.75-3.26 1.46.14.12.28.24.41.37.27.11.54.21.82.29.23.25.5.47.8.65.21.12.43.22.67.3.38.13.8.2 1.22.2.08 0 .15-.01.22-.02 0 .03-.01.05-.01.08"/>
-      </svg>
-    )
-  },
-  { 
-    id: 'iris', 
-    label: 'Iris', 
-    active: false,
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm0-4.5c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z"/>
-      </svg>
-    )
-  },
-  { 
-    id: 'proximidad', 
-    label: 'Proximidad', 
+    id: 'Tarjeta', 
+    label: 'Tarjeta', 
     active: false,
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -66,23 +47,14 @@ const biometricOptions = [
       </svg>
     )
   },
-  { 
-    id: 'firma', 
-    label: 'Firma', 
-    active: false,
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21.04 12.13c-.14 0-.28.06-.38.17l-1 1 2.05 2.05 1-1c.21-.21.21-.56 0-.77l-1.28-1.28c-.1-.1-.24-.17-.39-.17zm-1.97 1.75L13 19.94V22h2.06l6.06-6.07-2.05-2.05zM11.5 7.69c0-1.07-.87-1.94-1.94-1.94S7.62 6.62 7.62 7.69s.87 1.94 1.94 1.94 1.94-.87 1.94-1.94zm-3.88 10.06c0-1.94 1.94-3.81 4.06-4.23.76-1.76 2.58-3 4.63-3h2.42L17.94 2 12 4.41 6.06 2 5.28 10.5h1.22c1.66 0 2.94.59 4.24 1.96 1.05 1.1 1.91 1.99 3.57 1.99.83 0 1.55-.38 2.01-.96l.24.25c-2.28.4-4.44 1.97-4.91 4.01h-4.03z"/>
-      </svg>
-    )
-  },
 ];
 
 export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData, onChange }) => {
+  const [showStructureModal, setShowStructureModal] = useState(false);
   return (
     <div className="p-6">
       <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
-        <User className="w-5 h-5 mr-2 text-purple-500" />
+        <User className="w-5 h-5 mr-2 text-blue-500" />
         Datos personales
       </h3>
       
@@ -96,7 +68,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
             name="primerNombre"
             value={personalData.primerNombre}
             onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
@@ -108,7 +80,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
             name="segundoNombre"
             value={personalData.segundoNombre}
             onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
@@ -120,7 +92,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
             name="primerApellido"
             value={personalData.primerApellido}
             onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
@@ -132,7 +104,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
             name="segundoApellido"
             value={personalData.segundoApellido}
             onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
@@ -144,7 +116,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
               name="genero"
               value={personalData.genero}
               onChange={onChange}
-              className="w-full p-2 border border-gray-300 rounded-md appearance-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full p-2 border border-gray-300 rounded-md appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="Mujer">Mujer</option>
               <option value="Hombre">Hombre</option>
@@ -166,7 +138,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
               name="tipoDocumento"
               value={personalData.tipoDocumento}
               onChange={onChange}
-              className="w-full p-2 border border-gray-300 rounded-md appearance-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full p-2 border border-gray-300 rounded-md appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="Cédula">Cédula</option>
               <option value="Pasaporte">Pasaporte</option>
@@ -188,7 +160,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
             name="numeroDocumento"
             value={personalData.numeroDocumento}
             onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
@@ -200,7 +172,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
             name="fechaNacimiento"
             value={personalData.fechaNacimiento}
             onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
@@ -210,7 +182,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
           <div className="flex">
             <div className="w-16">
               <select
-                className="w-full p-2 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full p-2 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="+57">+57</option>
                 <option value="+1">+1</option>
@@ -222,7 +194,7 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
               name="telefono"
               value={personalData.telefono}
               onChange={onChange}
-              className="flex-1 p-2 border border-gray-300 rounded-r-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="flex-1 p-2 border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -235,30 +207,194 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ personalData
             name="correo"
             value={personalData.correo}
             onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>
 
-      {/* Biometría */}
+      {/* Biometría - Restructurado en dos columnas */}
       <div className="mt-6">
-        <h4 className="text-md font-medium text-gray-700 mb-3 flex items-center">
-          <Fingerprint className="w-5 h-5 mr-2 text-purple-500" />
-          Biometría
-        </h4>
+        <div className="flex justify-between items-center mb-3">
+          <div className="flex-1">
+            <h4 className="text-md font-medium text-gray-700 flex items-center">
+              <Fingerprint className="w-5 h-5 mr-2 text-blue-500" />
+              Métodos de marcajes permitidos
+            </h4>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <label htmlFor="permitir-visitas" className="mr-2 text-sm font-medium text-gray-700">
+                Permitir visitas
+              </label>
+              <div className="relative inline-block w-10 mr-2 align-middle select-none">
+                <input 
+                  type="checkbox" 
+                  name="permitirVisitas" 
+                  id="permitir-visitas" 
+                  className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                />
+                <label 
+                  htmlFor="permitir-visitas" 
+                  className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
+                ></label>
+              </div>
+            </div>
+            <button 
+              type="button" 
+              className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              onClick={() => setShowStructureModal(true)}
+            >
+              <Eye className="w-4 h-4 mr-1" />
+              Ver estructura
+            </button>
+          </div>
+        </div>
         <div className="grid grid-cols-7 gap-4 mt-2">
           {biometricOptions.map((option) => (
             <div key={option.id} className="flex flex-col items-center">
-              <div className={`w-14 h-14 rounded-md flex items-center justify-center ${option.active ? 'bg-purple-100 text-purple-500' : 'bg-gray-100 text-gray-300'}`}>
+              <div className={`w-14 h-14 rounded-md flex items-center justify-center ${option.active ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-300'}`}>
                 {option.icon}
               </div>
-              <span className={`text-xs mt-2 ${option.active ? 'text-purple-600 font-medium' : 'text-gray-400'}`}>
+              <span className={`text-xs mt-2 ${option.active ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
                 {option.label}
               </span>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Sección de datos laborales añadida aquí */}
+      <div className="mt-8">
+        <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
+          <User className="w-5 h-5 mr-2 text-blue-500" />
+          Datos laborales
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Código <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="codigo"
+              value={personalData.laborData?.codigo || ""}
+              onChange={onChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="1399"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Modalidad De Tiempo <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <select
+                name="modalidadTiempo"
+                value={personalData.laborData?.modalidadTiempo || ""}
+                onChange={onChange}
+                className="w-full p-2 border border-gray-300 rounded-md appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="002-Operativo">002-Operativo</option>
+                <option value="001-Administrativo">001-Administrativo</option>
+                <option value="003-Gerencial">003-Gerencial</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Fecha Inicial Contrato <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              name="fechaInicialContrato"
+              value={personalData.laborData?.fechaInicialContrato || ""}
+              onChange={onChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Fecha Final Contrato
+            </label>
+            <input
+              type="date"
+              name="fechaFinalContrato"
+              value={personalData.laborData?.fechaFinalContrato || ""}
+              onChange={onChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Empresa <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <select
+                name="empresa"
+                value={personalData.laborData?.empresa || ""}
+                onChange={onChange}
+                className="w-full p-2 border border-gray-300 rounded-md appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="Emp - Caldelpa S.a.">Emp - Caldelpa S.a.</option>
+                <option value="Emp - Hodelpa">Emp - Hodelpa</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Sede <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <select
+                name="sede"
+                value={personalData.laborData?.sede || ""}
+                onChange={onChange}
+                className="w-full p-2 border border-gray-300 rounded-md appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="111 - Hodelpa Gran Almirante">111 - Hodelpa Gran Almirante</option>
+                <option value="112 - Hodelpa Garden">112 - Hodelpa Garden</option>
+                <option value="113 - Centro Plaza Hodelpa">113 - Centro Plaza Hodelpa</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Estilos CSS para el toggle switch */}
+      <style>{`
+        .toggle-checkbox:checked {
+          right: 0;
+          border-color: #3B82F6;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+          background-color: #3B82F6;
+        }
+        .toggle-label {
+          transition: background-color 0.2s ease;
+        }
+      `}      </style>
+      
+      {/* Modal de Estructura Organizacional */}
+      <StructureModal 
+        isOpen={showStructureModal}
+        onClose={() => setShowStructureModal(false)}
+      />
     </div>
   );
 };

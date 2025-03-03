@@ -18,15 +18,6 @@ const EmployeeAvatar: React.FC<EmployeeAvatarProps> = ({
     medium: 'w-12 h-12 text-sm',
     large: 'w-20 h-20 text-lg'
   }[size];
-
-  // Si no hay foto, mostrar iniciales
-  // const initials = name
-  //   .split(' ')
-  //   .map(part => part[0])
-  //   .join('')
-  //   .substring(0, 2)
-  //   .toUpperCase();
-
   return (
     <div className={`${sizeClass} rounded-full overflow-hidden flex items-center justify-center`}>
       {photoUrl ? (
