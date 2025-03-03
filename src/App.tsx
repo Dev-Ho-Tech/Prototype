@@ -10,7 +10,7 @@ import { LicensesScreen } from './modules/administration/licenses/LicensesScreen
 import { UsersScreen } from './modules/administration/users/UsersScreen';
 import { ConfigScreen } from './modules/administration/config/ConfigScreen';
 import { StructureScreen } from './modules/system-config/structure/StructureScreen';
-import { PositionsScreen } from './modules/system-config/positions/PositionsScreen';
+import { AccessTypesScreen} from './modules/system-config/positions/PositionsScreen';
 import { DevicesScreen } from './modules/system-config/devices/DevicesScreen';
 import { EmployeeTypesScreen } from './modules/system-config/employee-types/EmployeeTypesScreen';
 import { ContractsScreen } from './modules/system-config/contracts/ContractsScreen';
@@ -33,7 +33,7 @@ import { PermissionsScreen } from './modules/access-control/permissions/Permissi
 import { MonitoringScreen } from './modules/access-control/monitoring/MonitoringScreen';
 import { LoginScreen } from './modules/auth/login/LoginScreen';
 import DashboardScreen from './modules/dashboard/DashboardScreen';
-import TestScreen from './modules/employees/incidents/test';
+// import TestScreen from './modules/employees/incidents/test';
 // import IncidenciasScreen from './modules/incidents/IncidentsScreen';
 
 function App() {
@@ -104,7 +104,7 @@ function App() {
         {currentView === '/administration/users' && <UsersScreen />}
         {currentView === '/administration/config' && <ConfigScreen />}
         {currentView === '/system-config/structure' && <StructureScreen />}
-        {currentView === '/system-config/positions' && <PositionsScreen />}
+        {currentView === '/system-config/positions' && <AccessTypesScreen />}
         {currentView === '/system-config/devices' && <DevicesScreen />}
         {currentView === '/system-config/employee-types' && <EmployeeTypesScreen />}
         {currentView === '/system-config/contracts' && <ContractsScreen />}
