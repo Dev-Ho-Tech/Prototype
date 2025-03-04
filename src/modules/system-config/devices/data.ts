@@ -230,3 +230,71 @@ export const eventosDetallados = [
     details: 'Acceso a comedor autorizado'
   }
 ];
+
+export const estructuras = [
+  {
+    id: 'caldelpa-empresas',
+    name: 'Caldelpa S.a.(Empresas)',
+    type: 'company',
+    children: [
+      {
+        id: 'comercial-caldelpa',
+        name: 'Comercial Caldelpa S.a.(Empresa)',
+        type: 'branch',
+        children: [
+          {
+            id: 'recursos-humanos-cc',
+            name: 'Recursos Humanos',
+            type: 'department',
+            children: []
+          },
+          {
+            id: 'finanzas-cc',
+            name: 'Finanzas',
+            type: 'department',
+            children: []
+          }
+        ]
+      },
+      {
+        id: 'positiva-inmobiliaria',
+        name: 'Positiva (Inmobiliaria)',
+        type: 'branch',
+        children: [
+          {
+            id: 'marketing-pi',
+            name: 'Marketing',
+            type: 'department',
+            children: []
+          }
+        ]
+      },
+      {
+        id: 'caldelpa-operaciones',
+        name: 'Caldelpa S.a.(Operaciones)',
+        type: 'branch',
+        children: [
+          {
+            id: 'logistica-co',
+            name: 'Logística',
+            type: 'department',
+            children: []
+          }
+        ]
+      },
+      {
+        id: 'instalaciones-hotelera',
+        name: 'Instalaciones Hotelera CHO Clima (empresa)',
+        type: 'branch',
+        children: [
+          {
+            id: 'mantenimiento-ih',
+            name: 'Mantenimiento',
+            type: 'department',
+            children: []
+          }
+        ]
+      }
+    ]
+  }
+];

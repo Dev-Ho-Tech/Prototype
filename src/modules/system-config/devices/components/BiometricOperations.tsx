@@ -113,7 +113,7 @@ export const BiometricOperations: React.FC<BiometricOperationsProps> = ({
               >
                 Operaciones Generales
               </button>
-              <button
+              {/* <button
                 onClick={() => setActiveTab('users')}
                 className={`py-2 px-4 border-b-2 font-medium text-sm ${
                   activeTab === 'users'
@@ -122,7 +122,7 @@ export const BiometricOperations: React.FC<BiometricOperationsProps> = ({
                 }`}
               >
                 Gestión de Personas
-              </button>
+              </button> */}
               <button
                 onClick={() => setActiveTab('time')}
                 className={`py-2 px-4 border-b-2 font-medium text-sm ${
