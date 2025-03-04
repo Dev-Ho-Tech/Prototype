@@ -3,12 +3,13 @@ import { Search, Plus, Download, Settings, LogOut, Users, ArrowUpRight, ArrowDow
 import { CustomPieChart } from '../../../components/common/PieChart';
 import { departmentData, locationData } from '../data';
 import { employees } from './data';
-import { EmployeeProfile } from './components/EmployeeProfile';
+import { EmployeeProfileForm } from './components/EmployeeProfile';
+import { Employee } from './interface/types';
 
 export function EmployeeManagementScreen() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfile, setShowProfile] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -25,7 +26,7 @@ export function EmployeeManagementScreen() {
     setSelectedEmployee(null);
   };
 
-  const handleEmployeeClick = (employee) => {
+  const handleEmployeeClick = (employee: Employee) => {
     setSelectedEmployee(employee);
     setShowProfile(true);
   };
@@ -44,7 +45,7 @@ export function EmployeeManagementScreen() {
               Volver a la lista de empleados
             </button>
           </div>
-          <EmployeeProfile 
+          <EmployeeProfileForm 
             employee={selectedEmployee}
             onClose={handleCloseProfile}
           />
