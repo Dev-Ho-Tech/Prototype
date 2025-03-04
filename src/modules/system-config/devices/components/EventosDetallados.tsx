@@ -1,7 +1,7 @@
 import  { useState } from 'react';
-import { X, Search,  Download, ArrowUpRight, ArrowDownLeft, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { X, Search,  Download, ArrowUpRight, ArrowDownLeft, AlertCircle, Clock } from 'lucide-react';
 import {  devicesData, eventosDetallados } from '../data';
-
+import { biometricOptions } from '../../../employees/management/components/EmployeeProfile/utils/const_biometric';
 
 interface EventosDetalladosProps {
   deviceId: string;
@@ -70,29 +70,20 @@ export function EventosDetallados({ deviceId, deviceName, onClose }: EventosDeta
     }
   };
 
-  const getVerificationTypeStyle = (verificationType: string) => {
-    switch (verificationType) {
-      case 'VERIFICADO':
-        return 'bg-green-100 text-green-800';
-      case 'NO_VERIFICADO':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const getVerificationIcon = (verificationMethod: string) => {
-    switch (verificationMethod) {
-      case 'HUELLA_DIGITAL':
-        return <span className="text-blue-600">👆</span>;
-      case 'ROSTRO':
-        return <span className="text-purple-600">👤</span>;
-      case 'TARJETA':
-        return <span className="text-orange-600">💳</span>;
-      case 'PIN':
-        return <span className="text-gray-600">🔢</span>;
+    switch (verificationMethod.toLowerCase()) {
+      case 'huella_digital':
+      case 'huella':
+        return biometricOptions.find(option => option.id === 'huella')?.icon;
+      case 'rostro':
+        return biometricOptions.find(option => option.id === 'rostro')?.icon;
+      case 'tarjeta':
+        return biometricOptions.find(option => option.id === 'Tarjeta')?.icon;
+      case 'pin':
+        return biometricOptions.find(option => option.id === 'pin')?.icon;
       default:
-        return <span className="text-gray-600">❓</span>;
+        // Devolver huella por defecto si no se encuentra el método
+        return biometricOptions.find(option => option.id === 'huella')?.icon;
     }
   };
 
@@ -253,9 +244,6 @@ export function EventosDetallados({ deviceId, deviceName, onClose }: EventosDeta
                       Tipo
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Verificación
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Método
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -285,20 +273,12 @@ export function EventosDetallados({ deviceId, deviceName, onClose }: EventosDeta
                           {evento.eventType}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getVerificationTypeStyle(evento.verificationType)}`}>
-                          {evento.verificationType === 'VERIFICADO' ? (
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                          ) : (
-                            <AlertCircle className="w-3 h-3 mr-1" />
-                          )}
-                          {evento.verificationType}
-                        </span>
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex items-center">
-                          {getVerificationIcon(evento.verificationMethod)}
-                          <span className="ml-1">{evento.verificationMethod.replace('_', ' ')}</span>
+                          <span className="mr-2">
+                            {getVerificationIcon(evento.verificationMethod)}
+                          </span>
+                          <span>{evento.verificationMethod.replace('_', ' ')}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

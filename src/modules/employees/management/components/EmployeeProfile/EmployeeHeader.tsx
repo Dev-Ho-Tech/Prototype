@@ -3,7 +3,7 @@ import { User, Briefcase, Upload } from 'lucide-react';
 import { ExtendedHeaderProps } from '../../interface/types';
 
 export const EmployeeHeader: React.FC<ExtendedHeaderProps> = ({ 
-  employee, 
+  employee,
   onClose, 
   onProfileImageChange 
 }) => {

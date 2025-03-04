@@ -20,12 +20,12 @@ export const menuItems: MenuItem[] = [
         icon: UserCheck,
         path: '/employees/management'
       },
-      {
-        id: 'records',
-        label: 'Expedientes',
-        icon: FileText,
-        path: '/employees/records'
-      },
+      // {
+      //   id: 'records',
+      //   label: 'Expedientes',
+      //   icon: FileText,
+      //   path: '/employees/records'
+      // },
       {
         id: 'schedule-assignment',
         label: 'Asignación de Horarios',

@@ -15,6 +15,8 @@ export interface Device {
     used: number;
     type: 'fingerprints' | 'faces' | 'users' | string;
   };
+  estructuraId?: string;
+  estructuraNombre?: string;  
   status?: string;
   mac?: string;
   firmware?: string;

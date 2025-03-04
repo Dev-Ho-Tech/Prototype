@@ -1,11 +1,30 @@
+
 export interface Employee {
-  initial?: string;
+  primerNombre?: string;
+  segundoNombre?: string;
+  primerApellido?: string;
+  segundoApellido?: string;
+  genero?: string;
+  tipoDocumento?: string;
+  numeroDocumento?: string;
+  fechaNacimiento?: string;
+  telefono?: string;
+  correo?: string;
+  permitirVisitas?: boolean;
+  codigo?: string;
+  modalidadTiempo?: string;
+  fechaInicialContrato?: string;
+  fechaFinalContrato?: string;
+  empresa?: string;
+  sede?: string;
+  tipoPlanificacion?: string;
+  cargo?: string;
+  perfilesMarcaje?: string[];
+  profileImage?: string;
   name?: string;
   position?: string;
   department?: string;
-  location?: string;
-  id?: string;
-  profileImage?: string;
+  initial?: string;
 }
 
 export interface EmployeeHeaderProps {
@@ -49,6 +68,8 @@ export interface LaborData {
 }
 
 export interface TreeNodeData {
+  id: string;
+  
   name: string;
   manager: string;
   employeeCount: number;
@@ -57,7 +78,19 @@ export interface TreeNodeData {
   type: string;
   expanded?: boolean;
   children: TreeNodeData[];
+  
 }
+// export interface TreeNodeData {
+//   id: string;
+//   name: string;
+//   expanded?: boolean;
+//   children: TreeNodeData[];
+//   manager?: string;
+//   employeeCount?: number;
+//   icon?: React.ReactNode;
+//   color?: string;
+//   type?: string;
+// }
 
 // Props para los componentes de formulario
 export interface EmployeeProfileHeaderProps {
@@ -90,7 +123,30 @@ export interface ActionButtonsProps {
 }
 
 export interface ExtendedHeaderProps extends EmployeeProfileHeaderProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
   onProfileImageChange?: (file: File, imageUrl: string) => void;
+}
+
+
+
+export interface LocationSelection {
+  id: string;
+  name: string;
+  path?: string;
+}
+
+export interface TreeNodeProps {
+  node: TreeNodeData;
+  level?: number;
+  selectedLocations: string[];
+  onToggleSelect: (nodeId: string) => void;
+  searchTerm: string;
+}
+
+export interface StructureModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelectLocations?: (selectedLocations: LocationSelection[]) => void;
+  initialSelectedLocations?: string[];
 }
