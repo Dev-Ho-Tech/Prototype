@@ -124,6 +124,13 @@ const IncidenciasScreen: React.FC = () => {
   // Manejar agregar marcaje
   const handleAddMarcaje = (data: MarcajeFormData) => {
     if (selectedEmployee) {
+      // Simular coordenadas para pruebas
+      const coordenadas = {
+        latitud: 18.46007921796652,  
+        longitud: -69.95589601299955,
+        // descripcion: dispositivos.find(d => d.id === data.dispositivo)?.ubicacion || "Ocean El Faro"
+      };
+  
       const newMarcaje: Marcaje = {
         id: generateId(),
         fecha: data.fecha.split('-').reverse().join('-'), // Convertir a formato DD-MM-YYYY
@@ -135,7 +142,9 @@ const IncidenciasScreen: React.FC = () => {
         esManual: true,
         observaciones: data.observaciones,
         usuarioRegistro: 'Usuario Actual',
-        timestampRegistro: new Date().toISOString()
+        timestampRegistro: new Date().toISOString(),
+        coordenadas: coordenadas, // Añadir coordenadas
+        resultado: "Verificado" // Añadir resultado por defecto
       };
       
       setMarcajes([...marcajes, newMarcaje]);
@@ -607,6 +616,7 @@ const IncidenciasScreen: React.FC = () => {
                   onAddMarcaje={() => setAddModalOpen(true)}
                   onMarkerClick={handleMarkerClick}
                   selectedMarcajeId={selectedMarcaje?.id}
+                  employee={selectedEmployee}
                 />
               </div>
               {/* Botones de acción */}

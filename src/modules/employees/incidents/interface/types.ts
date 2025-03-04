@@ -49,6 +49,8 @@ export interface Marcaje {
   usuarioRegistro?: string;
   timestampRegistro?: string;
   observaciones?: string;
+  coordenadas?: Coordenadas; 
+  resultado?: "Verificado" | "No Verificado" | "Pendiente";
 }
 
 export interface Incidencia {
@@ -70,6 +72,7 @@ export interface MarcajeFormData {
   tipoVerificacion: TipoVerificacion;
   tipoMarcaje: TipoMarcaje;
   observaciones?: string;
+  coordenadas?: Coordenadas;
 }
 
 export interface Employee {
@@ -121,4 +124,44 @@ export interface MarcajeFormData {
   tipoVerificacion: TipoVerificacion;
   tipoMarcaje: TipoMarcaje;
   observaciones?: string;
+}
+
+export interface Coordenadas {
+  latitud: number;
+  longitud: number;
+  descripcion?: string;
+}
+
+// Actualizar la interfaz Marcaje para incluir coordenadas y resultado
+export interface Marcaje {
+  id: string;
+  fecha: string;
+  hora: string;
+  empleadoId: string;
+  dispositivo: string;
+  tipoVerificacion: TipoVerificacion;
+  tipoMarcaje: TipoMarcaje;
+  esManual: boolean;
+  usuarioRegistro?: string;
+  timestampRegistro?: string;
+  observaciones?: string;
+  coordenadas?: Coordenadas; // Nueva propiedad
+  resultado?: "Verificado" | "No Verificado" | "Pendiente"; // Nueva propiedad
+}
+
+// Actualizar MarcajeFormData para incluir coordenadas
+export interface MarcajeFormData {
+  fecha: string;
+  hora: string;
+  dispositivo: string;
+  tipoVerificacion: TipoVerificacion;
+  tipoMarcaje: TipoMarcaje;
+  observaciones?: string;
+  coordenadas?: Coordenadas; // Nueva propiedad
+}
+
+export interface Coordenadas {
+  latitud: number;
+  longitud: number;
+  descripcion?: string;
 }
