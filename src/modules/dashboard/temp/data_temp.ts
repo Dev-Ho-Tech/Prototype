@@ -1,25 +1,176 @@
-import { Employee } from '../interface/types';
+import { Employee, Marcaje } from '../interface/types';
 
-export const empleadosData: Employee[] = [
+// Datos de marcajes de ejemplo
+const marcajesData: Record<number, Marcaje[]> = {
+  // Marcajes para empleado ID 2 (Gerardo Campos)
+  2: [
+    {
+      fecha: '2023-10-15',
+      hora: '07:45',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '17:30',
+      tipo: 'salida',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    }
+  ],
+  // Marcajes para empleado ID 8 (Maria Guerra)
+  8: [
+    {
+      fecha: '2023-10-15',
+      hora: '07:30',
+      tipo: 'entrada',
+      dispositivo: 'smartphone',
+      metodo: 'facial',
+      localizacion: 'Remoto'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '16:45',
+      tipo: 'salida',
+      dispositivo: 'smartphone',
+      metodo: 'manual',
+      localizacion: 'Remoto'
+    }
+  ],
+  // Marcajes para empleado ID 9 (Jose Del Nardo)
+  9: [
+    {
+      fecha: '2023-10-15',
+      hora: '08:15',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Secundaria'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '19:20',
+      tipo: 'salida',
+      dispositivo: 'smartphone',
+      metodo: 'manual',
+      localizacion: 'Oficina Secundaria'
+    }
+  ],
+  // Marcajes para empleado ID 4 (Carlos Peña)
+  4: [
+    {
+      fecha: '2023-10-15',
+      hora: '06:45',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '15:30',
+      tipo: 'salida',
+      dispositivo: 'smartphone',
+      metodo: 'manual',
+      localizacion: 'Remoto'
+    }
+  ],
+  // Marcajes para empleado ID 13 (Ana Mendoza)
+  13: [
+    {
+      fecha: '2023-10-15',
+      hora: '08:30',
+      tipo: 'entrada',
+      dispositivo: 'smartphone',
+      metodo: 'facial',
+      localizacion: 'Sucursal Norte'
+    }
+  ],
+  // Marcajes para empleado ID 15 (Valentina Romero)
+  15: [
+    {
+      fecha: '2023-10-15',
+      hora: '07:15',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    }
+  ],
+  // Marcajes para empleado ID 19 (Mariana López)
+  19: [
+    {
+      fecha: '2023-10-15',
+      hora: '08:00',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '16:00',
+      tipo: 'salida',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    }
+  ]
+};
+
+// Departamentos y cargos
+const departamentos = [
+  'Marketing', 
+  'Recursos Humanos', 
+  'Finanzas', 
+  'Ventas', 
+  'Desarrollo', 
+  'Diseño', 
+  'Operaciones', 
+  'Atención al Cliente'
+];
+
+const cargos = [
+  'Analista', 
+  'Gerente', 
+  'Coordinador', 
+  'Asistente', 
+  'Director', 
+  'Diseñador', 
+  'Desarrollador', 
+  'Consultor'
+];
+
+export const empleadosDataEnriquecida: Employee[] = [
   {
     id: 1,
     nombre: 'Marcel Arcuri',
     foto: 'https://randomuser.me/api/portraits/men/32.jpg',
     estado: 'permiso',
     horas: '0 hrs 0 min',
-    pais: 'Venezuela',
+    pais: 'Republica Dominicana',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Informatica',
+    cargo: 'Gerente'
   },
   {
     id: 2,
     nombre: 'Gerardo Campos',
     foto: 'https://randomuser.me/api/portraits/men/33.jpg',
     estado: 'trabajando',
-    horas: '0 hrs 0 min',
+    horas: '9 hrs 45 min',
     pais: 'Ecuador',
-    ultimaAccion: '09:50 pm',
-    dispositivo: 'computadora'
+    ultimaAccion: '07:45',
+    dispositivo: 'computadora',
+    ultimaAccion2: '17:30',
+    dispositivo2: 'computadora',
+    departamento: 'Operaciones',
+    cargo: 'Director',
+    marcajes: marcajesData[2]
   },
   {
     id: 3,
@@ -29,19 +180,24 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Colombia',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Estadistica',
+    cargo: 'Analista'
   },
   {
     id: 4,
     nombre: 'Carlos Peña',
     foto: 'https://randomuser.me/api/portraits/men/34.jpg',
     estado: 'trabajando',
-    horas: '3 hrs 23 min',
+    horas: '8 hrs 45 min',
     pais: 'Venezuela',
-    ultimaAccion: '07:00 am',
-    ultimaAccion2: '11:35 am',
+    ultimaAccion: '06:45',
+    ultimaAccion2: '15:30',
     dispositivo: 'computadora',
-    dispositivo2: 'movil'
+    dispositivo2: 'smartphone',
+    departamento: 'Marketing',
+    cargo: 'Gerente',
+    marcajes: marcajesData[4]
   },
   {
     id: 5,
@@ -51,7 +207,9 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Venezuela',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Ventas',
+    cargo: 'Coordinador'
   },
   {
     id: 6,
@@ -61,7 +219,9 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Colombia',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Marketing',
+    cargo: 'Diseñador'
   },
   {
     id: 7,
@@ -71,28 +231,39 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Colombia',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Finanzas',
+    cargo: 'Analista'
   },
   {
     id: 8,
     nombre: 'Maria Guerra',
     foto: 'https://randomuser.me/api/portraits/women/33.jpg',
     estado: 'trabajando',
-    horas: '0 hrs 0 min',
+    horas: '9 hrs 15 min',
     pais: 'Colombia',
-    ultimaAccion: '07:45 am',
-    dispositivo: 'computadora'
+    ultimaAccion: '07:30',
+    dispositivo: 'smartphone',
+    ultimaAccion2: '16:45',
+    dispositivo2: 'smartphone',
+    departamento: 'Diseño',
+    cargo: 'Diseñador',
+    marcajes: marcajesData[8]
   },
   {
     id: 9,
     nombre: 'Jose Del Nardo',
     foto: 'https://randomuser.me/api/portraits/men/38.jpg',
     estado: 'trabajando',
-    horas: '16 hrs 55 min',
+    horas: '11 hrs 05 min',
     pais: 'Colombia',
-    ultimaAccion: '10:45 am',
-    ultimaAccion2: '03:45 pm',
-    dispositivo: 'computadora'
+    ultimaAccion: '08:15',
+    ultimaAccion2: '19:20',
+    dispositivo: 'computadora',
+    dispositivo2: 'smartphone',
+    departamento: 'Desarrollo',
+    cargo: 'Desarrollador',
+    marcajes: marcajesData[9]
   },
   {
     id: 10,
@@ -102,7 +273,9 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Colombia',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Desarrollo',
+    cargo: 'Desarrollador'
   },
   {
     id: 11,
@@ -111,10 +284,12 @@ export const empleadosData: Employee[] = [
     estado: 'trabajó',
     horas: '0 hrs 40 min',
     pais: 'Colombia',
-    ultimaAccion: '05:00 pm',
-    ultimaAccion2: '05:40 pm',
+    ultimaAccion: '17:00',
+    ultimaAccion2: '17:40',
     dispositivo: 'computadora',
-    dispositivo2: 'movil'
+    dispositivo2: 'smartphone',
+    departamento: 'Operaciones',
+    cargo: 'Coordinador'
   },
   {
     id: 12,
@@ -123,20 +298,25 @@ export const empleadosData: Employee[] = [
     estado: 'trabajó',
     horas: '5 hrs 45 min',
     pais: 'Colombia',
-    ultimaAccion: '08:55 am',
-    ultimaAccion2: '02:40 pm',
+    ultimaAccion: '08:55',
+    ultimaAccion2: '14:40',
     dispositivo: 'computadora',
-    dispositivo2: 'movil'
+    dispositivo2: 'smartphone',
+    departamento: 'Atención al Cliente',
+    cargo: 'Asistente'
   },
   {
     id: 13,
     nombre: 'Ana Mendoza',
     foto: 'https://randomuser.me/api/portraits/women/41.jpg',
     estado: 'trabajando',
-    horas: '2 hrs 15 min',
+    horas: '7 hrs 30 min',
     pais: 'Venezuela',
-    ultimaAccion: '08:15 am',
-    dispositivo: 'movil'
+    ultimaAccion: '08:30',
+    dispositivo: 'smartphone',
+    departamento: 'Finanzas',
+    cargo: 'Gerente',
+    marcajes: marcajesData[13]
   },
   {
     id: 14,
@@ -146,17 +326,22 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Colombia',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Recursos Humanos',
+    cargo: 'Coordinador'
   },
   {
     id: 15,
     nombre: 'Valentina Romero',
     foto: 'https://randomuser.me/api/portraits/women/42.jpg',
     estado: 'trabajando',
-    horas: '4 hrs 10 min',
+    horas: '8 hrs 45 min',
     pais: 'Ecuador',
-    ultimaAccion: '07:30 am',
-    dispositivo: 'computadora'
+    ultimaAccion: '07:15',
+    dispositivo: 'computadora',
+    departamento: 'Ventas',
+    cargo: 'Director',
+    marcajes: marcajesData[15]
   },
   {
     id: 16,
@@ -166,17 +351,21 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Colombia',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Marketing',
+    cargo: 'Asistente'
   },
   {
     id: 17,
     nombre: 'Carolina Jiménez',
     foto: 'https://randomuser.me/api/portraits/women/43.jpg',
     estado: 'trabajando',
-    horas: '3 hrs 45 min',
+    horas: '6 hrs 15 min',
     pais: 'Venezuela',
-    ultimaAccion: '07:45 am',
-    dispositivo: 'computadora'
+    ultimaAccion: '09:45',
+    dispositivo: 'computadora',
+    departamento: 'Diseño',
+    cargo: 'Diseñador'
   },
   {
     id: 18,
@@ -186,7 +375,9 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Colombia',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Ventas',
+    cargo: 'Analista'
   },
   {
     id: 19,
@@ -195,20 +386,25 @@ export const empleadosData: Employee[] = [
     estado: 'trabajó',
     horas: '8 hrs 0 min',
     pais: 'Ecuador',
-    ultimaAccion: '08:00 am',
-    ultimaAccion2: '04:00 pm',
+    ultimaAccion: '08:00',
+    ultimaAccion2: '16:00',
     dispositivo: 'computadora',
-    dispositivo2: 'computadora'
+    dispositivo2: 'computadora',
+    departamento: 'Recursos Humanos',
+    cargo: 'Gerente',
+    marcajes: marcajesData[19]
   },
   {
     id: 20,
     nombre: 'Eduardo Torres',
     foto: 'https://randomuser.me/api/portraits/men/45.jpg',
     estado: 'trabajando',
-    horas: '1 hrs 30 min',
+    horas: '4 hrs 30 min',
     pais: 'Colombia',
-    ultimaAccion: '09:00 am',
-    dispositivo: 'computadora'
+    ultimaAccion: '10:30',
+    dispositivo: 'computadora',
+    departamento: 'Desarrollo',
+    cargo: 'Desarrollador'
   },
   {
     id: 21,
@@ -218,7 +414,9 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Venezuela',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Atención al Cliente',
+    cargo: 'Asistente'
   },
   {
     id: 22,
@@ -227,10 +425,12 @@ export const empleadosData: Employee[] = [
     estado: 'trabajó',
     horas: '4 hrs 15 min',
     pais: 'Colombia',
-    ultimaAccion: '08:30 am',
-    ultimaAccion2: '12:45 pm',
+    ultimaAccion: '08:30',
+    ultimaAccion2: '12:45',
     dispositivo: 'computadora',
-    dispositivo2: 'movil'
+    dispositivo2: 'smartphone',
+    departamento: 'Marketing',
+    cargo: 'Coordinador'
   },
   {
     id: 23,
@@ -240,238 +440,22 @@ export const empleadosData: Employee[] = [
     horas: '0 hrs 0 min',
     pais: 'Ecuador',
     ultimaAccion: null,
-    dispositivo: null
+    dispositivo: null,
+    departamento: 'Finanzas',
+    cargo: 'Analista'
   },
   {
     id: 24,
     nombre: 'Ricardo Vargas',
     foto: 'https://randomuser.me/api/portraits/men/47.jpg',
     estado: 'trabajando',
-    horas: '5 hrs 20 min',
+    horas: '7 hrs 45 min',
     pais: 'Colombia',
-    ultimaAccion: '07:15 am',
-    dispositivo: 'computadora'
-  },
-  {
-    id: 25,
-    nombre: 'Marcel Arcuri',
-    foto: 'https://randomuser.me/api/portraits/men/32.jpg',
-    estado: 'permiso',
-    horas: '0 hrs 0 min',
-    pais: 'Venezuela',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  {
-    id: 26,
-    nombre: 'Gerardo Campos',
-    foto: 'https://randomuser.me/api/portraits/men/33.jpg',
-    estado: 'trabajando',
-    horas: '0 hrs 0 min',
-    pais: 'Ecuador',
-    ultimaAccion: '09:50 pm',
-    dispositivo: 'computadora'
-  },
-  {
-    id: 27,
-    nombre: 'Genesis Orias',
-    foto: 'https://randomuser.me/api/portraits/women/32.jpg',
-    estado: 'permiso',
-    horas: '0 hrs 0 min',
-    pais: 'Colombia',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  {
-    id: 28,
-    nombre: 'Carlos Peña',
-    foto: 'https://randomuser.me/api/portraits/men/34.jpg',
-    estado: 'trabajando',
-    horas: '3 hrs 23 min',
-    pais: 'Venezuela',
-    ultimaAccion: '07:00 am',
-    ultimaAccion2: '11:35 am',
+    ultimaAccion: '07:15',
     dispositivo: 'computadora',
-    dispositivo2: 'movil'
-  },
-  {
-    id: 29,
-    nombre: 'Jose Pereira',
-    foto: 'https://randomuser.me/api/portraits/men/35.jpg',
-    estado: 'ausencia',
-    horas: '0 hrs 0 min',
-    pais: 'Venezuela',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  {
-    id: 30,
-    nombre: 'Jesus Pacheco',
-    foto: 'https://randomuser.me/api/portraits/men/36.jpg',
-    estado: 'ausencia',
-    horas: '0 hrs 0 min',
-    pais: 'Colombia',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  {
-    id: 32,
-    nombre: 'Jesus Valero',
-    foto: 'https://randomuser.me/api/portraits/men/37.jpg',
-    estado: 'ausencia',
-    horas: '0 hrs 0 min',
-    pais: 'Colombia',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  {
-    id: 33,
-    nombre: 'Maria Guerra',
-    foto: 'https://randomuser.me/api/portraits/women/33.jpg',
-    estado: 'trabajando',
-    horas: '0 hrs 0 min',
-    pais: 'Colombia',
-    ultimaAccion: '07:45 am',
-    dispositivo: 'computadora'
-  },
-  {
-    id: 34,
-    nombre: 'Jose Del Nardo',
-    foto: 'https://randomuser.me/api/portraits/men/38.jpg',
-    estado: 'trabajando',
-    horas: '16 hrs 55 min',
-    pais: 'Colombia',
-    ultimaAccion: '10:45 am',
-    ultimaAccion2: '03:45 pm',
-    dispositivo: 'computadora'
-  },
-  {
-    id: 35,
-    nombre: 'Fernando Martinez',
-    foto: null,
-    estado: 'planificado',
-    horas: '0 hrs 0 min',
-    pais: 'Colombia',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  {
-    id: 36,
-    nombre: 'Diego Cruz',
-    foto: 'https://randomuser.me/api/portraits/men/40.jpg',
-    estado: 'trabajó',
-    horas: '0 hrs 40 min',
-    pais: 'Colombia',
-    ultimaAccion: '05:00 pm',
-    ultimaAccion2: '05:40 pm',
-    dispositivo: 'computadora',
-    dispositivo2: 'movil'
-  },
-  {
-    id: 37,
-    nombre: 'Xilean Trujillo',
-    foto: 'https://randomuser.me/api/portraits/men/41.jpg',
-    estado: 'trabajó',
-    horas: '5 hrs 45 min',
-    pais: 'Colombia',
-    ultimaAccion: '08:55 am',
-    ultimaAccion2: '02:40 pm',
-    dispositivo: 'computadora',
-    dispositivo2: 'movil'
-  },
-  {
-    id: 38,
-    nombre: 'Ana Mendoza',
-    foto: 'https://randomuser.me/api/portraits/women/41.jpg',
-    estado: 'trabajando',
-    horas: '2 hrs 15 min',
-    pais: 'Venezuela',
-    ultimaAccion: '08:15 am',
-    dispositivo: 'movil'
-  },
-  {
-    id: 39,
-    nombre: 'Luis García',
-    foto: 'https://randomuser.me/api/portraits/men/42.jpg',
-    estado: 'permiso',
-    horas: '0 hrs 0 min',
-    pais: 'Colombia',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  {
-    id: 40,
-    nombre: 'Valentina Romero',
-    foto: 'https://randomuser.me/api/portraits/women/42.jpg',
-    estado: 'trabajando',
-    horas: '4 hrs 10 min',
-    pais: 'Ecuador',
-    ultimaAccion: '07:30 am',
-    dispositivo: 'computadora'
-  },
-  {
-    id: 41,
-    nombre: 'Pedro Silva',
-    foto: 'https://randomuser.me/api/portraits/men/43.jpg',
-    estado: 'ausencia',
-    horas: '0 hrs 0 min',
-    pais: 'Colombia',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  {
-    id: 42,
-    nombre: 'Carolina Jiménez',
-    foto: 'https://randomuser.me/api/portraits/women/43.jpg',
-    estado: 'trabajando',
-    horas: '3 hrs 45 min',
-    pais: 'Venezuela',
-    ultimaAccion: '07:45 am',
-    dispositivo: 'computadora'
-  },
-  {
-    id: 43,
-    nombre: 'Roberto Flores',
-    foto: 'https://randomuser.me/api/portraits/men/44.jpg',
-    estado: 'planificado',
-    horas: '0 hrs 0 min',
-    pais: 'Colombia',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  {
-    id: 44,
-    nombre: 'Mariana López',
-    foto: 'https://randomuser.me/api/portraits/women/44.jpg',
-    estado: 'trabajó',
-    horas: '8 hrs 0 min',
-    pais: 'Ecuador',
-    ultimaAccion: '08:00 am',
-    ultimaAccion2: '04:00 pm',
-    dispositivo: 'computadora',
-    dispositivo2: 'computadora'
-  },
-  {
-    id: 46,
-    nombre: 'Eduardo Torres',
-    foto: 'https://randomuser.me/api/portraits/men/45.jpg',
-    estado: 'trabajando',
-    horas: '1 hrs 30 min',
-    pais: 'Colombia',
-    ultimaAccion: '09:00 am',
-    dispositivo: 'computadora'
-  },
-  {
-    id: 47,
-    nombre: 'Sofía Ramírez',
-    foto: 'https://randomuser.me/api/portraits/women/45.jpg',
-    estado: 'ausencia',
-    horas: '0 hrs 0 min',
-    pais: 'Venezuela',
-    ultimaAccion: null,
-    dispositivo: null
-  },
-  
+    departamento: 'Operaciones',
+    cargo: 'Director'
+  }
 ];
 
 // Datos para estadísticas

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { Building2, ChevronDown, Search, X } from 'lucide-react';
 import { deviceTypes, estructuras } from '../data';
@@ -75,7 +76,6 @@ export function DeviceForm({ device, onClose }: DeviceFormProps) {
   };
 
   // Componente recursivo para renderizar el árbol de estructuras
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderTree = (node: any, path = '', level = 0) => {
     const currentPath = path ? `${path} > ${node.name}` : node.name;
     const isExpanded = expandedNodes.includes(node.id);
@@ -86,10 +86,8 @@ export function DeviceForm({ device, onClose }: DeviceFormProps) {
       node.name.toLowerCase().includes(searchTerm.toLowerCase());
     
     // Verificar si algún hijo coincide con la búsqueda
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const childrenMatch = node.children && node.children.some((child: any) => {
       return child.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (child.children && child.children.some((grandchild: any) => 
           grandchild.name.toLowerCase().includes(searchTerm.toLowerCase())
         ));

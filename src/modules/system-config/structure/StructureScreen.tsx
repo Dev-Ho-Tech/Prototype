@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Plus, Building2, Users, MapPin, Phone, Mail, Edit, Trash, Settings, FolderTree, Briefcase, ChevronRight, Building } from 'lucide-react';
 import { OrganizationalTree } from './components/OrganizationalTree';
 import { NodeForm } from './components/NodeForm';
