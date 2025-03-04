@@ -33,6 +33,7 @@ import { PermissionsScreen } from './modules/access-control/permissions/Permissi
 import { MonitoringScreen } from './modules/access-control/monitoring/MonitoringScreen';
 import { LoginScreen } from './modules/auth/login/LoginScreen';
 import DashboardScreen from './modules/dashboard/DashboardScreen';
+import ComedorScreen from './modules/system-config/diner/ComedorScreen';
 // import TestScreen from './modules/employees/incidents/test';
 // import IncidenciasScreen from './modules/incidents/IncidentsScreen';
 
@@ -108,6 +109,7 @@ function App() {
         {currentView === '/system-config/devices' && <DevicesScreen />}
         {currentView === '/system-config/employee-types' && <EmployeeTypesScreen />}
         {currentView === '/system-config/contracts' && <ContractsScreen />}
+        {currentView === '/system-config/diner' && <ComedorScreen />}
         {currentView === '/time-control/calendar' && <CalendarScreen />}
         {currentView === '/time-control/checks' && <ChecksScreen />}
         {currentView === '/time-control/hours-approval' && <HoursApprovalScreen />}
