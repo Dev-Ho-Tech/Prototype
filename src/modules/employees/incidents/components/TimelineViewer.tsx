@@ -1,5 +1,6 @@
-import React from 'react';
-import { Marcaje } from '../interface/types';
+import React, { useState } from 'react';
+import { Marcaje, Employee } from '../interface/types';
+import MarcajeDetailModal from './MarcajeDetailModal';
 
 interface TimelineViewerProps {
   marcajes: Marcaje[];
@@ -8,6 +9,7 @@ interface TimelineViewerProps {
   onAddMarcaje?: () => void;
   onMarkerClick?: (marcaje: Marcaje) => void;
   selectedMarcajeId?: string | null;
+  employee: Employee | null;
 }
 
 const TimelineViewer: React.FC<TimelineViewerProps> = ({
@@ -15,8 +17,13 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
   startHour = 5,
   endHour = 19,
   onMarkerClick,
-  selectedMarcajeId
+  selectedMarcajeId,
+  employee
 }) => {
+  // Estado para controlar la apertura del modal y el marcaje seleccionado para el modal
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedMarcajeForModal, setSelectedMarcajeForModal] = useState<Marcaje | null>(null);
+
   // Calcular posición horizontal basada en la hora
   const calculateHorizontalPosition = (timeString: string): number => {
     // Extraer hora y minutos, considerar AM/PM
@@ -63,66 +70,81 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
 
   // Manejar clic en marcador
   const handleMarkerClick = (marcaje: Marcaje) => {
+    // Llamamos al manejador proporcionado (para mantener la funcionalidad existente)
     if (onMarkerClick) {
       onMarkerClick(marcaje);
     }
+    
+    // Abrimos el modal con los detalles del marcaje
+    setSelectedMarcajeForModal(marcaje);
+    setModalOpen(true);
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <div className="relative" style={{ height: '100px', minWidth: '800px' }}>
-          {/* Horas en la parte inferior */}
-          <div className="absolute bottom-0 w-full flex border-t border-gray-200">
-            {Array.from({ length: endHour - startHour + 1 }, (_, i) => {
-              const hour = startHour + i;
-              return (
-                <div key={hour} className="flex-1 text-center border-r border-gray-200 last:border-r-0 text-xs text-gray-500 py-1">
-                  {`${hour.toString().padStart(2, '0')}:00`}
-                </div>
-              );
-            })}
-          </div>
-          
-          {/* Líneas verticales de la cuadrícula */}
-          <div className="absolute inset-0 w-full h-full flex pointer-events-none">
-            {Array.from({ length: endHour - startHour + 1 }, (_, i) => {
-              return (
-                <div key={i} className="flex-1 border-r border-gray-200 last:border-r-0"></div>
-              );
-            })}
-          </div>
-          
-          {/* Línea horizontal del tiempo */}
-          <div className="absolute top-1/2 w-full h-px bg-gray-300"></div>
-          
-          {/* Marcadores de tiempo */}
-          {marcajes.map(marcaje => {
-            const position = calculateHorizontalPosition(marcaje.hora);
-            const isSelected = marcaje.id === selectedMarcajeId;
-            const markerColor = getMarkerColor(marcaje);
+    <>
+      <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <div className="relative" style={{ height: '100px', minWidth: '800px' }}>
+            {/* Horas en la parte inferior */}
+            <div className="absolute bottom-0 w-full flex border-t border-gray-200">
+              {Array.from({ length: endHour - startHour + 1 }, (_, i) => {
+                const hour = startHour + i;
+                return (
+                  <div key={hour} className="flex-1 text-center border-r border-gray-200 last:border-r-0 text-xs text-gray-500 py-1">
+                    {`${hour.toString().padStart(2, '0')}:00`}
+                  </div>
+                );
+              })}
+            </div>
             
-            return (
-              <div 
-                key={marcaje.id}
-                className={`absolute cursor-pointer transition-all ${isSelected ? 'z-10' : 'z-0'}`}
-                style={{ 
-                  left: `${position}%`, 
-                  top: '50%',
-                  transform: `translate(-50%, -50%) ${isSelected ? 'scale(1.2)' : 'scale(1)'}` 
-                }}
-                onClick={() => handleMarkerClick(marcaje)}
-              >
-                <div className={`${markerColor} w-4 h-4 rounded-full shadow ${isSelected ? 'ring-2 ring-blue-400 ring-offset-2' : ''}`}></div>
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 whitespace-nowrap text-xs font-medium">
-                  {marcaje.hora}
+            {/* Líneas verticales de la cuadrícula */}
+            <div className="absolute inset-0 w-full h-full flex pointer-events-none">
+              {Array.from({ length: endHour - startHour + 1 }, (_, i) => {
+                return (
+                  <div key={i} className="flex-1 border-r border-gray-200 last:border-r-0"></div>
+                );
+              })}
+            </div>
+            
+            {/* Línea horizontal del tiempo */}
+            <div className="absolute top-1/2 w-full h-px bg-gray-300"></div>
+            
+            {/* Marcadores de tiempo */}
+            {marcajes.map(marcaje => {
+              const position = calculateHorizontalPosition(marcaje.hora);
+              const isSelected = marcaje.id === selectedMarcajeId;
+              const markerColor = getMarkerColor(marcaje);
+              
+              return (
+                <div 
+                  key={marcaje.id}
+                  className={`absolute cursor-pointer transition-all ${isSelected ? 'z-10' : 'z-0'}`}
+                  style={{ 
+                    left: `${position}%`, 
+                    top: '50%',
+                    transform: `translate(-50%, -50%) ${isSelected ? 'scale(1.2)' : 'scale(1)'}` 
+                  }}
+                  onClick={() => handleMarkerClick(marcaje)}
+                >
+                  <div className={`${markerColor} w-4 h-4 rounded-full shadow ${isSelected ? 'ring-2 ring-blue-400 ring-offset-2' : ''}`}></div>
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 whitespace-nowrap text-xs font-medium">
+                    {marcaje.hora}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Modal de detalles del marcaje */}
+      <MarcajeDetailModal 
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        marcaje={selectedMarcajeForModal}
+        employee={employee}
+      />
+    </>
   );
 };
 

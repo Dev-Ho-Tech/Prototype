@@ -105,6 +105,36 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
 
   return (
     <div className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        {novedadesCards.map((card) => (
+          <div 
+            key={card.id}
+            className="bg-white rounded-lg shadow relative overflow-hidden"
+            style={{ backgroundColor: card.bgColor }}
+          >
+            {/* Barra inferior de color */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-1"
+              style={{ backgroundColor: card.borderColor }}
+            ></div>
+            
+            {/* Contenido de la tarjeta */}
+            <div className="p-3">
+              <div className="flex justify-between items-center">
+                <div className="text-3xl font-bold" style={{ color: card.color }}>
+                  {card.count}
+                </div>
+                <div style={{ color: card.color }}>
+                  {card.icon}
+                </div>
+              </div>
+              <div className="mt-1" style={{ color: card.color }}>
+                <span className="text-sm">{card.label}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
       {/* Primera fila con 3 paneles principales */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Estado del día */}
@@ -253,36 +283,7 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
       </div>
       
       {/* Segunda fila con tarjetas individuales de novedades */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-        {novedadesCards.map((card) => (
-          <div 
-            key={card.id}
-            className="bg-white rounded-lg shadow relative overflow-hidden"
-            style={{ backgroundColor: card.bgColor }}
-          >
-            {/* Barra inferior de color */}
-            <div 
-              className="absolute bottom-0 left-0 right-0 h-1"
-              style={{ backgroundColor: card.borderColor }}
-            ></div>
-            
-            {/* Contenido de la tarjeta */}
-            <div className="p-3">
-              <div className="flex justify-between items-center">
-                <div className="text-3xl font-bold" style={{ color: card.color }}>
-                  {card.count}
-                </div>
-                <div style={{ color: card.color }}>
-                  {card.icon}
-                </div>
-              </div>
-              <div className="mt-1" style={{ color: card.color }}>
-                <span className="text-sm">{card.label}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+
       {/* Espacio de 5px para separación */}
       <div className="h-[4px]"></div>
     </div>

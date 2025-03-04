@@ -222,7 +222,7 @@ export const menuItems: MenuItem[] = [
       },
       {
         id: 'diner',
-        label: 'Comdedor',
+        label: 'Comedor',
         icon: Utensils,
         path: '/system-config/diner'
       },

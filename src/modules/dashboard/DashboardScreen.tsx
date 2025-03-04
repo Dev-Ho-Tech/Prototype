@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Grid, List, ArrowLeft } from 'lucide-react';
-import { empleadosData, estadoDelDiaData, tiemposData } from './temp/data_temp';
+import { empleadosDataEnriquecida, estadoDelDiaData, tiemposData } from './temp/data_temp';
 import EmployeeListView from './components/EmployeeListView';
 import StatisticsPanels from './components/StatisticsPanels';
 import EmployeeDetailView from './components/EmployeeDetailViewProps';
@@ -18,7 +18,7 @@ const DashboardScreen: React.FC = () => {
   const itemsPerPage = viewMode === 'grid' ? 18 : 8;
 
   // Filtrar empleados según el término de búsqueda
-  const filteredEmpleados = empleadosData.filter(empleado => 
+  const filteredEmpleados = empleadosDataEnriquecida.filter(empleado => 
     empleado.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     empleado.pais.toLowerCase().includes(searchTerm.toLowerCase())
   );

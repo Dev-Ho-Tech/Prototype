@@ -1,3 +1,4 @@
+// import { marcajes } from '../../employees/incidents/data';
 export interface Employee {
   id: number;
   nombre: string;
@@ -11,6 +12,7 @@ export interface Employee {
   dispositivo2?: 'computadora' | 'smartphone' | null;
   cargo?: string;
   departamento?: string;
+  marcajes?: Marcaje[];
 }
 
 export interface Marcaje {

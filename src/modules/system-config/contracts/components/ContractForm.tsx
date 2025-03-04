@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Contract, ContractFormProps, ContractType } from '../interfaces/types';
+import TimeSelector from './TimeSelector';
 
 export const ContractForm: React.FC<ContractFormProps> = ({
   contract,
@@ -181,33 +182,25 @@ export const ContractForm: React.FC<ContractFormProps> = ({
           
           {/* Sección 2: Horario nocturno */}
           <div>
-            <div className="mb-4">
-              <label htmlFor="nightShiftStart" className="block text-sm font-medium text-gray-700 mb-1">
-                Inicio del recargo nocturno
-              </label>
-              <input
-                type="text"
-                id="nightShiftStart"
-                name="nightShiftStart"
-                value={formData.workingHours?.nightShiftStart}
-                onChange={handleWorkingHoursChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+          <div className="mb-4">
+            <TimeSelector
+              id="nightShiftStart"
+              name="nightShiftStart"
+              value={formData.workingHours?.nightShiftStart}
+              onChange={handleWorkingHoursChange}
+              label="Inicio del recargo nocturno"
+            />
+          </div>
             
-            <div className="mb-4">
-              <label htmlFor="nightShiftEnd" className="block text-sm font-medium text-gray-700 mb-1">
-                Fin del recargo nocturno
-              </label>
-              <input
-                type="text"
-                id="nightShiftEnd"
-                name="nightShiftEnd"
-                value={formData.workingHours?.nightShiftEnd}
-                onChange={handleWorkingHoursChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+          <div className="mb-4">
+            <TimeSelector
+              id="nightShiftEnd"
+              name="nightShiftEnd"
+              value={formData.workingHours?.nightShiftEnd}
+              onChange={handleWorkingHoursChange}
+              label="Fin del recargo nocturno"
+            />
+          </div>
           </div>
           
           {/* Sección 3: Horas semanales */}
