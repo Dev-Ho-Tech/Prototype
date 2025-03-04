@@ -68,6 +68,8 @@ export interface LaborData {
 }
 
 export interface TreeNodeData {
+  id: string;
+  
   name: string;
   manager: string;
   employeeCount: number;
@@ -76,7 +78,19 @@ export interface TreeNodeData {
   type: string;
   expanded?: boolean;
   children: TreeNodeData[];
+  
 }
+// export interface TreeNodeData {
+//   id: string;
+//   name: string;
+//   expanded?: boolean;
+//   children: TreeNodeData[];
+//   manager?: string;
+//   employeeCount?: number;
+//   icon?: React.ReactNode;
+//   color?: string;
+//   type?: string;
+// }
 
 // Props para los componentes de formulario
 export interface EmployeeProfileHeaderProps {
@@ -112,4 +126,27 @@ export interface ExtendedHeaderProps extends EmployeeProfileHeaderProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
   onProfileImageChange?: (file: File, imageUrl: string) => void;
+}
+
+
+
+export interface LocationSelection {
+  id: string;
+  name: string;
+  path?: string;
+}
+
+export interface TreeNodeProps {
+  node: TreeNodeData;
+  level?: number;
+  selectedLocations: string[];
+  onToggleSelect: (nodeId: string) => void;
+  searchTerm: string;
+}
+
+export interface StructureModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelectLocations?: (selectedLocations: LocationSelection[]) => void;
+  initialSelectedLocations?: string[];
 }
