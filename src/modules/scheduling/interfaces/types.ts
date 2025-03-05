@@ -34,7 +34,7 @@ export interface ScheduleEntry {
   status?: 'onTime' | 'late' | 'early' | 'absent' | 'pending';
 }
 
-export type Period = 'Diario' | 'Semanal' | 'Mensual';
+export type Period = 'Diario' | 'Semanal' | 'Mensual' | 'Seleccionar fechas';
 
 // Interfaz para los elementos arrastrables
 export interface DragInfo {

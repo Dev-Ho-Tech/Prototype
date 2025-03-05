@@ -28,22 +28,17 @@ export const menuItems: MenuItem[] = [
       // },
       {
         id: 'schedule-assignment',
-        label: 'Asignación de Horarios',
+        label: 'Planificadir de Horarios',
         icon: Clock,
         path: '/employees/schedule'
       },
-      {
-        id: 'check-profiles',
-        label: 'Perfiles de Marcaje',
-        icon: Clock,
-        path: '/employees/check-profiles'
-      },
-      {
-        id: 'biometric',
-        label: 'Información Biométrica',
-        icon: Fingerprint,
-        path: '/employees/biometric'
-      },
+      
+      // {
+      //   id: 'biometric',
+      //   label: 'Información Biométrica',
+      //   icon: Fingerprint,
+      //   path: '/employees/biometric'
+      // },
       {
         id: 'incidencias',
         label: 'Gestión de Incidencias',
@@ -60,29 +55,48 @@ export const menuItems: MenuItem[] = [
     path: '/time-control',
     children: [
       {
+        id: 'check-profiles',
+        label: 'Perfiles de Marcaje',
+        icon: Clock,
+        path: '/employees/check-profiles'
+      },
+      {
         id: 'calendar',
-        label: 'Planificador',
+        label: 'Asignacion de Horarios',
         icon: Clock,
         path: '/time-control/calendar'
       },
       {
-        id: 'checks',
-        label: 'Marcajes',
+        id: 'geocerca',
+        label: 'Geocerca',
         icon: Clock,
-        path: '/time-control/checks'
+        path: '/employees/geocerca'
       },
       {
-        id: 'hours-approval',
-        label: 'Aprobación de Horas',
-        icon: Clock,
-        path: '/time-control/hours-approval'
+        id: 'contracts',
+        label: 'Contratos',
+        icon: FileText,
+        path: '/system-config/contracts'
       },
-      {
-        id: 'absence',
-        label: 'Gestión de Ausencias',
-        icon: Clock,
-        path: '/time-control/absence'
-      }
+
+      // {
+      //   id: 'checks',
+      //   label: 'Marcajes',
+      //   icon: Clock,
+      //   path: '/time-control/checks'
+      // },
+      // {
+      //   id: 'hours-approval',
+      //   label: 'Aprobación de Horas',
+      //   icon: Clock,
+      //   path: '/time-control/hours-approval'
+      // },
+      // {
+      //   id: 'absence',
+      //   label: 'Gestión de Ausencias',
+      //   icon: Clock,
+      //   path: '/time-control/absence'
+      // }
     ]
   },
   {
@@ -214,12 +228,7 @@ export const menuItems: MenuItem[] = [
         icon: Briefcase,
         path: '/system-config/positions'
       },
-      {
-        id: 'contracts',
-        label: 'Contratos',
-        icon: FileText,
-        path: '/system-config/contracts'
-      },
+      
       {
         id: 'diner',
         label: 'Comedor',

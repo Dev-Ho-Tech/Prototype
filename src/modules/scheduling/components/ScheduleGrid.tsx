@@ -11,16 +11,20 @@ interface ScheduleGridProps {
   licenses: License[];
   dragInfo: DragInfo | null;
   setDragInfo: React.Dispatch<React.SetStateAction<DragInfo | null>>;
+  startDate?: string;
+  endDate?: string;
 }
 
 const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   employee,
   selectedDate,
-  // selectedPeriod,
+  selectedPeriod,
   workShifts,
   licenses,
   dragInfo,
-  setDragInfo
+  setDragInfo,
+  startDate,
+  endDate
 }) => {
   // Horarios mostrados en la cuadrícula (horas de 6:00 a 20:00)
   const startHour = 5;
@@ -28,26 +32,83 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
   // Calcular los días de la semana para la fecha seleccionada
   const getWeekDays = () => {
-    const date = new Date(selectedDate);
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Ajuste para que la semana comience el lunes
-    
-    const monday = new Date(date.setDate(diff));
-    
-    const days = [
-      { name: 'Lunes', date: new Date(monday) },
-      { name: 'Martes', date: new Date(monday.setDate(monday.getDate() + 1)) },
-      { name: 'Miércoles', date: new Date(monday.setDate(monday.getDate() + 1)) },
-      { name: 'Jueves', date: new Date(monday.setDate(monday.getDate() + 1)) },
-      { name: 'Viernes', date: new Date(monday.setDate(monday.getDate() + 1)) },
-      { name: 'Sábado', date: new Date(monday.setDate(monday.getDate() + 1)) },
-      { name: 'Domingo', date: new Date(monday.setDate(monday.getDate() + 1)) }
-    ];
-    
-    return days.map(day => ({
-      name: day.name,
-      date: day.date.toISOString().split('T')[0]
-    }));
+    // Si estamos en modo "Seleccionar fechas", calcular los días basados en el rango
+    if (selectedPeriod === 'Seleccionar fechas' && startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const days = [];
+      const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      
+      // Limitar el número de días mostrados (para evitar problemas de rendimiento)
+      const maxDays = 30; // Mostrar máximo 30 días
+      let count = 0;
+      
+      for (let d = new Date(start); d <= end && count < maxDays; d.setDate(d.getDate() + 1), count++) {
+        days.push({
+          name: dayNames[d.getDay()],
+          date: new Date(d).toISOString().split('T')[0]
+        });
+      }
+      
+      return days;
+    } else if (selectedPeriod === 'Diario') {
+      // Para vista diaria, solo mostrar el día seleccionado
+      const date = new Date(selectedDate);
+      const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      
+      return [{
+        name: dayNames[date.getDay()],
+        date: date.toISOString().split('T')[0]
+      }];
+    } else if (selectedPeriod === 'Mensual') {
+      // Para vista mensual, mostrar todos los días del mes
+      const date = new Date(selectedDate);
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const days = [];
+      const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      
+      for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+        days.push({
+          name: dayNames[d.getDay()],
+          date: new Date(d).toISOString().split('T')[0]
+        });
+      }
+      
+      return days;
+    } else {
+      // Vista semanal (por defecto)
+      const date = new Date(selectedDate);
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Ajuste para que la semana comience el lunes
+      
+      const monday = new Date(date.setDate(diff));
+      
+      const days = [
+        { name: 'Lunes', date: new Date(monday) },
+        { name: 'Martes', date: new Date(monday) },
+        { name: 'Miércoles', date: new Date(monday) },
+        { name: 'Jueves', date: new Date(monday) },
+        { name: 'Viernes', date: new Date(monday) },
+        { name: 'Sábado', date: new Date(monday) },
+        { name: 'Domingo', date: new Date(monday) }
+      ];
+      
+      // Corregir el problema de las fechas
+      days[0].date = new Date(monday);
+      for (let i = 1; i < days.length; i++) {
+        const newDate = new Date(days[i-1].date);
+        newDate.setDate(newDate.getDate() + 1);
+        days[i].date = newDate;
+      }
+      
+      return days.map(day => ({
+        name: day.name,
+        date: day.date.toISOString().split('T')[0]
+      }));
+    }
   };
 
   const weekDays = getWeekDays();

@@ -164,7 +164,7 @@ export function LicenseForm({ license, onClose }: LicenseFormProps) {
               Módulos contratados
             </label>
             <div className="space-y-2">
-              {['presence', 'access', 'dining', 'training'].map((module) => (
+            {['Control de Tiempo', 'Control de Accesos', 'Control de Comedor', 'Control de Capacitación'].map((module) => (
                 <label key={module} className="flex items-center">
                   <input
                     type="checkbox"

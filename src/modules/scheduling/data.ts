@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Employee, WorkShift, License } from './interfaces/types';
 
 export const workShifts: WorkShift[] = [
@@ -589,5 +590,730 @@ export const employees: Employee[] = [
         endTime: '' 
       },
     ]
+  },
+  {
+    id: '1011',
+    name: 'Gabriela Sánchez',
+    position: 'Supervisora de Recepción',
+    department: 'Front Desk',
+    location: 'Hodelpa Gran Almirante',
+    code: '1011',
+    contractType: 'Indefinido',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '07:55',
+        actualExitTime: '16:10',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:02',
+        actualExitTime: '16:05',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:25',
+        actualExitTime: '16:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'TL', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+    ]
+  },
+  {
+    id: '1012',
+    name: 'Fernando Martínez',
+    position: 'Sommelier',
+    department: 'Restaurante',
+    location: 'Hodelpa Garden Court',
+    code: '1012',
+    contractType: 'Indefinido',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '16:00',
+        actualExitTime: '00:05',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '16:10',
+        actualExitTime: '00:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '16:05',
+        actualExitTime: '23:45',
+        status: 'early'
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+    ]
+  },
+  {
+    id: '1013',
+    name: 'Patricia Reyes',
+    position: 'Masajista',
+    department: 'Spa',
+    location: 'Hodelpa Gran Almirante',
+    code: '1013',
+    contractType: 'Por Hora',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:00',
+        actualExitTime: '14:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:15',
+        actualExitTime: '14:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'EEM', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        status: 'absent'
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00' 
+      },
+    ]
+  },
+  {
+    id: '1014',
+    name: 'Héctor Gómez',
+    position: 'Técnico de Sistemas',
+    department: 'IT',
+    location: 'Hodelpa Gran Almirante',
+    code: '1014',
+    contractType: 'Indefinido',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:00',
+        actualExitTime: '16:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:05',
+        actualExitTime: '16:10',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:00',
+        actualExitTime: '15:30',
+        status: 'early'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00' 
+      },
+    ]
+  },
+  {
+    id: '1015',
+    name: 'Carolina Medina',
+    position: 'Contadora',
+    department: 'Finanzas',
+    location: 'Hodelpa Garden Court',
+    code: '1015',
+    contractType: 'Indefinido',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:00',
+        actualExitTime: '16:05',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:20',
+        actualExitTime: '16:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:00',
+        actualExitTime: '16:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '07:55',
+        actualExitTime: '16:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+    ]
+  },
+  {
+    id: '1016',
+    name: 'Javier Espinal',
+    position: 'Botones',
+    department: 'Front Desk',
+    location: 'Hodelpa Gran Almirante',
+    code: '1016',
+    contractType: 'Temporal',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:10',
+        actualExitTime: '14:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:00',
+        actualExitTime: '13:45',
+        status: 'early'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:00',
+        actualExitTime: '14:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+    ]
+  },
+  {
+    id: '1017',
+    name: 'Alejandra Rosario',
+    position: 'Cocinera',
+    department: 'Cocina',
+    location: 'Hodelpa Garden Court',
+    code: '1017',
+    contractType: 'Indefinido',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00',
+        actualEntryTime: '08:05',
+        actualExitTime: '19:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00',
+        actualEntryTime: '08:00',
+        actualExitTime: '19:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00',
+        actualEntryTime: '08:30',
+        actualExitTime: '19:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'S', 
+        startTime: '08:00', 
+        endTime: '19:00' 
+      },
+    ]
+  },
+  {
+    id: '1018',
+    name: 'Rafael Ortiz',
+    position: 'Jardinero',
+    department: 'Mantenimiento',
+    location: 'Hodelpa Garden Court',
+    code: '1018',
+    contractType: 'Por Proyecto',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00',
+        actualEntryTime: '06:00',
+        actualExitTime: '14:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'IPA', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'IPA', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'IPA', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'M', 
+        startTime: '06:00', 
+        endTime: '14:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+    ]
+  },
+  {
+    id: '1019',
+    name: 'Lucía Hernández',
+    position: 'Maître',
+    department: 'Restaurante',
+    location: 'Hodelpa Gran Almirante',
+    code: '1019',
+    contractType: 'Indefinido',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '16:00',
+        actualExitTime: '00:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '16:05',
+        actualExitTime: '00:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00',
+        actualEntryTime: '15:55',
+        actualExitTime: '00:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'N', 
+        startTime: '16:00', 
+        endTime: '00:00' 
+      },
+    ]
+  },
+  {
+    id: '1020',
+    name: 'Elena Peralta',
+    position: 'Relaciones Públicas',
+    department: 'Marketing',
+    location: 'Hodelpa Gran Almirante',
+    code: '1020',
+    contractType: 'Indefinido',
+    schedule: [
+      { 
+        date: '2025-02-10', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:00',
+        actualExitTime: '16:00',
+        status: 'onTime'
+      },
+      { 
+        date: '2025-02-11', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00',
+        actualEntryTime: '08:10',
+        actualExitTime: '16:00',
+        status: 'late'
+      },
+      { 
+        date: '2025-02-12', 
+        shift: 'NDH', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-13', 
+        shift: 'NDH', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-14', 
+        shift: 'A', 
+        startTime: '08:00', 
+        endTime: '16:00' 
+      },
+      { 
+        date: '2025-02-15', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+      { 
+        date: '2025-02-16', 
+        shift: 'D', 
+        startTime: '', 
+        endTime: '' 
+      },
+    ]
   }
 ];
+
+// Sedes (Locations)
+export const locations = [
+  { id: 'loc1', name: 'Hodelpa Gran Almirante' },
+  { id: 'loc2', name: 'Hodelpa Garden Court' }
+];
+
+// Departamentos
+export const departments = [
+  { id: 'dep1', name: 'Front Desk', locationId: 'loc1' },
+  { id: 'dep2', name: 'Cocina', locationId: 'loc1' },
+  { id: 'dep3', name: 'Housekeeping', locationId: 'loc1' },
+  { id: 'dep4', name: 'Seguridad', locationId: 'loc1' },
+  { id: 'dep5', name: 'Bar', locationId: 'loc1' },
+  { id: 'dep6', name: 'Mantenimiento', locationId: 'loc1' },
+  { id: 'dep7', name: 'Spa', locationId: 'loc1' },
+  { id: 'dep8', name: 'IT', locationId: 'loc1' },
+  { id: 'dep9', name: 'Marketing', locationId: 'loc1' },
+  { id: 'dep10', name: 'Front Desk', locationId: 'loc2' },
+  { id: 'dep11', name: 'Cocina', locationId: 'loc2' },
+  { id: 'dep12', name: 'Housekeeping', locationId: 'loc2' },
+  { id: 'dep13', name: 'Seguridad', locationId: 'loc2' },
+  { id: 'dep14', name: 'Mantenimiento', locationId: 'loc2' },
+  { id: 'dep15', name: 'Restaurante', locationId: 'loc2' },
+  { id: 'dep16', name: 'Finanzas', locationId: 'loc2' }
+];
+
+// Secciones
+export const sections = [
+  { id: 'sec1', name: 'Recepción', departmentId: 'dep1' },
+  { id: 'sec2', name: 'Reservas', departmentId: 'dep1' },
+  { id: 'sec3', name: 'Cocina Caliente', departmentId: 'dep2' },
+  { id: 'sec4', name: 'Cocina Fría', departmentId: 'dep2' },
+  { id: 'sec5', name: 'Pastelería', departmentId: 'dep2' },
+  { id: 'sec6', name: 'Habitaciones', departmentId: 'dep3' },
+  { id: 'sec7', name: 'Áreas Comunes', departmentId: 'dep3' },
+  { id: 'sec8', name: 'Seguridad Interna', departmentId: 'dep4' },
+  { id: 'sec9', name: 'Seguridad Externa', departmentId: 'dep4' },
+  { id: 'sec10', name: 'Bar Principal', departmentId: 'dep5' },
+  { id: 'sec11', name: 'Bar Piscina', departmentId: 'dep5' },
+  { id: 'sec12', name: 'Reparaciones', departmentId: 'dep6' },
+  { id: 'sec13', name: 'Jardinería', departmentId: 'dep6' },
+  { id: 'sec14', name: 'Masajes', departmentId: 'dep7' },
+  { id: 'sec15', name: 'Soporte Técnico', departmentId: 'dep8' },
+  { id: 'sec16', name: 'Redes', departmentId: 'dep8' },
+  { id: 'sec17', name: 'Publicidad', departmentId: 'dep9' },
+  { id: 'sec18', name: 'Relaciones Públicas', departmentId: 'dep9' },
+  { id: 'sec19', name: 'Recepción', departmentId: 'dep10' },
+  { id: 'sec20', name: 'Cocina Principal', departmentId: 'dep11' },
+  { id: 'sec21', name: 'Habitaciones', departmentId: 'dep12' },
+  { id: 'sec22', name: 'Seguridad', departmentId: 'dep13' },
+  { id: 'sec23', name: 'Reparaciones', departmentId: 'dep14' },
+  { id: 'sec24', name: 'Servicio', departmentId: 'dep15' },
+  { id: 'sec25', name: 'Contabilidad', departmentId: 'dep16' }
+];
+
+// Unidades
+export const units = [
+  { id: 'uni1', name: 'Recepción Mañana', sectionId: 'sec1' },
+  { id: 'uni2', name: 'Recepción Tarde', sectionId: 'sec1' },
+  { id: 'uni3', name: 'Recepción Noche', sectionId: 'sec1' },
+  { id: 'uni4', name: 'Reservas Nacionales', sectionId: 'sec2' },
+  { id: 'uni5', name: 'Reservas Internacionales', sectionId: 'sec2' },
+  { id: 'uni6', name: 'Carnes', sectionId: 'sec3' },
+  { id: 'uni7', name: 'Guarniciones', sectionId: 'sec3' },
+  { id: 'uni8', name: 'Ensaladas', sectionId: 'sec4' },
+  { id: 'uni9', name: 'Postres', sectionId: 'sec5' },
+  { id: 'uni10', name: 'Limpieza General', sectionId: 'sec6' },
+  { id: 'uni11', name: 'Supervisión', sectionId: 'sec6' },
+  { id: 'uni12', name: 'Áreas Públicas', sectionId: 'sec7' },
+  { id: 'uni13', name: 'Guardia Diurna', sectionId: 'sec8' },
+  { id: 'uni14', name: 'Guardia Nocturna', sectionId: 'sec8' },
+  { id: 'uni15', name: 'Perímetro', sectionId: 'sec9' },
+  { id: 'uni16', name: 'Bartenders', sectionId: 'sec10' },
+  { id: 'uni17', name: 'Meseros Bar', sectionId: 'sec10' },
+  { id: 'uni18', name: 'Bartenders Piscina', sectionId: 'sec11' },
+  { id: 'uni19', name: 'Mantenimiento General', sectionId: 'sec12' },
+  { id: 'uni20', name: 'Aire Acondicionado', sectionId: 'sec12' },
+  { id: 'uni21', name: 'Jardineros', sectionId: 'sec13' },
+  { id: 'uni22', name: 'Terapeutas', sectionId: 'sec14' },
+  { id: 'uni23', name: 'Técnicos IT', sectionId: 'sec15' },
+  { id: 'uni24', name: 'Community Managers', sectionId: 'sec17' },
+  { id: 'uni25', name: 'Promotores', sectionId: 'sec18' }
+];
+
+// Función auxiliar para mapear IDs a departamentos, secciones, etc.
+export const mapEmployeeToOrganization = (employee: any) => {
+  // Mapear la location del empleado al id correspondiente
+  const locationName = employee.location;
+  const location = locations.find(loc => loc.name === locationName);
+  const locationId = location ? location.id : null;
+  
+  // Mapear el departamento del empleado al id correspondiente
+  const departmentName = employee.department;
+  let department = null;
+  if (locationId) {
+    department = departments.find(
+      dep => dep.name === departmentName && dep.locationId === locationId
+    );
+  } else {
+    department = departments.find(dep => dep.name === departmentName);
+  }
+  const departmentId = department ? department.id : null;
+  
+  // No tenemos suficiente información para mapear directamente a secciones y unidades
+  // Pero podríamos hacer un mapeo aproximado basado en el cargo
+  
+  return {
+    ...employee,
+    locationId,
+    departmentId
+  };
+};
