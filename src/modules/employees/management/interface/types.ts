@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 
 export interface Employee {
   primerNombre?: string;
@@ -67,19 +68,19 @@ export interface LaborData {
   perfilesMarcaje: string;
 }
 
-export interface TreeNodeData {
-  id: string;
+// export interface TreeNodeData {
+//   id: string;
   
-  name: string;
-  manager: string;
-  employeeCount: number;
-  icon: JSX.Element;
-  color: string;
-  type: string;
-  expanded?: boolean;
-  children: TreeNodeData[];
+//   name: string;
+//   manager: string;
+//   employeeCount: number;
+//   icon: JSX.Element;
+//   color: string;
+//   type: string;
+//   expanded?: boolean;
+//   children: TreeNodeData[];
   
-}
+// }
 // export interface TreeNodeData {
 //   id: string;
 //   name: string;
@@ -148,5 +149,40 @@ export interface StructureModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectLocations?: (selectedLocations: LocationSelection[]) => void;
+  initialSelectedLocations?: string[];
+}
+
+export interface TreeNodeData {
+  id: string;
+  name: string;
+  type?: string;
+  manager?: string;
+  employeeCount?: number;
+  icon?: ReactNode;
+  color?: string;
+  expanded?: boolean;
+  children: TreeNodeData[];
+}
+
+export interface TreeNodeProps {
+  node: TreeNodeData;
+  level?: number;
+  selectedLocations: string[];
+  onToggleSelect: (nodeId: string) => void;
+  searchTerm: string;
+}
+
+export interface LocationSelection {
+  id: string;
+  name: string;
+  type?: string;
+  manager?: string;
+  employeeCount?: number;
+}
+
+export interface StructureModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelectLocations?: (locations: LocationSelection[]) => void;
   initialSelectedLocations?: string[];
 }
