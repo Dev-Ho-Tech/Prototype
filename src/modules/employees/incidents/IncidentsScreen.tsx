@@ -8,38 +8,19 @@ import DeleteConfirmModal from './components/DeleteConfirmModal';
 import Pagination from './components/Pagination';
 import { Calendar, Search, Filter, ChevronDown } from 'lucide-react';
 import EnhancedTimeline from './components/EnhancedTimeline';
+import AdvancedFilters from './components/AdvancedFilters';
 
+// Función para generar un ID único
 // Función para generar un ID único
 const generateId = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
 
-// Turnos de trabajo disponibles (simulados para el ejemplo)
-const TURNOS_TRABAJO = [
-  { id: 'turno1', nombre: 'Mañana (6:00 AM - 2:00 PM)' },
-  { id: 'turno2', nombre: 'Tarde (2:00 PM - 10:00 PM)' },
-  { id: 'turno3', nombre: 'Noche (10:00 PM - 6:00 AM)' },
-  { id: 'turno4', nombre: 'Diurno (8:00 AM - 5:00 PM)' },
-  { id: 'turno5', nombre: 'Flexible' }
-];
-
-// Permisos disponibles (simulados para el ejemplo)
-const PERMISOS = [
-  { id: 'perm1', nombre: 'Vacaciones' },
-  { id: 'perm2', nombre: 'Licencia médica' },
-  { id: 'perm3', nombre: 'Permiso personal' },
-  { id: 'perm4', nombre: 'Estudio' },
-  { id: 'perm5', nombre: 'Maternidad/Paternidad' }
-];
-
-// Estructuras organizacionales (simuladas para el ejemplo)
-const ESTRUCTURAS = [
-  { id: 'est1', nombre: 'Hodelpa Gran Almirante' },
-  { id: 'est2', nombre: 'Hodelpa Garden' },
-  { id: 'est3', nombre: 'Alimentos y Bebidas' },
-  { id: 'est4', nombre: 'Housekeeping' },
-  { id: 'est5', nombre: 'Finanzas' },
-  { id: 'est6', nombre: 'Mantenimiento' },
-  { id: 'est7', nombre: 'Recepción' }
-];
+// Definir interface para el estado de filtros
+interface FilterState {
+  sedes: string[];
+  departamentos: string[];
+  secciones: string[];
+  unidades: string[];
+}
 
 const IncidenciasScreen: React.FC = () => {
   // Estados para lista de empleados
@@ -49,12 +30,14 @@ const IncidenciasScreen: React.FC = () => {
   const [panelWidth, setPanelWidth] = useState<number>(320); // Ancho inicial del panel izquierdo
   const [isResizing, setIsResizing] = useState<boolean>(false);
   
-  // Estados para búsqueda avanzada
-  const [searchType, setSearchType] = useState<string>('nombre'); // Por defecto buscar por nombre
-  const [showAdvancedSearch, setShowAdvancedSearch] = useState<boolean>(false);
-  const [searchTurno, setSearchTurno] = useState<string>('');
-  const [searchPermiso, setSearchPermiso] = useState<string>('');
-  const [searchEstructura, setSearchEstructura] = useState<string>('');
+  // Estado para filtros avanzados
+  const [filters, setFilters] = useState<FilterState>({
+    sedes: [],
+    departamentos: [],
+    secciones: [],
+    unidades: []
+  });
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
   
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -129,7 +112,6 @@ const IncidenciasScreen: React.FC = () => {
       const coordenadas = {
         latitud: 18.46007921796652,  
         longitud: -69.95589601299955,
-        // descripcion: dispositivos.find(d => d.id === data.dispositivo)?.ubicacion || "Ocean El Faro"
       };
   
       const newMarcaje: Marcaje = {
@@ -189,52 +171,41 @@ const IncidenciasScreen: React.FC = () => {
     setSelectedMarcaje(marcaje);
   };
 
+  // Manejador para cambios en los filtros avanzados
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    // Resetear a la primera página cuando cambian los filtros
+    setCurrentPage(1);
+  };
+
   // Función de búsqueda avanzada
   const filterEmployees = () => {
     return employees.filter(employee => {
-      // Filtrar por término de búsqueda según el tipo de búsqueda seleccionado
+      // Filtrar por término de búsqueda en varios campos
       const searchTermLower = searchTerm.toLowerCase();
-      let matchesSearchTerm = false;
+      const matchesSearchTerm = !searchTerm || 
+        employee.nombre.toLowerCase().includes(searchTermLower) || 
+        employee.apellidos.toLowerCase().includes(searchTermLower) ||
+        employee.id.includes(searchTerm) ||
+        employee.position.toLowerCase().includes(searchTermLower) ||
+        employee.department.toLowerCase().includes(searchTermLower) ||
+        employee.location.toLowerCase().includes(searchTermLower);
       
-      switch (searchType) {
-        case 'nombre':
-          matchesSearchTerm = employee.nombre.toLowerCase().includes(searchTermLower);
-          break;
-        case 'apellido':
-          matchesSearchTerm = employee.apellidos.toLowerCase().includes(searchTermLower);
-          break;
-        case 'documento':
-          // Simulamos que el ID es el documento
-          matchesSearchTerm = employee.id.includes(searchTerm);
-          break;
-        case 'todos':
-          matchesSearchTerm = 
-            employee.nombre.toLowerCase().includes(searchTermLower) || 
-            employee.apellidos.toLowerCase().includes(searchTermLower) ||
-            employee.id.includes(searchTerm) ||
-            employee.position.toLowerCase().includes(searchTermLower) ||
-            employee.department.toLowerCase().includes(searchTermLower) ||
-            employee.location.toLowerCase().includes(searchTermLower);
-          break;
-        default:
-          matchesSearchTerm = 
-            employee.nombre.toLowerCase().includes(searchTermLower) || 
-            employee.apellidos.toLowerCase().includes(searchTermLower);
-      }
+      // Aplicar filtros de la nueva interfaz
+      const matchesSedes = filters.sedes.length === 0 || 
+        filters.sedes.includes(employee.location);
+        
+      const matchesDepartamentos = filters.departamentos.length === 0 || 
+        filters.departamentos.includes(employee.department);
       
-      // Si no hay término de búsqueda, considerar como coincidencia
-      if (!searchTerm) matchesSearchTerm = true;
+      const matchesSecciones = filters.secciones.length === 0 || 
+        filters.secciones.includes(employee.section);
       
-      // Filtros adicionales
-      const matchesTurno = !searchTurno || employee.position.toLowerCase().includes(searchTurno.toLowerCase());
-      const matchesPermiso = !searchPermiso || true; // Simular coincidencia, en un caso real verificaríamos permisos
+      // Por ahora, no aplicamos filtros por unidades ya que no tenemos ese campo en nuestra data
+      const matchesUnidades = true;
       
-      // Filtro de estructura (basado en departamento o ubicación)
-      const matchesEstructura = !searchEstructura || 
-        employee.department.toLowerCase().includes(searchEstructura.toLowerCase()) ||
-        employee.location.toLowerCase().includes(searchEstructura.toLowerCase());
-      
-      return matchesSearchTerm && matchesTurno && matchesPermiso && matchesEstructura;
+      return matchesSearchTerm && matchesSedes && matchesDepartamentos && 
+        matchesSecciones && matchesUnidades;
     });
   };
 
@@ -253,8 +224,8 @@ const IncidenciasScreen: React.FC = () => {
   };
 
   // Toggle para mostrar/ocultar búsqueda avanzada
-  const toggleAdvancedSearch = () => {
-    setShowAdvancedSearch(!showAdvancedSearch);
+  const toggleAdvancedFilters = () => {
+    setShowAdvancedFilters(!showAdvancedFilters);
   };
 
   // Manejar el inicio del redimensionamiento
@@ -295,10 +266,12 @@ const IncidenciasScreen: React.FC = () => {
   // Limpiar todos los filtros de búsqueda
   const clearAllFilters = () => {
     setSearchTerm('');
-    setSearchTurno('');
-    setSearchPermiso('');
-    setSearchEstructura('');
-    setSearchType('nombre');
+    setFilters({
+      sedes: [],
+      departamentos: [],
+      secciones: [],
+      unidades: []
+    });
   };
 
   return (
@@ -309,109 +282,44 @@ const IncidenciasScreen: React.FC = () => {
         className={`border-r border-gray-200 flex flex-col bg-white ${selectedEmployee ? '' : 'w-full'}`}
         style={selectedEmployee ? { width: `${panelWidth}px` } : {}}
       >
-        {/* Filtro de búsqueda */}
+        {/* Título y botón para alternar tipo de búsqueda */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-sm font-medium text-gray-700">Empleados</h2>
             <button
-              onClick={toggleAdvancedSearch}
-              className="p-1.5 text-xs text-blue-600 hover:bg-blue-50 rounded-md flex items-center"
+              onClick={toggleAdvancedFilters}
+              className="p-1.5 text-xs text-indigo-600 hover:bg-indigo-50 rounded-md flex items-center"
             >
-              {showAdvancedSearch ? 'Búsqueda simple' : 'Búsqueda avanzada'}
-              <ChevronDown className={`ml-1 w-3 h-3 transition-transform ${showAdvancedSearch ? 'rotate-180' : ''}`} />
+              {showAdvancedFilters ? 'Búsqueda simple' : 'Búsqueda avanzada'}
+              <ChevronDown className={`ml-1 w-3 h-3 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
             </button>
           </div>
-          
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder={`Buscar por ${searchType === 'todos' ? 'cualquier campo' : searchType}...`}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
 
-          {/* Búsqueda avanzada */}
-          {showAdvancedSearch && (
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="mb-3">
-                <label className="block text-xs text-gray-500 mb-1">
-                  Buscar por:
-                </label>
-                <select
-                  value={searchType}
-                  onChange={(e) => setSearchType(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="nombre">Nombre</option>
-                  <option value="apellido">Apellido</option>
-                  <option value="documento">Nro. Documento</option>
-                  <option value="todos">Todos los campos</option>
-                </select>
+          {/* Contenedor de filtros */}
+          <div className="overflow-hidden transition-all duration-300">
+            {showAdvancedFilters ? (
+              <AdvancedFilters 
+                searchTerm={searchTerm}
+                onSearchTermChange={setSearchTerm}
+                onFilterChange={handleFilterChange}
+                onClearFilters={clearAllFilters}
+                employees={employees} // Pasar la lista de empleados
+              />
+            ) : (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre..."
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-              
-              <div className="mb-3">
-                <label className="block text-xs text-gray-500 mb-1">
-                  Turno de trabajo:
-                </label>
-                <select
-                  value={searchTurno}
-                  onChange={(e) => setSearchTurno(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="">Todos los turnos</option>
-                  {TURNOS_TRABAJO.map(turno => (
-                    <option key={turno.id} value={turno.nombre}>{turno.nombre}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="mb-3">
-                <label className="block text-xs text-gray-500 mb-1">
-                  Permiso:
-                </label>
-                <select
-                  value={searchPermiso}
-                  onChange={(e) => setSearchPermiso(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="">Todos los permisos</option>
-                  {PERMISOS.map(permiso => (
-                    <option key={permiso.id} value={permiso.nombre}>{permiso.nombre}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="mb-3">
-                <label className="block text-xs text-gray-500 mb-1">
-                  Estructura:
-                </label>
-                <select
-                  value={searchEstructura}
-                  onChange={(e) => setSearchEstructura(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="">Todas las estructuras</option>
-                  {ESTRUCTURAS.map(estructura => (
-                    <option key={estructura.id} value={estructura.nombre}>{estructura.nombre}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="flex justify-end">
-                <button
-                  onClick={clearAllFilters}
-                  className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded"
-                >
-                  Limpiar filtros
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Tabla de empleados */}
@@ -425,7 +333,7 @@ const IncidenciasScreen: React.FC = () => {
                 <p>No se encontraron empleados con los criterios de búsqueda.</p>
                 <button 
                   onClick={clearAllFilters}
-                  className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                  className="mt-2 text-sm text-indigo-600 hover:text-indigo-800"
                 >
                   Limpiar filtros
                 </button>
@@ -440,7 +348,7 @@ const IncidenciasScreen: React.FC = () => {
                     key={employee.id}
                     onClick={() => handleSelectEmployee(employee)}
                     className={`w-full text-left p-4 hover:bg-gray-50 cursor-pointer transition-colors flex items-center justify-between ${
-                      selectedEmployee?.id === employee.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                      selectedEmployee?.id === employee.id ? 'bg-indigo-50 border-l-4 border-indigo-500' : ''
                     }`}
                   >
                     <div>
