@@ -1,4 +1,4 @@
-import { Employee, Marcaje, TipoVerificacion, TipoMarcaje, Dispositivo } from './interface/types';
+import { Employee, Marcaje, TipoVerificacion, TipoMarcaje, Dispositivo } from '../interface/types';
 
 export const dispositivos: Dispositivo[] = [
   { id: 'disp1', nombre: 'BIO-GA-001', tipo: 'Biometric', ubicacion: 'Entrada Principal', ip: '192.168.1.100', sn: 'ZK2023120001', estado: 'online', ultimaSincronizacion: '14/2/2025, 10:30:00' },

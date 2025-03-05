@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Employee, Marcaje, MarcajeFormData } from './interface/types';
-import { employees as mockEmployees, marcajes as mockMarcajes, dispositivos } from './data';
+import { employees as mockEmployees, marcajes as mockMarcajes, dispositivos } from './temp/data';
 import EmployeeDetailHeader from './components/EmployeeDetailHeader';
-import TimelineViewer from './components/TimelineViewer';
+// import TimelineViewer from './components/TimelineViewer';
 import AddMarkModal from './components/AddMarkModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import Pagination from './components/Pagination';
 import { Calendar, Search, Filter, ChevronDown } from 'lucide-react';
+import EnhancedTimeline from './components/EnhancedTimeline';
 
 // Función para generar un ID único
 const generateId = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -611,14 +612,21 @@ const IncidenciasScreen: React.FC = () => {
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="text-sm font-medium text-gray-700">Marcajes</h3>
                 </div>
-                <TimelineViewer 
+                {/* <TimelineViewer 
                   marcajes={filteredMarcajes}
                   onAddMarcaje={() => setAddModalOpen(true)}
                   onMarkerClick={handleMarkerClick}
                   selectedMarcajeId={selectedMarcaje?.id}
                   employee={selectedEmployee}
+                /> */}
+                <EnhancedTimeline 
+                  marcajes={filteredMarcajes}
+                  onMarkerClick={handleMarkerClick}
+                  selectedMarcajeId={selectedMarcaje?.id}
+                  employee={selectedEmployee}
                 />
               </div>
+
               {/* Botones de acción */}
               <div className="flex space-x-2">
                 <button

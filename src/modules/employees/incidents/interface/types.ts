@@ -88,21 +88,6 @@ export interface Employee {
   containerType?: string;
 }
 
-// export enum TipoVerificacion {
-//   ROSTRO = 'Rostro',
-//   HUELLA = 'Huella',
-//   TARJETA = 'Tarjeta',
-//   MANUAL = 'Manual'
-// }
-
-// export enum TipoMarcaje {
-//   ENTRADA = 'Entrada',
-//   SALIDA = 'Salida',
-//   BREAK_INICIO = 'Inicio de Descanso',
-//   BREAK_FIN = 'Fin de Descanso',
-//   OTRO = 'Otro'
-// }
-
 export interface Marcaje {
   id: string;
   fecha: string;
