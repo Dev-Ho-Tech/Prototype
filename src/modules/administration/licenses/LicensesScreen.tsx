@@ -38,18 +38,18 @@ export function LicensesScreen() {
 
   const getModuleIcon = (module: string) => {
     switch (module) {
-      case 'presence':
+      case 'Control de Tiempo':
         return <CheckCircle2 className="w-5 h-5 text-blue-500" />;
-      case 'access':
+      case 'Control de Accesos':
         return <Building2 className="w-5 h-5 text-green-500" />;
-      case 'dining':
+      case 'Control de Comedor':
         return <Users className="w-5 h-5 text-amber-500" />;
-      case 'training':
+      case 'Control de Capacitación':
         return <Calendar className="w-5 h-5 text-purple-500" />;
       default:
         return null;
     }
-  };
+  };  
 
   return (
     <div className="flex-1 overflow-auto bg-gray-50">

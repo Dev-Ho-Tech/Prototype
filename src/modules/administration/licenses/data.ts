@@ -10,7 +10,7 @@ export const licensesData: License[] = [
     usedCompanies: 3,
     allowedEmployees: 1000,
     activeEmployees: 850,
-    modules: ['presence', 'access', 'dining', 'training'],
+    modules: ['Control de Tiempo', 'Control de Accesos', 'Control de Comedor', 'Control de Capacitación'],
     status: 'active',
     contactInfo: {
       name: 'María González',
@@ -27,7 +27,7 @@ export const licensesData: License[] = [
     usedCompanies: 2,
     allowedEmployees: 500,
     activeEmployees: 423,
-    modules: ['presence', 'access'],
+    modules: ['Control de Tiempo', 'Control de Accesos'],
     status: 'active',
     contactInfo: {
       name: 'Juan Pérez',
@@ -44,7 +44,7 @@ export const licensesData: License[] = [
     usedCompanies: 8,
     allowedEmployees: 2000,
     activeEmployees: 1850,
-    modules: ['presence', 'access', 'dining'],
+    modules: ['Control de Tiempo', 'Control de Accesos', 'Control de Comedor'],
     status: 'active',
     contactInfo: {
       name: 'Roberto Méndez',
@@ -61,7 +61,7 @@ export const licensesData: License[] = [
     usedCompanies: 12,
     allowedEmployees: 5000,
     activeEmployees: 4200,
-    modules: ['presence', 'access', 'dining', 'training'],
+    modules: ['Control de Tiempo', 'Control de Accesos', 'Control de Comedor', 'Control de Capacitación'],
     status: 'active',
     contactInfo: {
       name: 'Ana Ramírez',
@@ -78,7 +78,7 @@ export const licensesData: License[] = [
     usedCompanies: 6,
     allowedEmployees: 3000,
     activeEmployees: 2800,
-    modules: ['presence', 'access', 'dining'],
+    modules: ['Control de Tiempo', 'Control de Accesos', 'Control de Comedor'],
     status: 'active',
     contactInfo: {
       name: 'Carlos Santos',
