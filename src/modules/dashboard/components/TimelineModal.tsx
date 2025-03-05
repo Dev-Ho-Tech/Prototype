@@ -1,32 +1,14 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Clock, CheckCircle, XCircle, User } from 'lucide-react';
 import { Employee } from '../interface/types';
+import { marcajes, segmentos } from '../temp/line_time';
+import { Marcaje, Segmento, ActiveItem } from '../interface/timeline';
 
 interface TimelineModalProps {
   isOpen: boolean;
   onClose: () => void;
   employee?: Employee;
 }
-
-// Componente de Tooltip rediseñado y mejorado
-// const Tooltip = ({ visible, content, position }: { visible: boolean; content: React.ReactNode; position: { top?: string; left?: string; bottom?: string; right?: string; transform?: string } }) => {
-//   if (!visible) return null;
-  
-//   return (
-//     <div 
-//       className="fixed bg-white border border-gray-200 shadow-md rounded-md p-3 z-50"
-//       style={{ 
-//         ...position,
-//         minWidth: '180px',
-//         maxWidth: '250px',
-//         pointerEvents: 'none'  // Prevenir que el tooltip interfiera con eventos del mouse
-//       }}
-//     >
-//       {content}
-//       <div className="absolute w-3 h-3 bg-white border-b border-r border-gray-200 transform rotate-45" style={{ bottom: '-6px', left: 'calc(50% - 6px)' }}></div>
-//     </div>
-//   );
-// };
 
 // Icono Facial - componente separado para simplicidad
 const FaceIcon = ({ color }: { color: string }) => {
@@ -48,48 +30,30 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
   
   if (!isOpen) return null;
 
-  // Marcajes de ejemplo para visualización
-  const marcajes = [
-    {
-      id: "entrada",
-      time: "7:00 am",
-      type: "Entrada Almuerzo",
-      device: "Biométrico",
-      method: "Facial",
-      position: "16.67%", // 7am position (5am=0%, 8pm=100%)
-      color: "#22c55e" // green-500
-    },
-    {
-      id: "salida-almuerzo",
-      time: "11:00 am",
-      type: "Salida Almuerzo",
-      device: "Biométrico",
-      method: "Facial",
-      position: "46.15%", // 11am position
-      color: "#3b82f6" // blue-500
-    },
-    {
-      id: "entrada-almuerzo",
-      time: "12:00 pm",
-      type: "Entrada Almuerzo",
-      device: "Biométrico",
-      method: "Facial",
-      position: "53.85%", // 12pm position
-      color: "#eab308" // yellow-500
-    }
-  ];
-
   // Función para mostrar tooltip con posición calculada
-  const showTooltip = (id: string, event: React.MouseEvent) => {
+  const showMarcajeTooltip = (id: string, event: React.MouseEvent) => {
     // Calcular posición basada en el evento
     const rect = event.currentTarget.getBoundingClientRect();
     const position = {
-      top: rect.top - 80, // Posicionarlo más arriba
+      top: rect.top - 80, // Posicionarlo más arriba para los iconos de marcaje
       left: rect.left
     };
     
     setTooltipPosition(position);
-    setActiveTooltip(id);
+    setActiveTooltip(`marcaje-${id}`);
+  };
+
+  // Función para mostrar tooltip de segmentos
+  const showSegmentoTooltip = (id: string, event: React.MouseEvent) => {
+    // Calcular posición basada en el evento
+    const rect = event.currentTarget.getBoundingClientRect();
+    const position = {
+      top: rect.top - 20, // Posicionarlo justo encima del elemento
+      left: rect.left + (rect.width / 2) // Centrado horizontalmente
+    };
+    
+    setTooltipPosition(position);
+    setActiveTooltip(`segmento-${id}`);
   };
 
   // Función para ocultar tooltip
@@ -97,8 +61,31 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
     setActiveTooltip(null);
   };
 
-  // Obtener el marcaje activo
-  const activeMarcaje = activeTooltip ? marcajes.find(m => m.id === activeTooltip) : null;
+  // Obtener el marcaje o segmento activo
+  const getActiveItem = (): ActiveItem | null => {
+    if (!activeTooltip) return null;
+    
+    if (activeTooltip.startsWith('marcaje-')) {
+      const marcajeId = activeTooltip.replace('marcaje-', '');
+      return { 
+        tipo: 'marcaje', 
+        data: marcajes.find(m => m.id === marcajeId) as Marcaje | undefined
+      };
+    } else if (activeTooltip.startsWith('segmento-')) {
+      const segmentoId = activeTooltip.replace('segmento-', '');
+      return { 
+        tipo: 'segmento', 
+        data: segmentos.find(s => s.id === segmentoId) as Segmento | undefined
+      };
+    }
+    
+    return null;
+  };
+
+  const activeItem = getActiveItem();
+
+  // Calcular horas trabajadas totales
+  const horasTrabajadasTotales = "8 horas regulares + 2 horas extras";
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
@@ -114,22 +101,103 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
         
-        {/* Tooltip global - ahora usando posición fija calculada */}
-        {activeTooltip && activeMarcaje && (
+        {/* Tooltip para marcajes y segmentos */}
+        {activeItem && activeItem.data && (
           <div 
             className="fixed bg-white border border-gray-200 shadow-lg rounded-md p-3 z-50"
             style={{ 
               top: tooltipPosition.top,
               left: tooltipPosition.left,
-              minWidth: '180px',
+              minWidth: activeItem.tipo === 'segmento' ? '280px' : '220px',
               transform: 'translate(-50%, -100%)',
               zIndex: 9999
             }}
           >
-            <div className="font-semibold text-gray-800">{activeMarcaje.time}</div>
-            <div className="text-gray-600">{activeMarcaje.type}</div>
-            <div className="text-gray-500 text-sm">Dispositivo: {activeMarcaje.device}</div>
-            <div className="text-gray-500 text-sm">Método: {activeMarcaje.method}</div>
+            {activeItem.tipo === 'marcaje' && (
+              <>
+                <div className="font-semibold text-gray-800 mb-1 flex items-center">
+                  <Clock className="w-4 h-4 mr-1" />
+                  {activeItem.data.type}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                  <div className="text-gray-500">Hora:</div>
+                  <div className="text-gray-700 font-medium">{activeItem.data.time}</div>
+                  
+                  <div className="text-gray-500">Dispositivo:</div>
+                  <div className="text-gray-700">{activeItem.data.device}</div>
+                  
+                  <div className="text-gray-500">Método:</div>
+                  <div className="text-gray-700">{activeItem.data.method}</div>
+                </div>
+              </>
+            )}
+            
+            {activeItem.tipo === 'segmento' && (
+              <>
+                <div className="font-semibold text-gray-800 mb-2 flex items-center border-b pb-1">
+                  <Clock className="w-4 h-4 mr-1" />
+                  {activeItem.data.tipo === 'trabajo' ? 'Tiempo Trabajado' : 
+                  activeItem.data.tipo === 'descanso' ? 'Descanso/Almuerzo' : 'Horas Extras'}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                  <div className="text-gray-500">Entrada:</div>
+                  <div className="text-gray-700 font-medium">{activeItem.data.entrada}</div>
+                  
+                  <div className="text-gray-500">Salida:</div>
+                  <div className="text-gray-700 font-medium">{activeItem.data.salida}</div>
+                  
+                  <div className="text-gray-500">Horas:</div>
+                  <div className="text-gray-700 font-medium">{activeItem.data.horasTrabajadas}</div>
+                  
+                  {activeItem.data.esHoraExtra && (
+                    <>
+                      <div className="text-gray-500">Estado:</div>
+                      <div className="flex items-center">
+                        {activeItem.data.estadoHoraExtra === "aprobado" ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
+                            <span className="text-green-600">Aprobado</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-4 h-4 text-red-500 mr-1" />
+                            <span className="text-red-600">Rechazado</span>
+                          </>
+                        )}
+                      </div>
+                      
+                      {activeItem.data.aprobadoPor && (
+                        <>
+                          <div className="text-gray-500">Aprobado por:</div>
+                          <div className="text-gray-700 flex items-center">
+                            <User className="w-3 h-3 mr-1" />
+                            {activeItem.data.aprobadoPor}
+                          </div>
+                        </>
+                      )}
+                      
+                      {activeItem.data.fechaAprobacion && (
+                        <>
+                          <div className="text-gray-500">Fecha:</div>
+                          <div className="text-gray-700">{activeItem.data.fechaAprobacion}</div>
+                        </>
+                      )}
+                      
+                      {activeItem.data.comentarios && (
+                        <div className="col-span-2 mt-1">
+                          <div className="text-gray-500">Comentarios:</div>
+                          <div className="text-gray-700 bg-gray-50 p-1 rounded mt-1 text-xs">
+                            {activeItem.data.comentarios}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </>
+            )}
             
             {/* Flecha de tooltip */}
             <div className="absolute w-4 h-4 bg-white border-b border-r border-gray-200 transform rotate-45" style={{ bottom: '-7px', left: '50%', marginLeft: '-7px' }}></div>
@@ -137,37 +205,52 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
         )}
         
         <div className="p-6">
-          <div className="relative mb-8">
-            {/* Iconos de marcaje con conectores */}
-            {marcajes.map((marcaje) => (
-              <div 
-                key={marcaje.id}
-                className="absolute"
-                style={{ 
-                  left: marcaje.position,
-                  top: '0',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 20
-                }}
-              >
-                {/* Icono con conector */}
-                <div 
-                  className="relative cursor-pointer"
-                  onMouseEnter={(e) => showTooltip(marcaje.id, e)}
-                  onMouseLeave={hideTooltip}
-                >
-                  <FaceIcon color={marcaje.color} />
-                  <div 
-                    className="h-8 w-0.5" 
-                    style={{ backgroundColor: marcaje.color, margin: '0 auto' }}
-                  ></div>
-                </div>
+          <div className="mb-8">
+            {/* Información básica del empleado */}
+            <div className="mb-6 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Juan Carlos Pérez</h3>
+                <p className="text-sm text-gray-600">Fecha: 15 de marzo, 2025</p>
               </div>
-            ))}
-
+              <div className="bg-blue-50 px-3 py-1 rounded-full text-blue-700 font-medium text-sm flex items-center">
+                <Clock className="w-4 h-4 mr-1" /> 
+                Total: {horasTrabajadasTotales}
+              </div>
+            </div>
+            
             {/* Línea de tiempo con horas */}
-            <div className="mt-10 border border-gray-200 rounded-lg p-4">
-              <div className="relative h-32">
+            <div className="border border-gray-200 rounded-lg p-4 relative">
+              {/* Marcadores con conectores - ahora con un palito más largo */}
+              {marcajes.map((marcaje) => (
+                <div 
+                  key={marcaje.id}
+                  className="absolute"
+                  style={{ 
+                    left: marcaje.position,
+                    top: '20px', // Posicionado en la parte superior para dar más espacio al conector
+                    transform: 'translate(-50%, 0)',
+                    zIndex: 20
+                  }}
+                >
+                  {/* Icono con conector más largo */}
+                  <div 
+                    className="relative flex flex-col items-center cursor-pointer"
+                    onMouseEnter={(e) => showMarcajeTooltip(marcaje.id, e)}
+                    onMouseLeave={hideTooltip}
+                  >
+                    <FaceIcon color={marcaje.color} />
+                    <div 
+                      className="w-0.5" 
+                      style={{ 
+                        backgroundColor: marcaje.color,
+                        height: '50px' // Hacemos el palito más largo
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+              
+              <div className="relative h-40 mt-12">
                 {/* Escala de horas */}
                 <div className="absolute top-0 left-0 right-0 flex">
                   {Array.from({ length: 14 }).map((_, i) => {
@@ -186,66 +269,64 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
                 
                 {/* Línea de hora actual */}
                 <div 
-                  className="absolute top-6 bottom-0 w-0.5 bg-gray-400 z-10" 
-                  style={{ left: '46.15%' }} // 11:00 am
+                  className="absolute top-6 bottom-0 w-0.5 bg-red-400 z-10" 
+                  style={{ left: '62%' }} // 1:00 pm
+                ></div>
+                
+                {/* Horario planificado (azul) - ahora más arriba */}
+                <div 
+                  className="absolute h-6 rounded-md bg-blue-400"
+                  style={{ left: '16.67%', width: '66.66%', top: '38px' }} // 7am - 5pm
                 ></div>
                 
                 {/* Contenedor para barras de horario */}
-                <div className="absolute left-0 right-0 top-10 h-16">
-                  {/* Horario planificado (azul) */}
-                  <div 
-                    className="absolute h-5 rounded-md bg-blue-400"
-                    style={{ left: '16.67%', width: '66.66%' }} // 7am - 5pm
-                  ></div>
-                  
-                  {/* Tiempo trabajado 1 (verde rayado) */}
-                  <div 
-                    className="absolute h-5 rounded-md bg-striped-green"
-                    style={{ left: '16.67%', width: '29.48%', top: '10px' }} // 7am - 11am
-                    onMouseEnter={(e) => showTooltip("entrada", e)}
-                    onMouseLeave={hideTooltip}
-                  ></div>
-                  
-                  {/* Tiempo trabajado 2 (verde rayado) */}
-                  <div 
-                    className="absolute h-5 rounded-md bg-striped-green"
-                    style={{ left: '53.85%', width: '22%', top: '10px' }} // 12pm - 3pm
-                    onMouseEnter={(e) => showTooltip("entrada-almuerzo", e)}
-                    onMouseLeave={hideTooltip}
-                  ></div>
-                  
-                  {/* Descanso (naranja) */}
-                  <div 
-                    className="absolute h-12 rounded-md bg-orange-300"
-                    style={{ left: '46.15%', width: '7.7%', top: '10px' }} // 11am - 12pm
-                    onMouseEnter={(e) => showTooltip("salida-almuerzo", e)}
-                    onMouseLeave={hideTooltip}
-                  ></div>
+                <div className="absolute left-0 right-0 top-14">
+                  {/* Segmentos de tiempo */}
+                  {segmentos.map((segmento) => (
+                    <div 
+                      key={segmento.id}
+                      className={`absolute h-6 rounded-md ${segmento.color} cursor-pointer transition hover:brightness-95`}
+                      style={{ 
+                        left: segmento.inicio, 
+                        width: segmento.ancho
+                      }}
+                      onClick={(e) => showSegmentoTooltip(segmento.id, e)}
+                      onMouseLeave={hideTooltip}
+                    ></div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Leyenda */}
+          {/* Leyenda mejorada */}
           <div className="flex flex-wrap gap-6 mt-4">
             <div className="flex items-center">
               <div className="w-4 h-4 bg-blue-400 rounded mr-2"></div>
               <span className="text-sm text-gray-600">Horario planificado</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-striped-green rounded mr-2"></div>
+              <div className="w-4 h-4 bg-green-400 rounded mr-2"></div>
               <span className="text-sm text-gray-600">Tiempo trabajado</span>
             </div>
             <div className="flex items-center">
+              <div className="w-4 h-4 bg-striped-green rounded mr-2"></div>
+              <span className="text-sm text-gray-600">Horas extras</span>
+            </div>
+            <div className="flex items-center">
               <div className="w-4 h-4 bg-orange-300 rounded mr-2"></div>
-              <span className="text-sm text-gray-600">Descanso</span>
+              <span className="text-sm text-gray-600">Descanso/Almuerzo</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-0.5 h-4 bg-red-400 rounded mr-2"></div>
+              <span className="text-sm text-gray-600">Hora actual</span>
             </div>
           </div>
           
           {/* Estilos CSS para patrones y animaciones */}
           <style>{`
             .bg-striped-green {
-              background-color: #86efac;
+              background-color: #4ade80;
               background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.5) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.5) 75%, transparent 75%, transparent);
               background-size: 10px 10px;
             }
