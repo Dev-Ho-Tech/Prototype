@@ -177,7 +177,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
     };
     
     updateFilterOptions();
-  }, [employees, filterState.sedes, filterState.departamentos]);
+  }, [employees, filterState.sedes, filterState.departamentos, filterState.secciones]);
 
   // Función para manejar el cambio de estado de una opción de filtro
   const handleOptionChange = (sectionId: string, optionId: string, checked: boolean) => {
