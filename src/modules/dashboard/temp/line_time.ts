@@ -15,7 +15,7 @@ export const marcajes = [
   {
     id: "salida-almuerzo",
     time: "11:00 am",
-    type: "Salida Almuerzo",
+    type: "Entrada Almuerzo",
     device: "Biométrico",
     method: "Facial",
     position: "46.15%", // 11am position
@@ -28,7 +28,7 @@ export const marcajes = [
   {
     id: "entrada-almuerzo",
     time: "12:00 pm",
-    type: "Entrada Almuerzo",
+    type: "Salida Almuerzo",
     device: "Biométrico",
     method: "Facial",
     position: "53.85%", // 12pm position
@@ -99,11 +99,11 @@ export const segmentos = [
     tipo: "extra",
     inicio: "75.85%", // 3pm
     fin: "83.55%", // 5pm
-    ancho: "7.7%",
+    ancho: "20.7%",
     color: "bg-striped-green",
-    horasTrabajadas: "2 horas extras",
+    horasTrabajadas: "3 horas extras",
     entrada: "3:00 pm",
-    salida: "5:00 pm",
+    salida: "6:00 pm",
     esHoraExtra: true,
     estadoHoraExtra: "aprobado",
     aprobadoPor: "María Rodríguez",

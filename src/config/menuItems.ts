@@ -28,7 +28,7 @@ export const menuItems: MenuItem[] = [
       // },
       {
         id: 'schedule-assignment',
-        label: 'Planificadir de Horarios',
+        label: 'Planificador de horarios',
         icon: Clock,
         path: '/employees/schedule'
       },
@@ -60,12 +60,12 @@ export const menuItems: MenuItem[] = [
         icon: Clock,
         path: '/employees/check-profiles'
       },
-      {
-        id: 'calendar',
-        label: 'Asignacion de Horarios',
-        icon: Clock,
-        path: '/time-control/calendar'
-      },
+      // {
+      //   id: 'calendar',
+      //   label: 'Asignacion de Horarios',
+      //   icon: Clock,
+      //   path: '/time-control/calendar'
+      // },
       {
         id: 'geocerca',
         label: 'Geocerca',
