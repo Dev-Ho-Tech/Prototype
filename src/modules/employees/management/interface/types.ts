@@ -26,6 +26,15 @@ export interface Employee {
   position?: string;
   department?: string;
   initial?: string;
+  section: string;
+  unit?: string;
+  method: string;
+  id: string;
+  status?: 'active' | 'inactive';
+  email?: string;
+  phone?: string;
+  startDate?: string;
+  location?: string;
 }
 
 export interface EmployeeHeaderProps {
