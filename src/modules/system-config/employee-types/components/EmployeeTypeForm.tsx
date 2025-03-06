@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TagInput } from './TagInput';
+// import { TagInput } from './TagInput';
 import { ToggleSwitch } from './ToggleSwitch';
 
 interface EmployeeType {
@@ -20,20 +20,21 @@ interface EmployeeTypeFormProps {
 
 export const EmployeeTypeForm: React.FC<EmployeeTypeFormProps> = ({ employeeType, onSave, onCancel }) => {
   const [type, setType] = useState(employeeType.name || '');
-  const [selectedTags, setSelectedTags] = useState(employeeType.requiredFields || []);
+  const [selectedTags,] = useState(employeeType.requiredFields || []);
+  // const [selectedTags, setSelectedTags] = useState(employeeType.requiredFields || []);
   const [status, setStatus] = useState(employeeType.status === 'active');
   const [intelliTime, setIntelliTime] = useState(employeeType.intelliTime || false);
   const [intelliLunch, setIntelliLunch] = useState(employeeType.intelliLunch || false);
   const [emailRequired, setEmailRequired] = useState(employeeType.emailRequired || false);
   const [signatureRequired, setSignatureRequired] = useState(employeeType.signatureRequired || false);
 
-  const availableTags = [
-    'Huella', 'Rostro', 'Perfil De Marcaje', 'Estructura', 
-    'Contrato', 'Fecha Inicial Contrato', 'Fecha Final Contrato',
-    'Código', 'Cargo', 'Departamento', 'Sección', 'Sede',
-    'Contenedor', 'Empresa', 'Segundo Nombre', 'Segundo Apellido',
-    'Género', 'Fecha De Nacimiento', 'País', 'Estado', 'Teléfono'
-  ];
+  // const availableTags = [
+  //   'Huella', 'Rostro', 'Perfil De Marcaje', 'Estructura', 
+  //   'Contrato', 'Fecha Inicial Contrato', 'Fecha Final Contrato',
+  //   'Código', 'Cargo', 'Departamento', 'Sección', 'Sede',
+  //   'Contenedor', 'Empresa', 'Segundo Nombre', 'Segundo Apellido',
+  //   'Género', 'Fecha De Nacimiento', 'País', 'Estado', 'Teléfono'
+  // ];
 
   const handleSave = () => {
     onSave({
@@ -81,14 +82,14 @@ export const EmployeeTypeForm: React.FC<EmployeeTypeFormProps> = ({ employeeType
         />
       </div>
 
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">Campos requeridos *</label>
         <TagInput
           tags={selectedTags}
           setTags={setSelectedTags}
           availableTags={availableTags}
         />
-      </div>
+      </div> */}
 
       <div className="grid grid-cols-4 gap-6 mb-6">
         <ToggleSwitch label="Estatus" isChecked={status} onChange={setStatus} />
