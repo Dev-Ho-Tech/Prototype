@@ -1,13 +1,40 @@
 //Interfaces de SchedulingScreen
 export interface Employee {
+  primerNombre?: string;
+  segundoNombre?: string;
+  primerApellido?: string;
+  segundoApellido?: string;
+  genero?: string;
+  tipoDocumento?: string;
+  numeroDocumento?: string;
+  fechaNacimiento?: string;
+  telefono?: string;
+  correo?: string;
+  permitirVisitas?: boolean;
+  codigo?: string;
+  modalidadTiempo?: string;
+  fechaInicialContrato?: string;
+  fechaFinalContrato?: string;
+  empresa?: string;
+  sede?: string;
+  tipoPlanificacion?: string;
+  cargo?: string;
+  perfilesMarcaje?: string[];
+  profileImage?: string;
+  name?: string;
+  position?: string;
+  department?: string;
+  initial?: string;
+  section: string;
+  unit?: string;
+  method: string;
   id: string;
-  name: string;
-  position: string;
-  department: string;
-  location: string;
-  code?: string;
-  contractType?: string;
-  schedule: ScheduleEntry[];
+  status?: 'active' | 'inactive';
+  email?: string;
+  phone?: string;
+  startDate?: string;
+  location?: string;
+  
 }
 
 export interface WorkShift {

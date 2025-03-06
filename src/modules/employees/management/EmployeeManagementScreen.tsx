@@ -1,26 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, Download, Settings, Clock, Fingerprint, ArrowLeft, ChevronDown } from 'lucide-react';
 import { CustomPieChart } from '../../../components/common/PieChart';
 import { departmentData, locationData } from '../data';
-import { employees } from './data';
 import { EmployeeProfileForm } from './components/EmployeeProfile';
-import { Employee } from './interface/types';
 import { MarkingMethodComponent } from './components/kpiAndCards/MarkingMethodComponent';
 import { StatsSection } from './components/kpiAndCards/StatsSection';
 import AdvancedFilters from './components/Search/AdvancedFilters';
 import { Pagination } from './components/Pagination';
-// Importar el estado global directamente (sin exportar una variable)
-import { setSelectedEmployeeId } from '../../../../appState';
+// Importar el contexto de estado global
+import { useAppState } from '../../../global/context/AppStateContext';
+import { convertToSpecificModel, UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 
 interface EmployeeManagementScreenProps {
   setCurrentView: (view: string) => void;
 }
 
 export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementScreenProps) {
+  // Usar el contexto global
+  const { 
+    allEmployees, 
+    currentEmployee, 
+    setCurrentEmployee, 
+    setCurrentScreen 
+  } = useAppState();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfile, setShowProfile] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<UnifiedEmployee | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [, setFilterState] = useState({
@@ -31,6 +38,10 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
   });
   const itemsPerPage = 10;
 
+  // Actualizar el estado de pantalla actual al cargar el componente
+  useEffect(() => {
+    setCurrentScreen('employee');
+  }, [setCurrentScreen]);
 
   const markingMethodsData = [
     {
@@ -48,9 +59,9 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
   ];
 
   // Filtrar empleados según el término de búsqueda
-  const filteredEmployees = employees.filter(
+  const filteredEmployees = allEmployees.filter(
     (employee) =>
-      employee.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.department?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -66,8 +77,10 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
     setSelectedEmployee(null);
   };
 
-  const handleEmployeeClick = (employee: Employee) => {
+  const handleEmployeeClick = (employee: UnifiedEmployee) => {
+    // Actualizar tanto el estado local como el global
     setSelectedEmployee(employee);
+    setCurrentEmployee(employee);
     setShowProfile(true);
   };
 
@@ -96,17 +109,18 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
   
   const handleAddNewEmployee = () => {
     setSelectedEmployee(null);
+    setCurrentEmployee(null);
     setShowProfile(true);
   };
 
   // Función para navegar a SchedulingScreen
-  const handleNavigateToScheduling = (employee: Employee) => {
+  const handleNavigateToScheduling = (employee: UnifiedEmployee) => {
     try {
       console.log('Navegando a scheduling con empleado:', employee);
       
-      // Guardar el ID del empleado en el estado global
-      setSelectedEmployeeId(employee.id);
-      console.log('ID guardado en estado global:', employee.id);
+      // Guardar el empleado en el estado global
+      setCurrentEmployee(employee);
+      setCurrentScreen('scheduling');
       
       // También guardamos en sessionStorage como respaldo
       sessionStorage.setItem('selectedEmployeeId', employee.id);
@@ -117,6 +131,27 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
       console.error('Error al navegar a scheduling:', error);
       // Si hay un error, intentar navegar directamente
       setCurrentView('/employees/schedule');
+    }
+  };
+
+  // Función para navegar a IncidenciasScreen
+  const handleNavigateToIncidencias = (employee: UnifiedEmployee) => {
+    try {
+      console.log('Navegando a incidencias con empleado:', employee);
+      
+      // Guardar el empleado en el estado global
+      setCurrentEmployee(employee);
+      setCurrentScreen('incidencias');
+      
+      // También guardamos en sessionStorage como respaldo
+      sessionStorage.setItem('selectedEmployeeId', employee.id);
+      
+      // Navegar a la vista de incidencias
+      setCurrentView('/employees/incidencias');
+    } catch (error) {
+      console.error('Error al navegar a incidencias:', error);
+      // Si hay un error, intentar navegar directamente
+      setCurrentView('/employees/incidencias');
     }
   };
 
@@ -198,7 +233,7 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
                     onSearchTermChange={onSearchTermChange}
                     onFilterChange={handleFilterChange}
                     onClearFilters={clearAllFilters}
-                    employees={employees}
+                    employees={allEmployees}
                   />
                 </div>
               ) : (
@@ -252,67 +287,85 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
                 <tbody className="divide-y divide-gray-200">
                   {filteredEmployees
                     .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                    .map((employee) => (
-                      <tr 
-                        key={employee.id} 
-                        className="hover:bg-gray-50 cursor-pointer"
-                        onClick={() => handleEmployeeClick(employee)}
-                      >
-                        <td className="px-6 py-4">
-                          <input 
-                            type="checkbox" 
-                            className="rounded border-gray-300"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{employee.id}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium">
-                              {employee.initial}
+                    .map((employee) => {
+                      // Convertir al modelo específico para esta pantalla
+                      const displayEmployee = convertToSpecificModel(employee, 'employee');
+                      const isSelected = currentEmployee?.id === employee.id;
+                      
+                      return (
+                        <tr 
+                          key={employee.id} 
+                          className={`hover:bg-gray-50 cursor-pointer ${isSelected ? 'bg-indigo-50' : ''}`}
+                          onClick={() => handleEmployeeClick(employee)}
+                        >
+                          <td className="px-6 py-4">
+                            <input 
+                              type="checkbox" 
+                              className="rounded border-gray-300"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">{employee.id}</td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium">
+                                {displayEmployee.initial || employee.displayName?.charAt(0) || '?'}
+                              </div>
+                              <div className="ml-3">
+                                <p className="text-sm font-medium text-gray-900">{displayEmployee.name}</p>
+                                <p className="text-sm text-gray-500">{displayEmployee.position}</p>
+                              </div>
                             </div>
-                            <div className="ml-3">
-                              <p className="text-sm font-medium text-gray-900">{employee.name}</p>
-                              <p className="text-sm text-gray-500">{employee.position}</p>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{displayEmployee.location}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{displayEmployee.department}</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              <Fingerprint className="w-3 h-3 mr-1" />
+                              {displayEmployee.method || 'No definido'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex space-x-2">
+                              <button 
+                                className="text-gray-400 hover:text-blue-600"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEmployeeClick(employee);
+                                }}
+                                title="Editar empleado"
+                              >
+                                <Settings className="w-5 h-5" />
+                              </button>
+                              <button 
+                                className="text-gray-400 hover:text-blue-600"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  console.log('Botón de planificar horarios clickeado para:', displayEmployee.name);
+                                  handleNavigateToScheduling(employee);
+                                }}
+                                title="Planificar horarios"
+                              >
+                                <Clock className="w-5 h-5" />
+                              </button>
+                              <button 
+                                className="text-gray-400 hover:text-amber-600"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  console.log('Botón de incidencias clickeado para:', displayEmployee.name);
+                                  handleNavigateToIncidencias(employee);
+                                }}
+                                title="Ver incidencias"
+                              >
+                                <Fingerprint className="w-5 h-5" />
+                              </button>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{employee.location}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{employee.department}</td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            <Fingerprint className="w-3 h-3 mr-1" />
-                            {employee.method}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex space-x-2">
-                            <button 
-                              className="text-gray-400 hover:text-blue-600"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEmployeeClick(employee);
-                              }}
-                              title="Editar empleado"
-                            >
-                              <Settings className="w-5 h-5" />
-                            </button>
-                            <button 
-                              className="text-gray-400 hover:text-blue-600"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                console.log('Botón de planificar horarios clickeado para:', employee.name);
-                                handleNavigateToScheduling(employee);
-                              }}
-                              title="Planificar horarios"
-                            >
-                              <Clock className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
               <div className="px-6 py-4 border-t border-gray-200">

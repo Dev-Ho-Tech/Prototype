@@ -3,10 +3,18 @@ import { ActionButtons } from './EmployeeProfile/ActionButtons';
 import { EmployeeHeader } from './EmployeeProfile/EmployeeHeader';
 import { StructureModal } from './EmployeeProfile/TreeNode';
 import { Briefcase, Eye, Fingerprint, User } from 'lucide-react';
-import { Employee } from '../interface/types';
 import { biometricOptions } from './EmployeeProfile/utils/const_biometric';
+import { useAppState } from '../../../../global/context/AppStateContext';
+import { UnifiedEmployee } from '../../../../global/interfaces/unifiedTypes';
 
-export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee | null; onClose: () => void }) => {
+export const EmployeeProfileForm = ({ 
+  employee, 
+  onClose 
+}: { 
+  employee?: UnifiedEmployee | null; 
+  onClose: () => void;
+}) => {
+  const { setCurrentEmployee } = useAppState();
   const [showStructureModal, setShowStructureModal] = useState(false);
   const [personalData, setPersonalData] = useState({
     primerNombre: employee?.primerNombre || '',
@@ -17,20 +25,20 @@ export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee
     tipoDocumento: employee?.tipoDocumento || 'Cédula',
     numeroDocumento: employee?.numeroDocumento || '',
     fechaNacimiento: employee?.fechaNacimiento || '',
-    telefono: employee?.telefono || '',
-    correo: employee?.correo || '',
+    telefono: employee?.telefono || employee?.phone || '',
+    correo: employee?.correo || employee?.email || '',
     permitirVisitas: employee?.permitirVisitas || false,
   });
 
   const [laborData, setLaborData] = useState({
     codigo: employee?.codigo || '',
-    modalidadTiempo: employee?.modalidadTiempo || '002-Operativo',
-    fechaInicialContrato: employee?.fechaInicialContrato || '',
+    modalidadTiempo: employee?.modalidadTiempo || employee?.contractType || '002-Operativo',
+    fechaInicialContrato: employee?.fechaInicialContrato || employee?.startDate || '',
     fechaFinalContrato: employee?.fechaFinalContrato || '',
-    empresa: employee?.empresa || 'Emp - Caldelpa S.a.',
-    sede: employee?.sede || 'Hodelpa Gran Almirante',
+    empresa: employee?.company || employee?.empresa || 'Emp - Caldelpa S.a.',
+    sede: employee?.location || employee?.sede || 'Hodelpa Gran Almirante',
     tipoPlanificacion: employee?.tipoPlanificacion || '',
-    cargo: employee?.cargo || '',
+    cargo: employee?.position || employee?.cargo || '',
     perfilesMarcaje: employee?.perfilesMarcaje || ['Principal'],
   });
 
@@ -55,8 +63,61 @@ export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee
   };
 
   const handleSave = () => {
-    // Lógica para guardar cambios
-    console.log('Datos guardados:', { personalData, laborData });
+    // Creamos un empleado unificado con los datos actualizados
+    const updatedEmployee: UnifiedEmployee = {
+      ...employee,
+      id: employee?.id || 'nuevo-' + Date.now(),
+      primerNombre: personalData.primerNombre,
+      segundoNombre: personalData.segundoNombre,
+      primerApellido: personalData.primerApellido,
+      segundoApellido: personalData.segundoApellido,
+      genero: personalData.genero,
+      tipoDocumento: personalData.tipoDocumento,
+      numeroDocumento: personalData.numeroDocumento,
+      fechaNacimiento: personalData.fechaNacimiento,
+      telefono: personalData.telefono,
+      phone: personalData.telefono,
+      correo: personalData.correo,
+      email: personalData.correo,
+      permitirVisitas: personalData.permitirVisitas,
+      
+      // Datos laborales
+      codigo: laborData.codigo,
+      modalidadTiempo: laborData.modalidadTiempo,
+      contractType: laborData.modalidadTiempo,
+      fechaInicialContrato: laborData.fechaInicialContrato,
+      startDate: laborData.fechaInicialContrato,
+      fechaFinalContrato: laborData.fechaFinalContrato,
+      company: laborData.empresa,
+      empresa: laborData.empresa,
+      location: laborData.sede,
+      sede: laborData.sede,
+      tipoPlanificacion: laborData.tipoPlanificacion,
+      position: laborData.cargo,
+      cargo: laborData.cargo,
+      perfilesMarcaje: laborData.perfilesMarcaje,
+      
+      // Calcular campos derivados
+      fullName: `${personalData.primerNombre} ${personalData.segundoNombre ? personalData.segundoNombre + ' ' : ''}${personalData.primerApellido} ${personalData.segundoApellido || ''}`.trim(),
+      section: employee?.section || '', // Mantener la sección actual si existe
+      method: employee?.method || 'Biométrico', // Valor por defecto
+      status: employee?.status || 'active', // Valor por defecto
+    };
+    
+    // Establecer displayName basado en fullName
+    updatedEmployee.displayName = updatedEmployee.fullName;
+    // Establecer nombre compuesto
+    updatedEmployee.name = updatedEmployee.fullName;
+    // Establecer nombre y apellidos separados para compatibilidad
+    updatedEmployee.nombre = `${personalData.primerNombre} ${personalData.segundoNombre || ''}`.trim();
+    updatedEmployee.apellidos = `${personalData.primerApellido} ${personalData.segundoApellido || ''}`.trim();
+    // Establecer initial basado en primer nombre
+    updatedEmployee.initial = personalData.primerNombre ? personalData.primerNombre.charAt(0) : '';
+    
+    // Actualizar empleado en el estado global
+    setCurrentEmployee(updatedEmployee);
+    
+    console.log('Datos guardados:', updatedEmployee);
     onClose();
   };
 
@@ -329,9 +390,9 @@ export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee
                     onChange={handleLaborDataChange}
                     className="w-full p-2 border border-gray-300 rounded-md appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="111 - Hodelpa Gran Almirante">111 - Hodelpa Gran Almirante</option>
-                    <option value="112 - Hodelpa Garden">112 - Hodelpa Garden</option>
-                    <option value="113 - Centro Plaza Hodelpa">113 - Centro Plaza Hodelpa</option>
+                    <option value="Hodelpa Gran Almirante">Hodelpa Gran Almirante</option>
+                    <option value="Hodelpa Garden">Hodelpa Garden</option>
+                    <option value="Centro Plaza Hodelpa">Centro Plaza Hodelpa</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                     <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -432,6 +493,8 @@ export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee
                     type="checkbox" 
                     name="permitirVisitas" 
                     id="permitir-visitas" 
+                    checked={personalData.permitirVisitas}
+                    onChange={handlePersonalDataChange}
                     className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
                   />
                   <label 
@@ -448,9 +511,7 @@ export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee
                 <Eye className="w-4 h-4 mr-1" />
                 Ver estructura
               </button>
-              {/* Botones de acción */}
             </div>
-            
           </div>
 
           <div className="grid grid-cols-7 gap-4 mt-2">
@@ -465,7 +526,9 @@ export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee
               </div>
             ))}
           </div>
-        <ActionButtons onSave={handleSave} onCancel={onClose} />
+        
+          {/* Botones de acción */}
+          <ActionButtons onSave={handleSave} onCancel={onClose} />
         </div>
         
         {/* Estilos CSS para el toggle switch */}

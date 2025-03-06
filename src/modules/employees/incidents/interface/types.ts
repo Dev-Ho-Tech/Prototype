@@ -1,3 +1,4 @@
+//interfaces de IncidenciasScreen
 export interface Employee {
   id: string;
   nombre: string;

@@ -34,8 +34,11 @@ import { MonitoringScreen } from './modules/access-control/monitoring/Monitoring
 import { LoginScreen } from './modules/auth/login/LoginScreen';
 import DashboardScreen from './modules/dashboard/DashboardScreen';
 import ComedorScreen from './modules/system-config/diner/ComedorScreen';
+// Importa el proveedor de contexto
+import { AppStateProvider } from './global/context/AppStateContext';
 
-// Variable para almacenar el estado global 
+// Variable para almacenar el estado global (podemos mantenerla por compatibilidad)
+// eslint-disable-next-line react-refresh/only-export-components
 export const appState = {
   selectedEmployeeId: null as string | null,
   // Puedes agregar más estados globales si es necesario
@@ -155,13 +158,16 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <Toaster position="top-right" />
-      <Routes>
-        <Route path="/login" element={<LoginScreen onLogin={() => window.location.href = '/dashboard'} />} />
-        <Route path="/*" element={<AppContent />} />
-      </Routes>
-    </Router>
+    // Envuelve toda la aplicación con el AppStateProvider
+    <AppStateProvider>
+      <Router>
+        <Toaster position="top-right" />
+        <Routes>
+          <Route path="/login" element={<LoginScreen onLogin={() => window.location.href = '/dashboard'} />} />
+          <Route path="/*" element={<AppContent />} />
+        </Routes>
+      </Router>
+    </AppStateProvider>
   );
 }
 
