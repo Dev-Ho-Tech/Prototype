@@ -1,5 +1,12 @@
-import { BarChart2, Users, Clock, Coffee, DoorClosed, Settings, Building2, Briefcase, Fingerprint, UserCheck, FileText, Mail, Utensils } from 'lucide-react';
-import type { MenuItem } from '../types';
+import { BarChart2, Users, Clock, Coffee, DoorClosed, Settings, Building2, Briefcase, Fingerprint, UserCheck, FileText, Mail, Utensils, LucideIcon } from 'lucide-react';
+
+export interface MenuItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  path: string;
+  children?: MenuItem[];
+}
 
 export const menuItems: MenuItem[] = [
   {

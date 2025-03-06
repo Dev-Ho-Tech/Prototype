@@ -1,3 +1,4 @@
+//Data de EmployeeManagementScreen
 import { Employee } from "./interface/types";
 
 export const locationData = [

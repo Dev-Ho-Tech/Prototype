@@ -1,3 +1,4 @@
+//Interface de EmployeeManagementScreen
 import { ReactNode } from "react";
 
 export interface Employee {

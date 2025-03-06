@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { Employee, Period, DragInfo } from './interfaces/types';
-import { locations, departments, sections, units, mapEmployeeToOrganization ,workShifts, licenses, employees } from './data';
+import { locations, departments, sections, units, mapEmployeeToOrganization, workShifts, licenses, employees } from './data';
 import TopBar from './components/TopBar';
 import EmployeeList from './components/EmployeeList';
 import EmployeeInfo from './components/EmployeeInfo';
 import ScheduleGrid from './components/ScheduleGrid';
 import Legends from './components/Legends';
+import { findCorrespondingEmployee } from './utils/employeeUtils';
+// Importar directamente desde el módulo appState.ts en lugar de EmployeeManagementScreen
+import { appState, clearSelectedEmployeeId } from '../../../appState';
 
 // Mejorar la estructura de los empleados con datos de organización
 const enhancedEmployees = employees.map(emp => mapEmployeeToOrganization(emp));
@@ -19,7 +22,7 @@ export function SchedulingScreen() {
   // Nuevos estados para el rango de fechas
   const [startDate, setStartDate] = useState('2025-02-14');
   const [endDate, setEndDate] = useState('2025-02-14');
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(enhancedEmployees[0]);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showShifts, setShowShifts] = useState(true);
   const [showLicenses, setShowLicenses] = useState(true);
   const [editMode] = useState(false);
@@ -81,6 +84,60 @@ export function SchedulingScreen() {
   const handleAdvancedFilterChange = (filters: any) => {
     setAdvancedFilters(filters);
   };
+
+  // Cargar el empleado seleccionado usando varias fuentes posibles de datos
+  useEffect(() => {
+    console.log('Inicializando SchedulingScreen');
+    
+    // 1. Intentar obtener ID desde sessionStorage (para navegación entre páginas)
+    const sessionEmployeeId = sessionStorage.getItem('selectedEmployeeId');
+    // 2. Intentar obtener ID desde el estado global
+    const stateEmployeeId = appState.selectedEmployeeId;
+    
+    console.log('ID en sessionStorage:', sessionEmployeeId);
+    console.log('ID en estado global:', stateEmployeeId);
+    
+    // Usar el ID de cualquiera de las fuentes
+    const employeeId = sessionEmployeeId || stateEmployeeId;
+    
+    if (employeeId) {
+      console.log('Usando ID de empleado:', employeeId);
+      const foundEmployee = findCorrespondingEmployee(employeeId);
+      
+      if (foundEmployee) {
+        console.log('Empleado correspondiente encontrado:', foundEmployee.name);
+        setSelectedEmployee(foundEmployee);
+        
+        // Opcionalmente, podemos seleccionar automáticamente el departamento y la ubicación
+        if (foundEmployee.locationId) {
+          setAdvancedFilters(prev => ({
+            ...prev,
+            selectedLocations: [foundEmployee.locationId]
+          }));
+        }
+        
+        if (foundEmployee.departmentId) {
+          setAdvancedFilters(prev => ({
+            ...prev,
+            selectedDepartments: [foundEmployee.departmentId]
+          }));
+        }
+      } else {
+        console.log('No se encontró correspondencia, usando el primer empleado');
+        // Si no se encuentra, establece el primero de la lista como predeterminado
+        setSelectedEmployee(enhancedEmployees[0]);
+      }
+      
+      // Limpiar ambas fuentes después de usar el ID
+      sessionStorage.removeItem('selectedEmployeeId');
+      // Usar la función auxiliar para limpiar el estado global
+      clearSelectedEmployeeId();
+    } else {
+      console.log('No hay ID en ninguna fuente, usando el primer empleado');
+      // Si no hay ID en ninguna fuente, establece el primero como predeterminado
+      setSelectedEmployee(enhancedEmployees[0]);
+    }
+  }, []);
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col h-screen bg-gray-100">

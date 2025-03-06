@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+//Data de SchedulingScreen
 import { Employee, WorkShift, License } from './interfaces/types';
 
 export const workShifts: WorkShift[] = [

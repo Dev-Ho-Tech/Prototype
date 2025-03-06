@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { LogoutModal } from './modules/auth/components/LogoutModal';
 import { authService } from './modules/auth/services/authService';
 import { Sidebar } from './components/layout/Sidebar';
-// import { EmployeesScreen } from './modules/employees/EmployeesScreen';
 import { EmployeeManagementScreen } from './modules/employees/management/EmployeeManagementScreen';
 import { ReportsScreen } from './modules/reports/ReportsScreen';
 import { SchedulingScreen } from './modules/scheduling/SchedulingScreen';
@@ -18,7 +19,6 @@ import { RecordsScreen } from './modules/employees/records/RecordsScreen';
 import { CheckProfilesScreen } from './modules/employees/check-profiles/CheckProfilesScreen';
 import { BiometricScreen } from './modules/employees/biometric/BiometricScreen';
 import IncidenciasScreen from './modules/employees/incidents/IncidentsScreen';
-
 import { CalendarScreen } from './modules/time-control/calendar/CalendarScreen';
 import { ChecksScreen } from './modules/time-control/checks/ChecksScreen';
 import { HoursApprovalScreen } from './modules/time-control/hours/HoursApprovalScreen';
@@ -34,19 +34,42 @@ import { MonitoringScreen } from './modules/access-control/monitoring/Monitoring
 import { LoginScreen } from './modules/auth/login/LoginScreen';
 import DashboardScreen from './modules/dashboard/DashboardScreen';
 import ComedorScreen from './modules/system-config/diner/ComedorScreen';
-// import TestScreen from './modules/employees/incidents/test';
-// import IncidenciasScreen from './modules/incidents/IncidentsScreen';
 
-function App() {
-  const [currentView, setCurrentView] = useState('/dashboard');
-  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+// Variable para almacenar el estado global 
+export const appState = {
+  selectedEmployeeId: null as string | null,
+  // Puedes agregar más estados globales si es necesario
+};
+
+// Componente para manejar el estado de autenticación de la aplicación
+function AppContent() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState(() => authService.isAuthenticated());
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isViewTransitioning, setIsViewTransitioning] = useState(false);
 
+  // Verificar el estado de autenticación cuando cambia la ubicación
+  useEffect(() => {
+    // Verificar si el usuario está autenticado
+    const checkAuth = () => {
+      const authenticated = authService.isAuthenticated();
+      setIsAuthenticated(authenticated);
+      
+      // Si no está autenticado y no está en la página de login, redirigir
+      if (!authenticated && location.pathname !== '/login') {
+        navigate('/login', { replace: true });
+      }
+    };
+    
+    checkAuth();
+  }, [location, navigate]);
+
   const handleLogin = useCallback(() => {
     setIsAuthenticated(true);
-  }, []);
+    navigate('/dashboard');
+  }, [navigate]);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -54,12 +77,13 @@ function App() {
       await authService.logout();
       setIsAuthenticated(false);
       setShowLogoutModal(false);
+      navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       setIsLoggingOut(false);
     }
-  }, []);
+  }, [navigate]);
 
   const handleLogoutClick = useCallback(() => {
     setShowLogoutModal(true);
@@ -67,21 +91,20 @@ function App() {
 
   const handleViewChange = useCallback((view: string) => {
     setIsViewTransitioning(true);
-    // Clear any existing timeouts
     setTimeout(() => {
-      setCurrentView(view);
+      navigate(view);
       setIsViewTransitioning(false);
-    }, 150); // Small delay for smooth transition
-  }, []);
+    }, 150);
+  }, [navigate]);
 
   if (!isAuthenticated) {
     return <LoginScreen onLogin={handleLogin} />;
   }
-  try {
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar 
-        currentView={currentView} 
+        currentView={location.pathname} 
         setCurrentView={handleViewChange}
         onLogout={handleLogoutClick}
       />
@@ -93,43 +116,53 @@ function App() {
         />
       )}
       <div className={`flex-1 overflow-hidden transition-opacity duration-150 ${isViewTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-        {currentView === '/dashboard' && <DashboardScreen />}
-        {currentView === '/employees/management' && <EmployeeManagementScreen />}
-        {currentView === '/employees/records' && <RecordsScreen />}
-        {currentView === '/employees/schedule' && <SchedulingScreen />}
-        {currentView === '/employees/check-profiles' && <CheckProfilesScreen />}
-        {currentView === '/employees/biometric' && <BiometricScreen />}
-        {/* {currentView === '/employees/incidencias' && <TestScreen/>} */}
-        {currentView === '/employees/incidencias' && <IncidenciasScreen/>}
-        {currentView === '/administration/licenses' && <LicensesScreen />}
-        {currentView === '/administration/users' && <UsersScreen />}
-        {currentView === '/administration/config' && <ConfigScreen />}
-        {currentView === '/system-config/structure' && <StructureScreen />}
-        {currentView === '/system-config/positions' && <AccessTypesScreen />}
-        {currentView === '/system-config/devices' && <DevicesScreen />}
-        {currentView === '/system-config/employee-types' && <EmployeeTypesScreen />}
-        {currentView === '/system-config/contracts' && <ContractsScreen />}
-        {currentView === '/system-config/diner' && <ComedorScreen />}
-        {currentView === '/time-control/calendar' && <CalendarScreen />}
-        {currentView === '/time-control/checks' && <ChecksScreen />}
-        {currentView === '/time-control/hours-approval' && <HoursApprovalScreen />}
-        {currentView === '/time-control/absence' && <AbsencesScreen />}
-        {currentView === '/dining/rooms' && <DiningRoomsScreen />}
-        {currentView === '/dining/schedule' && <DiningScheduleScreen />}
-        {currentView === '/dining/access' && <DiningAccessScreen />}
-        {currentView === '/dining/reports' && <DiningReportsScreen />}
-        {currentView === '/access/doors' && <DoorsScreen />}
-        {currentView === '/access/visitors' && <VisitorsScreen />}
-        {currentView === '/access/permissions' && <PermissionsScreen />}
-        {currentView === '/access/monitoring' && <MonitoringScreen />}
-        {currentView === '/reports/attendance' && <ReportsScreen />}
+        <Routes>
+          <Route path="/dashboard" element={<DashboardScreen />} />
+          <Route path="/employees/management" element={<EmployeeManagementScreen setCurrentView={handleViewChange} />} />
+          <Route path="/employees/records" element={<RecordsScreen />} />
+          <Route path="/employees/schedule" element={<SchedulingScreen />} />
+          <Route path="/employees/check-profiles" element={<CheckProfilesScreen />} />
+          <Route path="/employees/biometric" element={<BiometricScreen />} />
+          <Route path="/employees/incidencias" element={<IncidenciasScreen />} />
+          <Route path="/administration/licenses" element={<LicensesScreen />} />
+          <Route path="/administration/users" element={<UsersScreen />} />
+          <Route path="/administration/config" element={<ConfigScreen />} />
+          <Route path="/system-config/structure" element={<StructureScreen />} />
+          <Route path="/system-config/positions" element={<AccessTypesScreen />} />
+          <Route path="/system-config/devices" element={<DevicesScreen />} />
+          <Route path="/system-config/employee-types" element={<EmployeeTypesScreen />} />
+          <Route path="/system-config/contracts" element={<ContractsScreen />} />
+          <Route path="/system-config/diner" element={<ComedorScreen />} />
+          <Route path="/time-control/calendar" element={<CalendarScreen />} />
+          <Route path="/time-control/checks" element={<ChecksScreen />} />
+          <Route path="/time-control/hours-approval" element={<HoursApprovalScreen />} />
+          <Route path="/time-control/absence" element={<AbsencesScreen />} />
+          <Route path="/dining/rooms" element={<DiningRoomsScreen />} />
+          <Route path="/dining/schedule" element={<DiningScheduleScreen />} />
+          <Route path="/dining/access" element={<DiningAccessScreen />} />
+          <Route path="/dining/reports" element={<DiningReportsScreen />} />
+          <Route path="/access/doors" element={<DoorsScreen />} />
+          <Route path="/access/visitors" element={<VisitorsScreen />} />
+          <Route path="/access/permissions" element={<PermissionsScreen />} />
+          <Route path="/access/monitoring" element={<MonitoringScreen />} />
+          <Route path="/reports/attendance" element={<ReportsScreen />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
       </div>
     </div>
   );
-} catch (error) {
-  console.error("Error rendering view:", error);
-  return <div>Error loading view. See console for details.</div>;
 }
+
+function App() {
+  return (
+    <Router>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route path="/login" element={<LoginScreen onLogin={() => window.location.href = '/dashboard'} />} />
+        <Route path="/*" element={<AppContent />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;

@@ -1,3 +1,4 @@
+//Interfaces de SchedulingScreen
 export interface Employee {
   id: string;
   name: string;

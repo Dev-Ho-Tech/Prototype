@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
-import { Search, Plus, Download, Settings, LogOut, Fingerprint, ArrowLeft, ChevronDown } from 'lucide-react';
+import { Search, Plus, Download, Settings, Clock, Fingerprint, ArrowLeft, ChevronDown } from 'lucide-react';
 import { CustomPieChart } from '../../../components/common/PieChart';
 import { departmentData, locationData } from '../data';
 import { employees } from './data';
@@ -10,8 +10,14 @@ import { MarkingMethodComponent } from './components/kpiAndCards/MarkingMethodCo
 import { StatsSection } from './components/kpiAndCards/StatsSection';
 import AdvancedFilters from './components/Search/AdvancedFilters';
 import { Pagination } from './components/Pagination';
+// Importar el estado global directamente (sin exportar una variable)
+import { setSelectedEmployeeId } from '../../../../appState';
 
-export function EmployeeManagementScreen() {
+interface EmployeeManagementScreenProps {
+  setCurrentView: (view: string) => void;
+}
+
+export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementScreenProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfile, setShowProfile] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -93,6 +99,27 @@ export function EmployeeManagementScreen() {
     setShowProfile(true);
   };
 
+  // Función para navegar a SchedulingScreen
+  const handleNavigateToScheduling = (employee: Employee) => {
+    try {
+      console.log('Navegando a scheduling con empleado:', employee);
+      
+      // Guardar el ID del empleado en el estado global
+      setSelectedEmployeeId(employee.id);
+      console.log('ID guardado en estado global:', employee.id);
+      
+      // También guardamos en sessionStorage como respaldo
+      sessionStorage.setItem('selectedEmployeeId', employee.id);
+      
+      // Navegar a la vista de scheduling
+      setCurrentView('/employees/schedule');
+    } catch (error) {
+      console.error('Error al navegar a scheduling:', error);
+      // Si hay un error, intentar navegar directamente
+      setCurrentView('/employees/schedule');
+    }
+  };
+
   return (
     <div className="flex-1 overflow-auto bg-gray-50 p-8 relative">
       {/* Mostrar perfil cuando está seleccionado */}
@@ -144,7 +171,7 @@ export function EmployeeManagementScreen() {
                 </div>
               </div>
 
-              {/* CAMBIO: Sección de búsqueda modificada para manejar correctamente el botón de búsqueda avanzada */}
+              {/* Sección de búsqueda */}
               {showAdvancedFilters ? (
                 <div className="bg-white rounded-lg border border-gray-200">
                   <div className="relative w-full p-4 mb-2">
@@ -165,7 +192,7 @@ export function EmployeeManagementScreen() {
                     </button>
                   </div>
                   
-                  {/* CAMBIO: Usar el componente AdvancedFilters sin duplicar la barra de búsqueda */}
+                  {/* Componente AdvancedFilters */}
                   <AdvancedFilters 
                     searchTerm={searchTerm}
                     onSearchTermChange={onSearchTermChange}
@@ -266,17 +293,21 @@ export function EmployeeManagementScreen() {
                                 e.stopPropagation();
                                 handleEmployeeClick(employee);
                               }}
+                              title="Editar empleado"
                             >
                               <Settings className="w-5 h-5" />
                             </button>
                             <button 
-                              className="text-gray-400 hover:text-red-600"
+                              className="text-gray-400 hover:text-blue-600"
                               onClick={(e) => {
+                                e.preventDefault();
                                 e.stopPropagation();
-                                // Lógica para dar de baja al empleado
+                                console.log('Botón de planificar horarios clickeado para:', employee.name);
+                                handleNavigateToScheduling(employee);
                               }}
+                              title="Planificar horarios"
                             >
-                              <LogOut className="w-5 h-5" />
+                              <Clock className="w-5 h-5" />
                             </button>
                           </div>
                         </td>
@@ -289,12 +320,12 @@ export function EmployeeManagementScreen() {
                   <div className="text-sm text-gray-500">
                     Mostrando {Math.min((currentPage - 1) * itemsPerPage + 1, filteredEmployees.length)} a {Math.min(currentPage * itemsPerPage, filteredEmployees.length)} de {filteredEmployees.length} empleados
                   </div>
-                  {/* Nueva paginación con números de página */}
+                  {/* Paginación */}
                   <Pagination 
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
-                      />
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
                 </div>
               </div>
             </div>

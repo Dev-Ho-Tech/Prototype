@@ -143,7 +143,6 @@ const marcajesData: Record<number, Marcaje[]> = {
 //   'Desarrollador', 
 //   'Consultor'
 // ];
-
 export const empleadosDataEnriquecida: Employee[] = [
   {
     id: 1,
@@ -151,10 +150,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/32.jpg',
     estado: 'permiso',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Hotels & Resorts',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Informatica',
+    departamento: 'Recursos Humanos',
     cargo: 'Gerente'
   },
   {
@@ -163,7 +162,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/33.jpg',
     estado: 'trabajando',
     horas: '9 hrs 45 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '07:45',
     dispositivo: 'computadora',
     ultimaAccion2: '17:30',
@@ -178,10 +177,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/women/32.jpg',
     estado: 'permiso',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Garden Court',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Estadistica',
+    departamento: 'Habitaciones',
     cargo: 'Analista'
   },
   {
@@ -190,12 +189,12 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/34.jpg',
     estado: 'trabajando',
     horas: '8 hrs 45 min',
-    pais: 'Venezuela',
+    pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '06:45',
     ultimaAccion2: '15:30',
     dispositivo: 'computadora',
     dispositivo2: 'smartphone',
-    departamento: 'Marketing',
+    departamento: 'Alimentos y Bebidas',
     cargo: 'Gerente',
     marcajes: marcajesData[4]
   },
@@ -205,10 +204,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/35.jpg',
     estado: 'ausencia',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Hotels & Resorts',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Ventas',
+    departamento: 'Administración de Personal',
     cargo: 'Coordinador'
   },
   {
@@ -217,10 +216,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/36.jpg',
     estado: 'ausencia',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Garden Court',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Marketing',
+    departamento: 'Operaciones',
     cargo: 'Diseñador'
   },
   {
@@ -229,10 +228,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/37.jpg',
     estado: 'ausencia',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Hotels & Resorts',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Finanzas',
+    departamento: 'Reclutamiento y Selección',
     cargo: 'Analista'
   },
   {
@@ -241,12 +240,12 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/women/33.jpg',
     estado: 'trabajando',
     horas: '9 hrs 15 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '07:30',
     dispositivo: 'smartphone',
     ultimaAccion2: '16:45',
     dispositivo2: 'smartphone',
-    departamento: 'Diseño',
+    departamento: 'Housekeeping',
     cargo: 'Diseñador',
     marcajes: marcajesData[8]
   },
@@ -256,12 +255,12 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/38.jpg',
     estado: 'trabajando',
     horas: '11 hrs 05 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '08:15',
     ultimaAccion2: '19:20',
     dispositivo: 'computadora',
     dispositivo2: 'smartphone',
-    departamento: 'Desarrollo',
+    departamento: 'Cocina Principal',
     cargo: 'Desarrollador',
     marcajes: marcajesData[9]
   },
@@ -271,10 +270,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: null,
     estado: 'planificado',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Garden Court',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Desarrollo',
+    departamento: 'Supervisión de Sucursales',
     cargo: 'Desarrollador'
   },
   {
@@ -283,12 +282,12 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/40.jpg',
     estado: 'trabajó',
     horas: '0 hrs 40 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '17:00',
     ultimaAccion2: '17:40',
     dispositivo: 'computadora',
     dispositivo2: 'smartphone',
-    departamento: 'Operaciones',
+    departamento: 'Restaurantes',
     cargo: 'Coordinador'
   },
   {
@@ -297,12 +296,12 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/41.jpg',
     estado: 'trabajó',
     horas: '5 hrs 45 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Garden Court',
     ultimaAccion: '08:55',
     ultimaAccion2: '14:40',
     dispositivo: 'computadora',
     dispositivo2: 'smartphone',
-    departamento: 'Atención al Cliente',
+    departamento: 'Housekeeping',
     cargo: 'Asistente'
   },
   {
@@ -311,10 +310,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/women/41.jpg',
     estado: 'trabajando',
     horas: '7 hrs 30 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Hotels & Resorts',
     ultimaAccion: '08:30',
     dispositivo: 'smartphone',
-    departamento: 'Finanzas',
+    departamento: 'Nómina y Compensación',
     cargo: 'Gerente',
     marcajes: marcajesData[13]
   },
@@ -324,10 +323,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/42.jpg',
     estado: 'permiso',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Grupo CCN',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Recursos Humanos',
+    departamento: 'Gestión de Tiendas',
     cargo: 'Coordinador'
   },
   {
@@ -336,10 +335,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/women/42.jpg',
     estado: 'trabajando',
     horas: '8 hrs 45 min',
-    pais: 'Republica Dominicana',
+    pais: 'Banco Popular Dominicano',
     ultimaAccion: '07:15',
     dispositivo: 'computadora',
-    departamento: 'Ventas',
+    departamento: 'Red de Sucursales',
     cargo: 'Director',
     marcajes: marcajesData[15]
   },
@@ -349,10 +348,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/43.jpg',
     estado: 'ausencia',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Gran Almirante',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Marketing',
+    departamento: 'Bares',
     cargo: 'Asistente'
   },
   {
@@ -361,11 +360,11 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/women/43.jpg',
     estado: 'trabajando',
     horas: '6 hrs 15 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '09:45',
     dispositivo: 'computadora',
-    departamento: 'Diseño',
-    cargo: 'Diseñador'
+    departamento: 'Recepción',
+    cargo: 'Supervisora'
   },
   {
     id: 18,
@@ -373,10 +372,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/44.jpg',
     estado: 'planificado',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Supermercados Nacional',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Ventas',
+    departamento: 'Operaciones Retail',
     cargo: 'Analista'
   },
   {
@@ -385,7 +384,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/women/44.jpg',
     estado: 'trabajó',
     horas: '8 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Hotels & Resorts',
     ultimaAccion: '08:00',
     ultimaAccion2: '16:00',
     dispositivo: 'computadora',
@@ -400,10 +399,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/45.jpg',
     estado: 'trabajando',
     horas: '4 hrs 30 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Garden Court',
     ultimaAccion: '10:30',
     dispositivo: 'computadora',
-    departamento: 'Desarrollo',
+    departamento: 'Habitaciones',
     cargo: 'Desarrollador'
   },
   {
@@ -412,10 +411,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/women/45.jpg',
     estado: 'ausencia',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Banco Popular Dominicano',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Atención al Cliente',
+    departamento: 'Banca Personal',
     cargo: 'Asistente'
   },
   {
@@ -424,12 +423,12 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/46.jpg',
     estado: 'trabajó',
     horas: '4 hrs 15 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '08:30',
     ultimaAccion2: '12:45',
     dispositivo: 'computadora',
     dispositivo2: 'smartphone',
-    departamento: 'Marketing',
+    departamento: 'Lavandería',
     cargo: 'Coordinador'
   },
   {
@@ -438,10 +437,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/women/46.jpg',
     estado: 'permiso',
     horas: '0 hrs 0 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Gran Almirante',
     ultimaAccion: null,
     dispositivo: null,
-    departamento: 'Finanzas',
+    departamento: 'Selección de Personal',
     cargo: 'Analista'
   },
   {
@@ -450,10 +449,10 @@ export const empleadosDataEnriquecida: Employee[] = [
     foto: 'https://randomuser.me/api/portraits/men/47.jpg',
     estado: 'trabajando',
     horas: '7 hrs 45 min',
-    pais: 'Republica Dominicana',
+    pais: 'Hodelpa Garden Court',
     ultimaAccion: '07:15',
     dispositivo: 'computadora',
-    departamento: 'Operaciones',
+    departamento: 'Evaluación y Desarrollo',
     cargo: 'Director'
   }
 ];
