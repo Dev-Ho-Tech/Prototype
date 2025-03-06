@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MoreVertical, RefreshCw, Power, AlertCircle, CheckCircle, Clock, Activity } from 'lucide-react';
+import { Plus, Search, Filter, MoreVertical, RefreshCw, Power, AlertCircle, CheckCircle, Clock, Activity, X } from 'lucide-react';
 import { devicesData } from './data';
 import { Device } from './interfaces/device';
 import { DeviceForm } from './components/DeviceForm';
 import { BiometricOperations } from './components/BiometricOperations';
 import { EventosDetallados } from './components/EventosDetallados';
+import { RestartModal } from './components/RestartModal';
+import { DeleteDeviceModal } from './components/DeleteDeviceModal';
+import { DeviceContextMenu } from './components/DeviceContextMenu';
 import DevicesSummary from './components/DevicesSummaryProps';
 
 export const DevicesScreen: React.FC = () => {
@@ -17,6 +20,10 @@ export const DevicesScreen: React.FC = () => {
   const [showBiometricOperations, setShowBiometricOperations] = useState<boolean>(false);
   const [showEventosDetallados, setShowEventosDetallados] = useState<boolean>(false);
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
+  const [showRestartModal, setShowRestartModal] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null);
+  const [contextMenuDevice, setContextMenuDevice] = useState<Device | null>(null);
 
   // Filtrar dispositivos
   useEffect(() => {
@@ -75,9 +82,59 @@ export const DevicesScreen: React.FC = () => {
   };
 
   // Función para reiniciar dispositivo
-  const handleRestart = (deviceId: string | number) => {
-    // En una implementación real, aquí iría la lógica para reiniciar el dispositivo
-    console.log('Reiniciando dispositivo:', deviceId);
+  const handleRestart = (device: Device) => {
+    setSelectedDevice(device);
+    setShowRestartModal(true);
+  };
+
+  // Función para confirmar eliminación de dispositivo
+  const handleDeleteDevice = (device: Device) => {
+    setSelectedDevice(device);
+    setShowDeleteModal(true);
+  };
+
+  // Función para procesar la eliminación
+  const confirmDeleteDevice = () => {
+    // Aquí iría la lógica para eliminar el dispositivo
+    console.log('Eliminando dispositivo:', selectedDevice?.id);
+    
+    // Actualizar la lista (simulación)
+    if (selectedDevice) {
+      setDevices(currentDevices => 
+        currentDevices.filter(device => device.id !== selectedDevice.id)
+      );
+    }
+    
+    // Mostrar notificación
+    setToast({
+      type: 'success',
+      message: `Dispositivo "${selectedDevice?.name}" eliminado correctamente`
+    });
+    
+    // Cerrar modal
+    setShowDeleteModal(false);
+    setSelectedDevice(null);
+  };
+
+  // Función para manejar clic en fila
+  const handleRowClick = (device: Device) => {
+    handleOpenEventos(device);
+  };
+
+  // Función para abrir el menú contextual
+  const handleOpenContextMenu = (device: Device, e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Cerrar menú si ya está abierto para el mismo dispositivo
+    if (contextMenuDevice && contextMenuDevice.id === device.id) {
+      setContextMenuDevice(null);
+    } else {
+      setContextMenuDevice(device);
+    }
+  };
+
+  // Función para cerrar el menú contextual
+  const handleCloseContextMenu = () => {
+    setContextMenuDevice(null);
   };
 
   // Obtener la clase CSS para el estado del dispositivo
@@ -179,8 +236,8 @@ export const DevicesScreen: React.FC = () => {
       </div>
 
       {/* Lista de dispositivos */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-lg shadow">
+        <div className="overflow-x-auto" style={{ overflowY: "visible" }}>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -191,7 +248,7 @@ export const DevicesScreen: React.FC = () => {
                   Tipo/Modelo
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  IP/Ubicación
+                  Ubicación
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
@@ -206,7 +263,11 @@ export const DevicesScreen: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {devices.map((device) => (
-                <tr key={device.id} className="hover:bg-gray-50">
+                <tr 
+                  key={device.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleRowClick(device)}
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
@@ -242,7 +303,7 @@ export const DevicesScreen: React.FC = () => {
                     <div className="text-sm text-gray-500">{device.model}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{device.ip}</div>
+                    {/* <div className="text-sm text-gray-900">{device.ip}</div> */}
                     <div className="text-sm text-gray-500">{device.location}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -251,67 +312,62 @@ export const DevicesScreen: React.FC = () => {
                       {device.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>
                     {device.lastSync ? new Date(device.lastSync).toLocaleString() : 'Sin sincronizar'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
                     <div className="flex space-x-2 justify-end">
                       <button
-                        onClick={() => handleOpenOperations(device)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenOperations(device);
+                        }}
                         className="text-blue-600 hover:text-blue-900"
                         title="Operaciones biométricas"
                       >
                         <Activity className="h-5 w-5" />
                       </button>
                       <button
-                        onClick={() => handleOpenEventos(device)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEventos(device);
+                        }}
                         className="text-green-600 hover:text-green-900"
                         title="Ver eventos"
                       >
                         <Clock className="h-5 w-5" />
                       </button>
                       <button
-                        onClick={() => handleRestart(device.id || '')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRestart(device);
+                        }}
                         className="text-orange-600 hover:text-orange-900"
                         title="Reiniciar dispositivo"
                       >
                         <RefreshCw className="h-5 w-5" />
                       </button>
-                      <div className="relative group">
+                      <div className="relative" style={{ position: "relative" }}>
                         <button
+                          onClick={(e) => handleOpenContextMenu(device, e)}
                           className="text-gray-500 hover:text-gray-700"
                           title="Más acciones"
                         >
                           <MoreVertical className="h-5 w-5" />
                         </button>
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block z-10">
-                          <div className="py-1">
-                            <button 
-                              onClick={() => handleEditDevice(device)} 
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              Editar dispositivo
-                            </button>
-                            <button 
-                              onClick={() => handleOpenOperations(device)}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              Operaciones biométricas
-                            </button>
-                            <button 
-                              onClick={() => handleOpenEventos(device)}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              Ver eventos
-                            </button>
-                            <button 
-                              onClick={() => handleRestart(device.id || '' )}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              Reiniciar dispositivo
-                            </button>
-                          </div>
-                        </div>
+                        
+                        {contextMenuDevice && contextMenuDevice.id === device.id && (
+                          <DeviceContextMenu
+                            device={device}
+                            isOpen={true}
+                            onClose={handleCloseContextMenu}
+                            onEdit={handleEditDevice}
+                            onOpenOperations={handleOpenOperations}
+                            onOpenEventos={handleOpenEventos}
+                            onRestart={handleRestart}
+                            onDelete={handleDeleteDevice}
+                          />
+                        )}
                       </div>
                     </div>
                   </td>
@@ -376,6 +432,49 @@ export const DevicesScreen: React.FC = () => {
             setSelectedDevice(null);
           }}
         />
+      )}
+
+      {/* Modal de reinicio */}
+      {showRestartModal && selectedDevice && (
+        <RestartModal
+          deviceName={selectedDevice.name}
+          onClose={() => {
+            setShowRestartModal(false);
+            setSelectedDevice(null);
+          }}
+        />
+      )}
+
+      {/* Modal de eliminación */}
+      {showDeleteModal && selectedDevice && (
+        <DeleteDeviceModal
+          deviceName={selectedDevice.name}
+          onDelete={confirmDeleteDevice}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setSelectedDevice(null);
+          }}
+        />
+      )}
+
+      {/* Toast de notificación */}
+      {toast && (
+        <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-lg flex items-center space-x-3 shadow-lg
+          ${toast.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' :
+            toast.type === 'error' ? 'bg-red-50 text-red-800 border border-red-200' :
+            'bg-yellow-50 text-yellow-800 border border-yellow-200'}`}
+        >
+          {toast.type === 'success' && <CheckCircle className="w-5 h-5" />}
+          {toast.type === 'error' && <AlertCircle className="w-5 h-5" />}
+          {toast.type === 'warning' && <AlertCircle className="w-5 h-5" />}
+          <p className="text-sm font-medium">{toast.message}</p>
+          <button
+            onClick={() => setToast(null)}
+            className="p-1 rounded-full hover:bg-white hover:bg-opacity-20"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       )}
     </div>
   );
