@@ -22,8 +22,8 @@ interface TopBarProps {
   // Nuevas props para filtros avanzados
   locations: any[];
   departments: any[];
-  sections: any[];
-  units: any[];
+
+
   employees: any[];
   onAdvancedFilterChange: (filters: any) => void;
 }
@@ -46,8 +46,7 @@ const TopBar: React.FC<TopBarProps> = ({
   // Nuevas props
   locations = [],
   departments = [],
-  sections = [],
-  units = [],
+
   employees = [],
   onAdvancedFilterChange = () => {}
 }) => {
@@ -132,8 +131,6 @@ const TopBar: React.FC<TopBarProps> = ({
               onClose={() => setShowAdvancedFilter(false)}
               locations={locations}
               departments={departments}
-              sections={sections}
-              units={units}
               employees={employees}
               onFilterChange={handleAdvancedFilterChange}
             />

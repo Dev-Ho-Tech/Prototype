@@ -1,10 +1,11 @@
 import React from 'react';
-import { Employee, WorkShift, License, ScheduleEntry, DragInfo } from '../interfaces/types';
+import { WorkShift, License, ScheduleEntry, DragInfo } from '../interfaces/types';
+import { UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 import DayRow from './DayRow';
 import TimeSlotHeader from './TimeSlotHeader';
 
 interface ScheduleGridProps {
-  employee: Employee | null;
+  employee: UnifiedEmployee | null;
   selectedDate: string;
   selectedPeriod: string;
   workShifts: WorkShift[];

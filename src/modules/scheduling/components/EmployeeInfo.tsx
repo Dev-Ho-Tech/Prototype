@@ -1,8 +1,8 @@
 import React from 'react';
-import { Employee } from '../interfaces/types';
+import { UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 
 interface EmployeeInfoProps {
-  employee: Employee;
+  employee: UnifiedEmployee;
 }
 
 const EmployeeInfo: React.FC<EmployeeInfoProps> = ({ employee }) => {
@@ -11,12 +11,12 @@ const EmployeeInfo: React.FC<EmployeeInfoProps> = ({ employee }) => {
       <div className="grid grid-cols-5 gap-4">
         <div className="col-span-1">
           <div className="text-xs text-gray-500 mb-1">Código:</div>
-          <div className="font-medium">{employee.code || employee.id}</div>
+          <div className="font-medium">{employee.codigo || employee.id}</div>
         </div>
         
         <div className="col-span-1">
           <div className="text-xs text-gray-500 mb-1">Sede:</div>
-          <div className="font-medium">{employee.location}</div>
+          <div className="font-medium">{employee.location || employee.sede}</div>
         </div>
         
         <div className="col-span-1">
@@ -26,12 +26,12 @@ const EmployeeInfo: React.FC<EmployeeInfoProps> = ({ employee }) => {
         
         <div className="col-span-1">
           <div className="text-xs text-gray-500 mb-1">Cargo:</div>
-          <div className="font-medium">{employee.position}</div>
+          <div className="font-medium">{employee.position || employee.cargo}</div>
         </div>
         
         <div className="col-span-1">
           <div className="text-xs text-gray-500 mb-1">Tipo De Contrato:</div>
-          <div className="font-medium">{employee.contractType || 'Indefinido'}</div>
+          <div className="font-medium">{employee.contractType || employee.modalidadTiempo || 'Indefinido'}</div>
         </div>
       </div>
     </div>

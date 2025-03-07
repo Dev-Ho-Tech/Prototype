@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, X, Search, UserIcon, Building, Layers, Grid } from 'lucide-react';
+import { ChevronDown, ChevronUp, X, Search, UserIcon, Building, Layers } from 'lucide-react';
 
 interface Location {
   id: string;
@@ -13,25 +13,17 @@ interface Department {
   locationId: string;
 }
 
-interface Section {
-  id: string;
-  name: string;
-  departmentId: string;
-}
 
-interface Unit {
-  id: string;
-  name: string;
-  sectionId: string;
-}
+
+
 
 interface AdvancedFilterProps {
   isOpen: boolean;
   onClose: () => void;
   locations: Location[];
   departments: Department[];
-  sections: Section[];
-  units: Unit[];
+
+
   employees: any[];
   onFilterChange: (filters: FilterState) => void;
 }
@@ -49,8 +41,8 @@ const AdvancedFilter: React.FC<AdvancedFilterProps> = ({
   onClose,
   locations,
   departments,
-  sections,
-  units,
+
+
   employees,
   onFilterChange
 }) => {
@@ -67,7 +59,7 @@ const AdvancedFilter: React.FC<AdvancedFilterProps> = ({
     locations: true,
     departments: true,
     sections: true,
-    units: true,
+
     employees: true
   });
 
@@ -76,13 +68,9 @@ const AdvancedFilter: React.FC<AdvancedFilterProps> = ({
     ? departments.filter(dept => filters.selectedLocations.includes(dept.locationId))
     : departments;
 
-  const filteredSections = filters.selectedDepartments.length > 0
-    ? sections.filter(section => filters.selectedDepartments.includes(section.departmentId))
-    : sections;
 
-  const filteredUnits = filters.selectedSections.length > 0
-    ? units.filter(unit => filters.selectedSections.includes(unit.sectionId))
-    : units;
+
+
 
   // Filtrado de empleados basado en los filtros seleccionados y el término de búsqueda
   const filteredEmployees = employees.filter(employee => {
@@ -129,25 +117,8 @@ const AdvancedFilter: React.FC<AdvancedFilterProps> = ({
     });
   };
 
-  const handleSectionChange = (sectionId: string) => {
-    setFilters(prev => {
-      const newSections = prev.selectedSections.includes(sectionId)
-        ? prev.selectedSections.filter(id => id !== sectionId)
-        : [...prev.selectedSections, sectionId];
-      
-      return { ...prev, selectedSections: newSections };
-    });
-  };
 
-  const handleUnitChange = (unitId: string) => {
-    setFilters(prev => {
-      const newUnits = prev.selectedUnits.includes(unitId)
-        ? prev.selectedUnits.filter(id => id !== unitId)
-        : [...prev.selectedUnits, unitId];
-      
-      return { ...prev, selectedUnits: newUnits };
-    });
-  };
+
 
   const handleEmployeeChange = (employeeId: string) => {
     setFilters(prev => {
@@ -324,75 +295,9 @@ const AdvancedFilter: React.FC<AdvancedFilterProps> = ({
             }
           </button>
           
-          {expandedSections.sections && (
-            <div className="px-3 py-2 space-y-2">
-              {filteredSections.length > 0 ? (
-                filteredSections.map(section => (
-                  <div key={section.id} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={`section-${section.id}`}
-                      checked={filters.selectedSections.includes(section.id)}
-                      onChange={() => handleSectionChange(section.id)}
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                    <label 
-                      htmlFor={`section-${section.id}`}
-                      className="ml-2 text-sm text-gray-700"
-                    >
-                      {section.name}
-                    </label>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500 italic">Seleccione un departamento primero</p>
-              )}
-            </div>
-          )}
+
         </div>
 
-        {/* Unidades */}
-        <div className="border-b border-gray-200">
-          <button 
-            className="w-full px-3 py-2 flex justify-between items-center hover:bg-gray-50"
-            onClick={() => toggleSection('units')}
-          >
-            <div className="flex items-center">
-              <Grid className="w-4 h-4 mr-2 text-blue-500" />
-              <span className="text-sm font-medium">Unidades</span>
-            </div>
-            {expandedSections.units ? 
-              <ChevronUp className="w-4 h-4 text-gray-500" /> : 
-              <ChevronDown className="w-4 h-4 text-gray-500" />
-            }
-          </button>
-          
-          {expandedSections.units && (
-            <div className="px-3 py-2 space-y-2">
-              {filteredUnits.length > 0 ? (
-                filteredUnits.map(unit => (
-                  <div key={unit.id} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={`unit-${unit.id}`}
-                      checked={filters.selectedUnits.includes(unit.id)}
-                      onChange={() => handleUnitChange(unit.id)}
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                    <label 
-                      htmlFor={`unit-${unit.id}`}
-                      className="ml-2 text-sm text-gray-700"
-                    >
-                      {unit.name}
-                    </label>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500 italic">Seleccione una sección primero</p>
-              )}
-            </div>
-          )}
-        </div>
 
         {/* Empleados */}
         <div>

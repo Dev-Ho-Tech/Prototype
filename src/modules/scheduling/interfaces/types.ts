@@ -1,13 +1,3 @@
-export interface Employee {
-  id: string;
-  name: string;
-  position: string;
-  department: string;
-  location: string;
-  code?: string;
-  contractType?: string;
-  schedule: ScheduleEntry[];
-}
 
 export interface WorkShift {
   id: string;

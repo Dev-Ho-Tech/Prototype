@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, User, Mail, X } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { authService } from '../services/authService';
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -8,23 +10,44 @@ interface LoginScreenProps {
 export function LoginScreen({ onLogin }: LoginScreenProps) {
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
+    showPassword: false
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [isRecovering, setIsRecovering] = useState(false);
   const [recoverySuccess, setRecoverySuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null);
+    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      onLogin();
+      // Llamar al servicio de autenticación con las credenciales
+      const response = await authService.login({
+        username: formData.username,
+        password: formData.password
+      });
+      
+      // Verificar si la autenticación fue exitosa
+      if (response.success) {
+        // Mostrar mensaje de éxito
+        toast.success('Inicio de sesión exitoso');
+        
+        // Llamar a la función de callback para manejar la navegación
+        onLogin();
+      } else {
+        // Mostrar mensaje de error
+        setErrorMessage(response.error || 'Error de autenticación');
+        toast.error(response.error || 'Credenciales inválidas');
+      }
     } catch (error) {
       console.error('Login error:', error);
+      toast.error('Ocurrió un error al iniciar sesión');
+      setErrorMessage('Ocurrió un error al iniciar sesión. Por favor intente de nuevo.');
     } finally {
       setIsLoading(false);
     }
@@ -37,8 +60,10 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       setRecoverySuccess(true);
+      toast.success('Instrucciones enviadas a su correo electrónico');
     } catch (error) {
       console.error('Recovery error:', error);
+      toast.error('Error al enviar instrucciones de recuperación');
     } finally {
       setIsRecovering(false);
     }
@@ -117,6 +142,12 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
+            {errorMessage && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                {errorMessage}
+              </div>
+            )}
+            
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                 Usuario
@@ -147,7 +178,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                 </div>
                 <input
                   id="password"
-                  type={formData.password ? 'text' : 'password'}
+                  type={formData.showPassword ? 'text' : 'password'}
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -156,10 +187,10 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                 />
                 <button
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, showPassword: !prev.password }))}
+                  onClick={() => setFormData(prev => ({ ...prev, showPassword: !prev.showPassword }))}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                 >
-                  {formData.password ? (
+                  {formData.showPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -194,6 +225,11 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                 'Ingresar'
               )}
             </button>
+            
+            {/* Mensaje de prueba */}
+            <div className="text-center text-xs text-gray-500">
+              <p>Usar usuario: <strong>admin</strong> y contraseña: <strong>admin</strong> para pruebas</p>
+            </div>
           </form>
         </div>
 
