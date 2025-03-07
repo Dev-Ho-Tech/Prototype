@@ -25,6 +25,13 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
     setCurrentScreen 
   } = useAppState();
   
+  const UserIcon = (props) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <circle cx="12" cy="8" r="4" fill="currentColor"/>
+      <path d="M4 20C4 17.2386 6.23858 15 9 15H15C17.7614 15 20 17.2386 20 20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V20Z" fill="currentColor"/>
+    </svg>
+  );
+
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfile, setShowProfile] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<UnifiedEmployee | null>(null);
@@ -308,7 +315,7 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
                           <td className="px-6 py-4">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               {displayEmployee.method === 'Rostro' ? (
-                                <User className="w-3 h-3 mr-1" />
+                                <UserIcon className="w-3 h-3 mr-1" />
                               ) : displayEmployee.method === 'Huella' ? (
                                 <Fingerprint className="w-3 h-3 mr-1" />
                               ) : (

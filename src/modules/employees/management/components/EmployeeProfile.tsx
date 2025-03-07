@@ -6,6 +6,8 @@ import { Briefcase, Eye, Fingerprint, User } from 'lucide-react';
 import { biometricOptions } from './EmployeeProfile/utils/const_biometric';
 import { useAppState } from '../../../../global/context/AppStateContext';
 import { UnifiedEmployee } from '../../../../global/interfaces/unifiedTypes';
+import PerfilesMarcajeSelector from './EmployeeProfile/PerfilesMarcajeSelector';
+import DocumentTypeSelector from './EmployeeProfile/DocumentTypeSelector';
 
 export const EmployeeProfileForm = ({ 
   employee, 
@@ -61,6 +63,7 @@ export const EmployeeProfileForm = ({
       [name]: type === 'checkbox' ? checked : value,
     });
   };
+  
 
   const handleSave = () => {
     // Creamos un empleado unificado con los datos actualizados
@@ -207,28 +210,15 @@ export const EmployeeProfileForm = ({
                   </div>
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm text-gray-600 mb-1">
-                  Tipo De Documento <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    name="tipoDocumento"
-                    value={personalData.tipoDocumento}
-                    onChange={handlePersonalDataChange}
-                    className="w-full p-2 border border-gray-300 rounded-md appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="Cédula">Cédula</option>
-                    <option value="Pasaporte">Pasaporte</option>
-                    <option value="DNI">DNI</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
+                <DocumentTypeSelector
+                  selectedType={personalData.tipoDocumento}
+                  onChange={handlePersonalDataChange}
+                  required={true}
+                />
               </div>
+              
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
                   Número De Documento <span className="text-red-500">*</span>
@@ -447,29 +437,20 @@ export const EmployeeProfileForm = ({
                   </div>
                 </div>
               </div>
+              
+
               <div>
-                <label className="block text-sm text-gray-600 mb-1">
-                  Perfiles De Marcaje
-                </label>
-                <div className="relative flex items-center border border-gray-300 p-2 rounded-md">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
-                    Principal
-                    <button type="button" className="ml-1 text-blue-600 hover:text-blue-800">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                    </button>
-                  </span>
-                  <button 
-                    type="button" 
-                    className="text-blue-600 hover:text-blue-800 ml-auto"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
+            <PerfilesMarcajeSelector
+              selectedProfiles={laborData.perfilesMarcaje}
+              onChange={(newProfiles) => {
+                setLaborData({
+                  ...laborData,
+                  perfilesMarcaje: newProfiles
+                });
+              }}
+            />
+            </div>
+
             </div>
           </div>
         </div>
