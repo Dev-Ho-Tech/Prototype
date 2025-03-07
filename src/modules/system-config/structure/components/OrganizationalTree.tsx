@@ -8,10 +8,11 @@ import type { OrganizationalNode } from '../../../../types';
 interface OrganizationalTreeProps {
   node: OrganizationalNode;
   onSelect: (node: OrganizationalNode) => void;
-  selectedNode?: OrganizationalNode;
+  selectedNode?: OrganizationalNode | null;
   expandedNodes: string[];
   onToggleExpand: (nodeId: string) => void;
   level?: number;
+  onEdit?: (node: OrganizationalNode) => void; // Nueva prop para manejar edición
 }
 
 export function OrganizationalTree({
@@ -20,7 +21,8 @@ export function OrganizationalTree({
   selectedNode,
   expandedNodes,
   onToggleExpand,
-  level = 0
+  level = 0,
+  onEdit
 }: OrganizationalTreeProps) {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [showConfirmation, setShowConfirmation] = useState<'create' | 'delete' | null>(null);
@@ -62,11 +64,18 @@ export function OrganizationalTree({
 
   const handleEditNode = () => {
     setContextMenu(null);
-    // Mostrar formulario de edición
-    setShowToast({
-      type: 'success',
-      message: 'Cambios guardados exitosamente'
-    });
+    // Seleccionar el nodo actual
+    onSelect(node);
+    // Llamar a la función de edición si está disponible
+    if (onEdit) {
+      onEdit(node);
+    } else {
+      // Si no hay función de edición, mostrar un toast informativo
+      setShowToast({
+        type: 'warning',
+        message: 'Funcionalidad de edición no disponible'
+      });
+    }
   };
 
   const handleDeleteNode = () => {
@@ -187,6 +196,7 @@ export function OrganizationalTree({
               expandedNodes={expandedNodes}
               onToggleExpand={onToggleExpand}
               level={level + 1}
+              onEdit={onEdit}
             />
           ))}
         </div>

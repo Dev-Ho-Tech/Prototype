@@ -4,13 +4,17 @@ import { OrganizationalTree } from './components/OrganizationalTree';
 import { NodeForm } from './components/NodeForm';
 import { SearchComponent } from './components/SearchComponentProps';
 import { organizationalStructureData } from './data';
+import { Toast } from './components/Toast';
 import type { OrganizationalNode } from '../../../types';
+import { ConfirmationModal } from './components/ConfirmationModal';
 
 export function StructureScreen() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNode, setSelectedNode] = useState<OrganizationalNode | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
+  const [toast, setToast] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   // Función recursiva para buscar nodos que coincidan con el término de búsqueda
   const searchNodes = (nodes: OrganizationalNode[], term: string): OrganizationalNode[] => {
@@ -67,8 +71,10 @@ export function StructureScreen() {
     setShowForm(true);
   };
 
-  const handleEditNode = () => {
-    if (selectedNode) {
+  const handleEditNode = (nodeToEdit?: OrganizationalNode) => {
+    const nodeToUpdate = nodeToEdit || selectedNode;
+    if (nodeToUpdate) {
+      setSelectedNode(nodeToUpdate);
       setShowForm(true);
     }
   };
@@ -77,6 +83,35 @@ export function StructureScreen() {
     console.log('Submitting node:', data);
     // Aquí iría la lógica para actualizar la estructura organizacional
     setShowForm(false);
+    
+    // Mostrar toast de éxito
+    setToast({
+      type: 'success',
+      message: selectedNode ? 'Cambios guardados exitosamente' : 'Nuevo nodo creado exitosamente'
+    });
+  };
+  
+  const handleDeleteNode = () => {
+    setShowDeleteConfirmation(true);
+  };
+  
+  const confirmDeleteNode = () => {
+    console.log('Deleting node:', selectedNode?.id);
+    // Aquí iría la lógica para eliminar el nodo de la estructura
+    setShowDeleteConfirmation(false);
+    
+    // Mostrar toast de éxito
+    setToast({
+      type: 'success',
+      message: `${selectedNode?.type === 'company' ? 'Compañía' : 
+                selectedNode?.type === 'branch' ? 'Sucursal' : 
+                selectedNode?.type === 'department' ? 'Departamento' : 
+                selectedNode?.type === 'section' ? 'Sección' : 
+                selectedNode?.type === 'unit' ? 'Unidad' : 'Nodo'} eliminada correctamente`
+    });
+    
+    // Volver a null el nodo seleccionado después de eliminarlo
+    setSelectedNode(null);
   };
 
   const handleSearch = (term: string) => {
@@ -99,6 +134,7 @@ export function StructureScreen() {
         selectedNode={selectedNode}
         expandedNodes={expandedNodes}
         onToggleExpand={handleNodeToggle}
+        onEdit={handleEditNode}
       />
     ));
   };
@@ -137,6 +173,7 @@ export function StructureScreen() {
               selectedNode={selectedNode}
               expandedNodes={expandedNodes}
               onToggleExpand={handleNodeToggle}
+              onEdit={handleEditNode}
             />
             {organizationalStructureData.children && renderTreeNodes(organizationalStructureData.children)}
           </div>
@@ -167,7 +204,7 @@ export function StructureScreen() {
               </div>
               <div className="flex items-center space-x-3">
                 <button
-                  onClick={handleEditNode}
+                  onClick={() => handleEditNode(selectedNode)}
                   className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                 >
                   <Edit className="w-4 h-4" />
@@ -177,7 +214,11 @@ export function StructureScreen() {
                   <Settings className="w-4 h-4" />
                   <span>Configuración</span>
                 </button>
-                <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Eliminar">
+                <button 
+                  onClick={handleDeleteNode}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg" 
+                  title="Eliminar"
+                >
                   <Trash className="w-5 h-5" />
                 </button>
               </div>
@@ -332,6 +373,36 @@ export function StructureScreen() {
             setShowForm(false);
           }}
           onSubmit={handleSubmitNode}
+        />
+      )}
+
+      {/* Toast de notificación */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
+      {/* Modal de confirmación para eliminar */}
+      {showDeleteConfirmation && selectedNode && (
+        <ConfirmationModal
+          title={`Eliminar ${selectedNode.type === 'company' ? 'Compañía' : 
+                           selectedNode.type === 'branch' ? 'Sucursal' : 
+                           selectedNode.type === 'department' ? 'Departamento' : 
+                           selectedNode.type === 'section' ? 'Sección' : 
+                           selectedNode.type === 'unit' ? 'Unidad' : 'Nodo'}`}
+          message={`¿Está seguro que desea eliminar ${selectedNode.type === 'company' ? 'la compañía' : 
+                                                    selectedNode.type === 'branch' ? 'la sucursal' : 
+                                                    selectedNode.type === 'department' ? 'el departamento' : 
+                                                    selectedNode.type === 'section' ? 'la sección' : 
+                                                    selectedNode.type === 'unit' ? 'la unidad' : 'el nodo'} "${selectedNode.name}"? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          cancelLabel="Cancelar"
+          onConfirm={confirmDeleteNode}
+          onCancel={() => setShowDeleteConfirmation(false)}
+          type="danger"
         />
       )}
     </div>

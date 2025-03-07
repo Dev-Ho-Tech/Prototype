@@ -201,8 +201,8 @@ export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee
                     <select
                       className="w-full p-2 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="+57">+57</option>
                       <option value="+1">+1</option>
+                      <option value="+57">+57</option>
                       <option value="+34">+34</option>
                     </select>
                   </div>
@@ -448,8 +448,11 @@ export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee
                 <Eye className="w-4 h-4 mr-1" />
                 Ver estructura
               </button>
+              {/* Botones de acción */}
             </div>
+            
           </div>
+
           <div className="grid grid-cols-7 gap-4 mt-2">
             {biometricOptions.map((option) => (
               <div key={option.id} className="flex flex-col items-center">
@@ -462,10 +465,8 @@ export const EmployeeProfileForm = ({ employee, onClose }: { employee?: Employee
               </div>
             ))}
           </div>
-        </div>
-        
-        {/* Botones de acción */}
         <ActionButtons onSave={handleSave} onCancel={onClose} />
+        </div>
         
         {/* Estilos CSS para el toggle switch */}
         <style>{`

@@ -15,10 +15,16 @@ const FaceIcon = ({ color }: { color: string }) => {
   return (
     <div className={`w-8 h-8 rounded-full flex items-center justify-center`} style={{ backgroundColor: color }}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-        <path d="M9 10C9 9.44772 9.44772 9 10 9H10.01C10.5623 9 11.01 9.44772 11.01 10C11.01 10.5523 10.5623 11 10.01 11H10C9.44772 11 9 10.5523 9 10Z" fill="currentColor"/>
-        <path d="M13 10C13 9.44772 13.4477 9 14 9H14.01C14.5623 9 15.01 9.44772 15.01 10C15.01 10.5523 14.5623 11 14.01 11H14C13.4477 11 13 10.5523 13 10Z" fill="currentColor"/>
-        <path d="M9 15C9 13.8954 9.89543 13 11 13H13C14.1046 13 15 13.8954 15 15C15 15.5523 14.5523 16 14 16C13.4477 16 13 15.5523 13 15H11C11 15.5523 10.5523 16 10 16C9.44772 16 9 15.5523 9 15Z" fill="currentColor"/>
-        <path fillRule="evenodd" clipRule="evenodd" d="M3 8C3 5.23858 5.23858 3 8 3H16C18.7614 3 21 5.23858 21 8V16C21 18.7614 18.7614 21 16 21H8C5.23858 21 3 18.7614 3 16V8ZM8 5C6.34315 5 5 6.34315 5 8V16C5 17.6569 6.34315 19 8 19H16C17.6569 19 19 17.6569 19 16V8C19 6.34315 17.6569 5 16 5H8Z" fill="currentColor"/>
+        {/* Cabeza */}
+        <path 
+          d="M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z" 
+          fill="currentColor"
+        />
+        {/* Cuerpo */}
+        <path 
+          d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" 
+          fill="currentColor"
+        />
       </svg>
     </div>
   );
@@ -35,7 +41,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
     // Calcular posición basada en el evento
     const rect = event.currentTarget.getBoundingClientRect();
     const position = {
-      top: rect.top - 80, // Posicionarlo más arriba para los iconos de marcaje
+      top: rect.top - 35, // Modificado: 5px más abajo que el valor original (-80)
       left: rect.left
     };
     
@@ -48,7 +54,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
     // Calcular posición basada en el evento
     const rect = event.currentTarget.getBoundingClientRect();
     const position = {
-      top: rect.top - 20, // Posicionarlo justo encima del elemento
+      top: rect.top - 15, // Modificado: 5px más abajo que el valor original (-20)
       left: rect.left + (rect.width / 2) // Centrado horizontalmente
     };
     
@@ -85,7 +91,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
   const activeItem = getActiveItem();
 
   // Calcular horas trabajadas totales
-  const horasTrabajadasTotales = "8 horas regulares + 2 horas extras";
+  const horasTrabajadasTotales = "8 horas regulares + 3 horas extras";
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
@@ -101,7 +107,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
         
-        {/* Tooltip para marcajes y segmentos */}
+        {/* Tooltip para marcajes y segmentos - Se ajustó la propiedad transform para bajar 5px */}
         {activeItem && activeItem.data && (
           <div 
             className="fixed bg-white border border-gray-200 shadow-lg rounded-md p-3 z-50"
@@ -109,7 +115,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
               top: tooltipPosition.top,
               left: tooltipPosition.left,
               minWidth: activeItem.tipo === 'segmento' ? '280px' : '220px',
-              transform: 'translate(-50%, -100%)',
+              transform: 'translate(-50%, -95%)', // Modificado: cambiado de -100% a -95% para bajar 5px el tooltip
               zIndex: 9999
             }}
           >
@@ -220,7 +226,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose }) => {
             
             {/* Línea de tiempo con horas */}
             <div className="border border-gray-200 rounded-lg p-4 relative">
-              {/* Marcadores con conectores - ahora con un palito más largo */}
+              {/* Marcadores con conectores  */}
               {marcajes.map((marcaje) => (
                 <div 
                   key={marcaje.id}
