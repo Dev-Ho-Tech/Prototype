@@ -36,6 +36,7 @@ import DashboardScreen from './modules/dashboard/DashboardScreen';
 import ComedorScreen from './modules/system-config/diner/ComedorScreen';
 // Importa el proveedor de contexto
 import { AppStateProvider } from './global/context/AppStateContext';
+import GeofenceModule from './modules/employees/geocerca/geocercaScreen';
 
 // Variable para almacenar el estado global (podemos mantenerla por compatibilidad)
 // eslint-disable-next-line react-refresh/only-export-components
@@ -125,6 +126,7 @@ function AppContent() {
           <Route path="/employees/records" element={<RecordsScreen />} />
           <Route path="/employees/schedule" element={<SchedulingScreen />} />
           <Route path="/employees/check-profiles" element={<CheckProfilesScreen />} />
+          <Route path="/employees/geocerca" element={<GeofenceModule />} />
           <Route path="/employees/biometric" element={<BiometricScreen />} />
           <Route path="/employees/incidencias" element={<IncidenciasScreen />} />
           <Route path="/administration/licenses" element={<LicensesScreen />} />

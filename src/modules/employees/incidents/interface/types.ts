@@ -10,6 +10,10 @@ export interface Employee {
   company: string;
   photoUrl?: string;
   containerType?: string;
+  containerName? : string;
+  supervisor?: string;
+  level4?: string;
+  level5?: string;
 }
 
 export interface Dispositivo {

@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, Filter } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { Period } from '../interfaces/types';
-import AdvancedFilter from './AdvancedFilter';
+import SearchFilterComponent from './SearchFilterComponent';
+import { UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 
 interface TopBarProps {
   searchTerm: string;
@@ -19,12 +20,10 @@ interface TopBarProps {
   setStartDate?: (date: string) => void;
   endDate?: string;
   setEndDate?: (date: string) => void;
-  // Nuevas props para filtros avanzados
+  // Props para filtros
   locations: any[];
   departments: any[];
-
-
-  employees: any[];
+  employees: UnifiedEmployee[];
   onAdvancedFilterChange: (filters: any) => void;
 }
 
@@ -43,18 +42,14 @@ const TopBar: React.FC<TopBarProps> = ({
   setStartDate = () => {},
   endDate = '',
   setEndDate = () => {},
-  // Nuevas props
-  locations = [],
-  departments = [],
-
+  // Props de filtros
+  // locations = [],
+  // departments = [],
   employees = [],
   onAdvancedFilterChange = () => {}
 }) => {
   // Estado local para manejar la visibilidad del selector de fechas
   const [showDateRange, setShowDateRange] = useState(selectedPeriod === 'Seleccionar fechas');
-  
-  // Estado para mostrar/ocultar filtro avanzado
-  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   
   // Inicializar fechas si no están definidas
   const [localStartDate, setLocalStartDate] = useState(startDate || selectedDate);
@@ -96,53 +91,54 @@ const TopBar: React.FC<TopBarProps> = ({
     // Aquí podrías añadir lógica adicional para buscar con el rango de fechas
   };
 
-  // Función para manejar cambios en el filtro avanzado
-  const handleAdvancedFilterChange = (filters: any) => {
+  // Función para manejar cambios en los filtros
+  const handleFilterChange = (filters: any) => {
     onAdvancedFilterChange(filters);
+  };
+
+  // Función para limpiar filtros
+  const clearAllFilters = () => {
+    // Implementación de limpiar filtros
+    setSearchTerm('');
+    onAdvancedFilterChange({
+      sedes: [],
+      departamentos: [],
+      secciones: [],
+      unidades: []
+    });
   };
 
   return (
     <div className="relative p-4 border-b border-gray-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex flex-col relative">
-            <label className="text-sm text-gray-500 mb-1">Buscar</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre, cargo o departamento"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-96 pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <button 
-                onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500"
-                title="Filtros avanzados"
-              >
-                <Filter className="w-4 h-4" />
-              </button>
-            </div>
+      {/* IMPORTANTE: Este div se mantiene como contenedor principal */}
+      <div className="flex" style={{ minHeight: '42px' }}>
+        {/* Componente de búsqueda a la izquierda con position relative y z-index para que los filtros se muestren por encima */}
+        <div className="w-1/3 relative" style={{ zIndex: 30 }}>
+          <SearchFilterComponent
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onFilterChange={handleFilterChange}
+            onClearFilters={clearAllFilters}
+            employees={employees}
+          />
+        </div>
 
-            {/* Componente de Filtro Avanzado */}
-            <AdvancedFilter 
-              isOpen={showAdvancedFilter}
-              onClose={() => setShowAdvancedFilter(false)}
-              locations={locations}
-              departments={departments}
-              employees={employees}
-              onFilterChange={handleAdvancedFilterChange}
-            />
-          </div>
-          
-
+        {/* CAMBIO IMPORTANTE: Controles de la derecha con position absolute para que estén fijos independiente de los filtros */}
+        <div 
+          className="flex items-center space-x-2" 
+          style={{ 
+            position: 'absolute', 
+            right: '1rem', 
+            top: '1rem',
+            zIndex: 20
+          }}
+        >
           <div className="flex flex-col">
-            <label className="text-sm text-gray-500 mb-1">Periodo</label>
+            <label className="text-xs text-gray-500 mb-1">Periodo</label>
             <select
               value={selectedPeriod}
               onChange={handlePeriodChange}
-              className="px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="px-2 py-1 pr-6 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option>Diario</option>
               <option>Semanal</option>
@@ -154,86 +150,87 @@ const TopBar: React.FC<TopBarProps> = ({
           {showDateRange ? (
             <>
               <div className="flex flex-col">
-                <label className="text-sm text-gray-500 mb-1">Fecha desde</label>
+                <label className="text-xs text-gray-500 mb-1">Fecha desde</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
                   <input
                     type="date"
                     value={localStartDate}
                     onChange={(e) => setLocalStartDate(e.target.value)}
-                    className="w-48 pl-9 pr-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-36 pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div className="flex flex-col">
-                <label className="text-sm text-gray-500 mb-1">Fecha hasta</label>
+                <label className="text-xs text-gray-500 mb-1">Fecha hasta</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
                   <input
                     type="date"
                     value={localEndDate}
                     onChange={(e) => setLocalEndDate(e.target.value)}
-                    className="w-48 pl-9 pr-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-36 pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <button 
-                className="px-4 py-2 mt-5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                className="px-3 py-1 mt-5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
                 onClick={handleSearchDateRange}
               >
                 Buscar
               </button>
-              <div className="w-[3px] h-6 bg-gray-300 mt-5"></div>
+              <div className="w-[2px] h-6 bg-gray-300 mt-5 mx-1"></div>
             </>
           ) : (
             <>
               <div className="flex flex-col">
-                <label className="text-sm text-gray-500 mb-1">Fecha</label>
+                <label className="text-xs text-gray-500 mb-1">Fecha</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
                   <input
                     type="date"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-48 pl-9 pr-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-36 pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <button 
-                className="px-4 py-2 mt-5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                className="px-3 py-1 mt-5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
                 onClick={goToToday}
               >
                 Hoy
               </button>
             </>
           )}
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => setShowShifts(!showShifts)}
-            className={`px-4 py-2 rounded-lg text-sm border ${
-              showShifts ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-300 text-gray-700'
-            }`}
-          >
-            Turnos de trabajo
-          </button>
-          <button
-            onClick={() => setShowLicenses(!showLicenses)}
-            className={`px-4 py-2 rounded-lg text-sm border ${
-              showLicenses ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-300 text-gray-700'
-            }`}
-          >
-            Licencias y permisos
-          </button>
-          <button
-            className="px-4 py-2 rounded-lg text-sm border border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            Guardar cambios
-          </button>
+          
+          {/* Botones de acciones a la derecha */}
+          <div className="flex items-center space-x-2 ml-2">
+            <button
+              onClick={() => setShowShifts(!showShifts)}
+              className={`px-3 py-1 rounded-lg text-sm border ${
+                showShifts ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-300 text-gray-700'
+              }`}
+            >
+              Turnos de trabajo
+            </button>
+            <button
+              onClick={() => setShowLicenses(!showLicenses)}
+              className={`px-3 py-1 rounded-lg text-sm border ${
+                showLicenses ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-300 text-gray-700'
+              }`}
+            >
+              Licencias y permisos
+            </button>
+            <button
+              className="px-3 py-1 rounded-lg text-sm border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Guardar cambios
+            </button>
+          </div>
         </div>
       </div>
     </div>

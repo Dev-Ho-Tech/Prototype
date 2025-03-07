@@ -227,6 +227,12 @@ const IncidenciasScreen: React.FC = () => {
   const toggleAdvancedFilters = () => {
     setShowAdvancedFilters(!showAdvancedFilters);
   };
+  
+  useEffect(() => {
+    if (employees.length > 0 && !selectedEmployee) {
+      setSelectedEmployee(employees[0]);
+    }
+  }, [employees, selectedEmployee]);
 
   // Manejar el inicio del redimensionamiento
   const handleResizeStart = (e: React.MouseEvent) => {

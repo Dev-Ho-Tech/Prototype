@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Building2, Users, MapPin, Phone, Mail, Edit, Trash, Settings, FolderTree, Briefcase, ChevronRight, Building } from 'lucide-react';
+import { Plus, Building2, Users, MapPin, Phone, Mail, Edit, Trash, FolderTree, Briefcase, ChevronRight, Building } from 'lucide-react';
 import { OrganizationalTree } from './components/OrganizationalTree';
 import { NodeForm } from './components/NodeForm';
 import { SearchComponent } from './components/SearchComponentProps';
@@ -210,10 +210,10 @@ export function StructureScreen() {
                   <Edit className="w-4 h-4" />
                   <span>Editar</span>
                 </button>
-                <button className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                {/* <button className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
                   <Settings className="w-4 h-4" />
                   <span>Configuración</span>
-                </button>
+                </button> */}
                 <button 
                   onClick={handleDeleteNode}
                   className="p-2 text-red-600 hover:bg-red-50 rounded-lg" 

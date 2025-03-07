@@ -12,6 +12,7 @@ export interface Contract {
   firstLastCheck: boolean;
   status: 'active' | 'inactive';
   employeeCount?: number;
+  concepts: string[]; 
 }
 
 // Tipo de contrato

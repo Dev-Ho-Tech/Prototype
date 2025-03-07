@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Globe2, Link, Mail, Sliders, Bell, Save, Send } from 'lucide-react';
+import { useState } from 'react';
+import { Globe2, Link, Sliders, Bell, Save } from 'lucide-react';
 import { ConfigTabs } from './components/ConfigTabs';
 import { BaseConfig } from './components/BaseConfig';
 import { VipsConfig } from './components/VipsConfig';
@@ -10,7 +10,7 @@ import { AlertsConfig } from './components/AlertsConfig';
 const tabs = [
   { id: 'base', label: 'Configuración Base', icon: Globe2 },
   { id: 'vips', label: 'Integración VIPS 3.0', icon: Link },
-  { id: 'email', label: 'Configuración de Correo', icon: Mail },
+  // { id: 'email', label: 'Configuración de Correo', icon: Mail },
   { id: 'params', label: 'Parametrización', icon: Sliders },
   { id: 'alerts', label: 'Alertas y Notificaciones', icon: Bell }
 ];
