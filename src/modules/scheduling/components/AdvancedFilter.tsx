@@ -1,354 +1,421 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, X, Search, UserIcon, Building, Layers } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 
-interface Location {
+// Interfaces
+interface FilterOption {
   id: string;
-  name: string;
+  nombre: string;
+  checked?: boolean;
 }
 
-interface Department {
+interface FilterSection {
   id: string;
-  name: string;
-  locationId: string;
-}
-
-
-
-
-
-interface AdvancedFilterProps {
-  isOpen: boolean;
-  onClose: () => void;
-  locations: Location[];
-  departments: Department[];
-
-
-  employees: any[];
-  onFilterChange: (filters: FilterState) => void;
+  title: string;
+  icon: string;
+  options: FilterOption[];
+  expanded: boolean;
+  dependsOn?: {
+    sectionId: string;
+    message: string;
+  };
 }
 
 interface FilterState {
-  selectedLocations: string[];
-  selectedDepartments: string[];
-  selectedSections: string[];
-  selectedUnits: string[];
-  selectedEmployees: string[];
+  sedes: string[];
+  departamentos: string[];
+  secciones: string[];
+  unidades: string[];
 }
 
-const AdvancedFilter: React.FC<AdvancedFilterProps> = ({
-  isOpen,
-  onClose,
-  locations,
-  departments,
+interface AdvancedFiltersProps {
+  onFilterChange: (filters: FilterState) => void;
+  onSearchTermChange: (term: string) => void;
+  searchTerm: string;
+  onClearFilters: () => void;
+  employees: UnifiedEmployee[];
+}
 
-
-  employees,
-  onFilterChange
+const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
+  onFilterChange,
+  onSearchTermChange,
+  onClearFilters,
+  employees
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState<FilterState>({
-    selectedLocations: [],
-    selectedDepartments: [],
-    selectedSections: [],
-    selectedUnits: [],
-    selectedEmployees: []
+  // Estado inicial de filtros
+  const [filterState, setFilterState] = useState<FilterState>({
+    sedes: [],
+    departamentos: [],
+    secciones: [],
+    unidades: []
   });
 
-  const [expandedSections, setExpandedSections] = useState({
-    locations: true,
-    departments: true,
-    sections: true,
-
-    employees: true
-  });
-
-  // Filtrar las opciones disponibles según las selecciones superiores
-  const filteredDepartments = filters.selectedLocations.length > 0
-    ? departments.filter(dept => filters.selectedLocations.includes(dept.locationId))
-    : departments;
-
-
-
-
-
-  // Filtrado de empleados basado en los filtros seleccionados y el término de búsqueda
-  const filteredEmployees = employees.filter(employee => {
-    const matchesSearch = searchTerm === '' || 
-      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (employee.code && employee.code.toLowerCase().includes(searchTerm.toLowerCase()));
+  // Extraer opciones únicas de los datos de empleados
+  const getUniqueOptions = (key: keyof UnifiedEmployee): FilterOption[] => {
+    const uniqueValues = new Set<string>();
     
-    const matchesLocation = filters.selectedLocations.length === 0 || 
-      filters.selectedLocations.includes(employee.location);
+    employees.forEach(employee => {
+      if (employee[key]) {
+        uniqueValues.add(employee[key] as string);
+      }
+    });
     
-    const matchesDepartment = filters.selectedDepartments.length === 0 || 
-      filters.selectedDepartments.includes(employee.department);
-    
-    // Aquí habría que agregar más filtros si tuviéramos sección y unidad en los datos de empleados
-    
-    return matchesSearch && matchesLocation && matchesDepartment;
-  });
-
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
+    return Array.from(uniqueValues).map(value => ({
+      id: value,
+      nombre: value,
+      checked: false
     }));
   };
 
-  const handleLocationChange = (locationId: string) => {
-    setFilters(prev => {
-      const newLocations = prev.selectedLocations.includes(locationId)
-        ? prev.selectedLocations.filter(id => id !== locationId)
-        : [...prev.selectedLocations, locationId];
-      
-      return { ...prev, selectedLocations: newLocations };
-    });
-  };
-
-  const handleDepartmentChange = (departmentId: string) => {
-    setFilters(prev => {
-      const newDepartments = prev.selectedDepartments.includes(departmentId)
-        ? prev.selectedDepartments.filter(id => id !== departmentId)
-        : [...prev.selectedDepartments, departmentId];
-      
-      return { ...prev, selectedDepartments: newDepartments };
-    });
-  };
-
-
-
-
-  const handleEmployeeChange = (employeeId: string) => {
-    setFilters(prev => {
-      const newEmployees = prev.selectedEmployees.includes(employeeId)
-        ? prev.selectedEmployees.filter(id => id !== employeeId)
-        : [...prev.selectedEmployees, employeeId];
-      
-      return { ...prev, selectedEmployees: newEmployees };
-    });
-  };
-
-  const handleSelectAllEmployees = () => {
-    if (filters.selectedEmployees.length === filteredEmployees.length) {
-      // Si todos están seleccionados, desmarca todos
-      setFilters(prev => ({...prev, selectedEmployees: []}));
-    } else {
-      // Si no todos están seleccionados, marca todos
-      setFilters(prev => ({
-        ...prev, 
-        selectedEmployees: filteredEmployees.map(emp => emp.id)
-      }));
+  // Estado para las secciones de filtro
+  const [filterSections, setFilterSections] = useState<FilterSection[]>([
+    {
+      id: 'sedes',
+      title: 'Sedes',
+      icon: 'building',
+      options: getUniqueOptions('location'),
+      expanded: true
+    },
+    {
+      id: 'departamentos',
+      title: 'Departamentos',
+      icon: 'briefcase',
+      options: getUniqueOptions('department'),
+      expanded: true,
+      dependsOn: {
+        sectionId: 'sedes',
+        message: 'Seleccione una sede primero'
+      }
+    },
+    {
+      id: 'secciones',
+      title: 'Secciones',
+      icon: 'layers',
+      options: getUniqueOptions('section'),
+      expanded: true,
+      dependsOn: {
+        sectionId: 'departamentos',
+        message: 'Seleccione un departamento primero'
+      }
+    },
+    {
+      id: 'unidades',
+      title: 'Unidades',
+      icon: 'users',
+      options: [], // Inicialmente vacío porque dependerá de la sección
+      expanded: true,
+      dependsOn: {
+        sectionId: 'secciones',
+        message: 'Seleccione una sección primero'
+      }
     }
-  };
+  ]);
 
-  const clearAllFilters = () => {
-    setFilters({
-      selectedLocations: [],
-      selectedDepartments: [],
-      selectedSections: [],
-      selectedUnits: [],
-      selectedEmployees: []
-    });
-    setSearchTerm('');
-  };
-
-  // Enviar los cambios de filtro al componente padre
+  // Actualizar las opciones de secciones basado en la selección de departamentos
   useEffect(() => {
-    onFilterChange(filters);
-  }, [filters, onFilterChange]);
+    const updateFilterOptions = () => {
+      // Actualizamos las listas dependientes
+      if (filterState.sedes.length > 0) {
+        // Filtrar departamentos basados en las sedes seleccionadas
+        const filteredDepartments = new Set<string>();
+        
+        employees.forEach(employee => {
+          if (employee.location && filterState.sedes.includes(employee.location) && employee.department) {
+            filteredDepartments.add(employee.department);
+          }
+        });
+        
+        // Actualizar opciones de departamentos
+        setFilterSections(prevSections => 
+          prevSections.map(section => {
+            if (section.id === 'departamentos') {
+              const currentDeptOptions = Array.from(filteredDepartments).map(dept => ({
+                id: dept,
+                nombre: dept,
+                checked: filterState.departamentos.includes(dept)
+              }));
+              
+              return {
+                ...section,
+                options: currentDeptOptions
+              };
+            }
+            return section;
+          })
+        );
+      }
+      
+      if (filterState.departamentos.length > 0) {
+        // Filtrar secciones basadas en los departamentos seleccionados
+        const filteredSections = new Set<string>();
+        
+        employees.forEach(employee => {
+          if (employee.department && filterState.departamentos.includes(employee.department) && employee.section) {
+            filteredSections.add(employee.section);
+          }
+        });
+        
+        // Actualizar opciones de secciones
+        setFilterSections(prevSections => 
+          prevSections.map(section => {
+            if (section.id === 'secciones') {
+              const currentSectionOptions = Array.from(filteredSections).map(sec => ({
+                id: sec,
+                nombre: sec,
+                checked: filterState.secciones.includes(sec)
+              }));
+              
+              return {
+                ...section,
+                options: currentSectionOptions
+              };
+            }
+            return section;
+          })
+        );
+      }
+    };
+    
+    updateFilterOptions();
+  }, [employees, filterState.sedes, filterState.departamentos, filterState.secciones]);
 
-  if (!isOpen) return null;
+  // Función para manejar el cambio de estado de una opción de filtro
+  const handleOptionChange = (sectionId: string, optionId: string, checked: boolean) => {
+    // Actualizar estado de secciones de filtro (para controlar checkboxes)
+    setFilterSections(sections => 
+      sections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            options: section.options.map(option => {
+              if (option.id === optionId) {
+                return { ...option, checked };
+              }
+              return option;
+            })
+          };
+        }
+        return section;
+      })
+    );
+
+    // Actualizar estado de filtros seleccionados
+    setFilterState(prevState => {
+      const newState = { ...prevState };
+      
+      // Si el checkbox está marcado, añadir a la lista
+      if (checked) {
+        newState[sectionId as keyof FilterState] = [
+          ...newState[sectionId as keyof FilterState], 
+          optionId
+        ];
+      } 
+      // Si está desmarcado, quitar de la lista
+      else {
+        newState[sectionId as keyof FilterState] = newState[sectionId as keyof FilterState]
+          .filter(id => id !== optionId);
+      }
+      
+      // Si cambia la selección de una sección padre, limpiamos las selecciones hijas
+      if (sectionId === 'sedes' && !checked) {
+        // Si desmarcamos una sede, verificamos si debemos limpiar departamentos relacionados
+        const remainingSedes = newState.sedes;
+        const validDepartamentos = new Set<string>();
+        
+        employees.forEach(employee => {
+          if (employee.location && employee.department && remainingSedes.includes(employee.location)) {
+            validDepartamentos.add(employee.department);
+          }
+        });
+        
+        // Filtrar los departamentos que ya no son válidos
+        newState.departamentos = newState.departamentos.filter(dept => 
+          validDepartamentos.has(dept)
+        );
+        
+        // Si se eliminaron todos los departamentos, limpiar secciones
+        if (newState.departamentos.length === 0) {
+          newState.secciones = [];
+          newState.unidades = [];
+        }
+      } else if (sectionId === 'departamentos' && !checked) {
+        // Si desmarcamos un departamento, verificamos si debemos limpiar secciones relacionadas
+        const remainingDepartamentos = newState.departamentos;
+        const validSecciones = new Set<string>();
+        
+        employees.forEach(employee => {
+          if (employee.department && remainingDepartamentos.includes(employee.department)) {
+            validSecciones.add(employee.section);
+          }
+        });
+        
+        // Filtrar las secciones que ya no son válidas
+        newState.secciones = newState.secciones.filter(sec => 
+          validSecciones.has(sec)
+        );
+        
+        // Si se eliminaron todas las secciones, limpiar unidades
+        if (newState.secciones.length === 0) {
+          newState.unidades = [];
+        }
+      }
+      
+      // Llamar al callback con el nuevo estado
+      onFilterChange(newState);
+      return newState;
+    });
+  };
+
+  // Función para expandir/colapsar una sección
+  const toggleSection = (sectionId: string) => {
+    setFilterSections(sections => 
+      sections.map(section => {
+        if (section.id === sectionId) {
+          return { ...section, expanded: !section.expanded };
+        }
+        return section;
+      })
+    );
+  };
+
+  // Verificar si una sección depende de otra y si hay selecciones en la sección dependiente
+  const isSectionDisabled = (section: FilterSection): boolean => {
+    if (!section.dependsOn) return false;
+    
+    const { sectionId } = section.dependsOn;
+    return filterState[sectionId as keyof FilterState].length === 0;
+  };
+
+  // Limpiar todos los filtros
+  const handleClearFilters = () => {
+    setFilterState({
+      sedes: [],
+      departamentos: [],
+      secciones: [],
+      unidades: []
+    });
+    
+    // Reiniciar las opciones de las secciones
+    setFilterSections(sections => 
+      sections.map(section => {
+        if (section.id === 'sedes') {
+          return {
+            ...section,
+            options: getUniqueOptions('location').map(opt => ({ ...opt, checked: false })),
+            expanded: true
+          };
+        } else if (section.id === 'departamentos') {
+          return {
+            ...section,
+            options: getUniqueOptions('department').map(opt => ({ ...opt, checked: false })),
+            expanded: true
+          };
+        } else if (section.id === 'secciones') {
+          return {
+            ...section,
+            options: getUniqueOptions('section').map(opt => ({ ...opt, checked: false })),
+            expanded: true
+          };
+        } else {
+          return {
+            ...section,
+            options: [],
+            expanded: true
+          };
+        }
+      })
+    );
+    
+    onSearchTermChange('');
+    onClearFilters();
+  };
 
   return (
-    <div className="absolute z-10 top-20 left-4 w-80 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-      <div className="p-3 border-b border-gray-200 flex justify-between items-center">
-        <h3 className="text-blue-600 font-medium flex items-center">
-          <UserIcon className="w-5 h-5 mr-2" />
-          Filtrar Empleados
-        </h3>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      <div className="p-3 border-b border-gray-200">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
-            type="text"
-            placeholder="Buscar Empleado, ID, Nro documento"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-      </div>
-
-      <div className="px-3 py-2 flex justify-between items-center border-b border-gray-200">
-        <h4 className="text-sm font-medium text-gray-700">Filtros</h4>
-        <button 
-          onClick={clearAllFilters} 
-          className="text-sm text-blue-600 hover:text-blue-800"
+    // CAMBIO: Eliminada la clase w-full para no forzar el ancho ya que ahora manejamos el campo de búsqueda fuera de este componente
+    <div className="p-4">
+      {/* CAMBIO: Eliminado el campo de búsqueda duplicado */}
+      
+      {/* Título de Filtros y botón Limpiar */}
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-sm font-medium text-indigo-900">Filtros</h2>
+        <button
+          onClick={handleClearFilters}
+          className="text-xs text-indigo-600 hover:text-indigo-800"
         >
           Limpiar
         </button>
       </div>
 
-      <div className="max-h-96 overflow-y-auto">
-        {/* Sedes */}
-        <div className="border-b border-gray-200">
-          <button 
-            className="w-full px-3 py-2 flex justify-between items-center hover:bg-gray-50"
-            onClick={() => toggleSection('locations')}
-          >
-            <div className="flex items-center">
-              <Building className="w-4 h-4 mr-2 text-blue-500" />
-              <span className="text-sm font-medium">Sedes</span>
-            </div>
-            {expandedSections.locations ? 
-              <ChevronUp className="w-4 h-4 text-gray-500" /> : 
-              <ChevronDown className="w-4 h-4 text-gray-500" />
-            }
-          </button>
+      {/* Secciones de filtro */}
+      <div className="space-y-3">
+        {filterSections.map((section) => {
+          const isDisabled = isSectionDisabled(section);
           
-          {expandedSections.locations && (
-            <div className="px-3 py-2 space-y-2">
-              {locations.map(location => (
-                <div key={location.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`location-${location.id}`}
-                    checked={filters.selectedLocations.includes(location.id)}
-                    onChange={() => handleLocationChange(location.id)}
-                    className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                  />
-                  <label 
-                    htmlFor={`location-${location.id}`}
-                    className="ml-2 text-sm text-gray-700"
-                  >
-                    {location.name}
-                  </label>
+          return (
+            <div key={section.id} className="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
+              {/* Cabecera de sección */}
+              <button
+                className="flex items-center justify-between w-full text-left py-1"
+                onClick={() => toggleSection(section.id)}
+                disabled={isDisabled}
+              >
+                <div className="flex items-center text-sm font-medium text-indigo-900">
+                  {/* Icono según el tipo de sección */}
+                  {section.icon === 'building' && (
+                    <span className="text-indigo-300 mr-2">□</span>
+                  )}
+                  {section.icon === 'briefcase' && (
+                    <span className="text-indigo-300 mr-2">□</span>
+                  )}
+                  {section.icon === 'layers' && (
+                    <span className="text-indigo-300 mr-2">◉</span>
+                  )}
+                  {section.icon === 'users' && (
+                    <span className="text-indigo-300 mr-2">◉</span>
+                  )}
+                  {section.title}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Departamentos */}
-        <div className="border-b border-gray-200">
-          <button 
-            className="w-full px-3 py-2 flex justify-between items-center hover:bg-gray-50"
-            onClick={() => toggleSection('departments')}
-          >
-            <div className="flex items-center">
-              <Layers className="w-4 h-4 mr-2 text-blue-500" />
-              <span className="text-sm font-medium">Departamentos</span>
-            </div>
-            {expandedSections.departments ? 
-              <ChevronUp className="w-4 h-4 text-gray-500" /> : 
-              <ChevronDown className="w-4 h-4 text-gray-500" />
-            }
-          </button>
-          
-          {expandedSections.departments && (
-            <div className="px-3 py-2 space-y-2">
-              {filteredDepartments.length > 0 ? (
-                filteredDepartments.map(department => (
-                  <div key={department.id} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={`department-${department.id}`}
-                      checked={filters.selectedDepartments.includes(department.id)}
-                      onChange={() => handleDepartmentChange(department.id)}
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                    <label 
-                      htmlFor={`department-${department.id}`}
-                      className="ml-2 text-sm text-gray-700"
-                    >
-                      {department.name}
-                    </label>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500 italic">Seleccione una sede primero</p>
+                {section.expanded ? (
+                  <ChevronUp className="h-4 w-4 text-indigo-500" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-indigo-500" />
+                )}
+              </button>
+              
+              {/* Contenido de la sección */}
+              {section.expanded && (
+                <div className="mt-2 ml-5 space-y-2">
+                  {isDisabled ? (
+                    <p className="text-sm text-gray-500 italic">
+                      {section.dependsOn?.message}
+                    </p>
+                  ) : (
+                    section.options.map((option) => (
+                      <div key={option.id} className="flex items-center">
+                        <input
+                          id={`${section.id}-${option.id}`}
+                          type="checkbox"
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          checked={!!option.checked}
+                          onChange={(e) => handleOptionChange(section.id, option.id, e.target.checked)}
+                        />
+                        <label
+                          htmlFor={`${section.id}-${option.id}`}
+                          className="ml-2 block text-sm text-gray-700"
+                        >
+                          {option.nombre}
+                        </label>
+                      </div>
+                    ))
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
-
-        {/* Secciones */}
-        <div className="border-b border-gray-200">
-          <button 
-            className="w-full px-3 py-2 flex justify-between items-center hover:bg-gray-50"
-            onClick={() => toggleSection('sections')}
-          >
-            <div className="flex items-center">
-              <Layers className="w-4 h-4 mr-2 text-blue-500" />
-              <span className="text-sm font-medium">Secciones</span>
-            </div>
-            {expandedSections.sections ? 
-              <ChevronUp className="w-4 h-4 text-gray-500" /> : 
-              <ChevronDown className="w-4 h-4 text-gray-500" />
-            }
-          </button>
-          
-
-        </div>
-
-
-        {/* Empleados */}
-        <div>
-          <div className="px-3 py-2 flex justify-between items-center border-b border-gray-200">
-            <button 
-              className="flex items-center"
-              onClick={() => toggleSection('employees')}
-            >
-              <UserIcon className="w-4 h-4 mr-2 text-blue-500" />
-              <span className="text-sm font-medium">Empleados</span>
-            </button>
-            <div className="flex items-center">
-              <button 
-                onClick={handleSelectAllEmployees}
-                className="text-xs text-blue-600 hover:text-blue-800 mr-2"
-              >
-                Seleccionar todos
-              </button>
-              {expandedSections.employees ? 
-                <ChevronUp className="w-4 h-4 text-gray-500" /> : 
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              }
-            </div>
-          </div>
-          
-          {expandedSections.employees && (
-            <div className="px-3 py-2 space-y-2">
-              {filteredEmployees.map(employee => (
-                <div key={employee.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`employee-${employee.id}`}
-                    checked={filters.selectedEmployees.includes(employee.id)}
-                    onChange={() => handleEmployeeChange(employee.id)}
-                    className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                  />
-                  <label 
-                    htmlFor={`employee-${employee.id}`}
-                    className="ml-2 text-sm text-gray-700"
-                  >
-                    <div>{employee.name}</div>
-                    <div className="text-xs text-gray-500">{employee.code || employee.id} • {employee.position}</div>
-                  </label>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+          );
+        })}
       </div>
     </div>
   );
 };
 
-export default AdvancedFilter;
+export default AdvancedFilters;

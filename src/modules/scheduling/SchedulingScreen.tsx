@@ -7,7 +7,7 @@ import ScheduleGrid from './components/ScheduleGrid';
 import Legends from './components/Legends';
 // Importar el contexto de estado global
 import { useAppState } from '../../global/context/AppStateContext';
-import { UnifiedEmployee} from '../../global/interfaces/unifiedTypes';
+import { UnifiedEmployee } from '../../global/interfaces/unifiedTypes';
 
 export function SchedulingScreen() {
   // Usar el contexto global
@@ -31,13 +31,12 @@ export function SchedulingScreen() {
   const [editMode] = useState(false);
   const [dragInfo, setDragInfo] = useState<DragInfo | null>(null);
 
-  // Estado para los filtros avanzados
-  const [advancedFilters, setAdvancedFilters] = useState({
-    selectedLocations: [] as string[],
-    selectedDepartments: [] as string[],
-    selectedSections: [] as string[],
-    selectedUnits: [] as string[],
-    selectedEmployees: [] as string[]
+  // Estado para los filtros avanzados (mismo formato que en EmployeeManagementScreen)
+  const [filterState, setFilterState] = useState({
+    sedes: [] as string[],
+    departamentos: [] as string[],
+    secciones: [] as string[],
+    unidades: [] as string[]
   });
 
   // Estado para los empleados filtrados
@@ -68,35 +67,49 @@ export function SchedulingScreen() {
       );
     }
 
-    // Aplicar filtros avanzados
-    if (advancedFilters.selectedLocations.length > 0) {
+    // Aplicar filtros de la misma manera que en EmployeeManagementScreen
+    if (filterState.sedes.length > 0) {
       filtered = filtered.filter(emp => 
-        advancedFilters.selectedLocations.includes(emp.location || '')
+        filterState.sedes.includes(emp.location || '')
       );
     }
 
-    if (advancedFilters.selectedDepartments.length > 0) {
+    if (filterState.departamentos.length > 0) {
       filtered = filtered.filter(emp => 
-        advancedFilters.selectedDepartments.includes(emp.department || '')
+        filterState.departamentos.includes(emp.department || '')
       );
     }
 
-    // Para secciones y unidades, necesitaríamos tener esa información en los registros de empleados
-    // Este es un filtrado simplificado
-
-    if (advancedFilters.selectedEmployees.length > 0) {
+    if (filterState.secciones.length > 0) {
       filtered = filtered.filter(emp => 
-        advancedFilters.selectedEmployees.includes(emp.id)
+        filterState.secciones.includes(emp.section || '')
+      );
+    }
+
+    if (filterState.unidades.length > 0) {
+      filtered = filtered.filter(emp => 
+        filterState.unidades.includes(emp.unit || '')
       );
     }
 
     setFilteredEmployees(filtered);
-  }, [searchTerm, advancedFilters, allEmployees]);
+  }, [searchTerm, filterState, allEmployees]);
 
-  // Manejar cambios en los filtros avanzados
-  const handleAdvancedFilterChange = (filters: any) => {
-    setAdvancedFilters(filters);
+  // Manejar cambios en los filtros
+  const handleFilterChange = (filters: any) => {
+    setFilterState(filters);
   };
+
+  // Limpiar todos los filtros
+  // const clearAllFilters = () => {
+  //   setFilterState({
+  //     sedes: [],
+  //     departamentos: [],
+  //     secciones: [],
+  //     unidades: []
+  //   });
+  //   setSearchTerm('');
+  // };
 
   // Seleccionar el empleado actual cuando cambia
   useEffect(() => {
@@ -106,21 +119,6 @@ export function SchedulingScreen() {
     if (currentEmployee) {
       console.log('Empleado encontrado en el contexto global:', currentEmployee.displayName);
       setSelectedEmployee(currentEmployee);
-      
-      // Opcionalmente, podemos seleccionar automáticamente el departamento y la ubicación
-      if (currentEmployee.location) {
-        setAdvancedFilters(prev => ({
-          ...prev,
-          selectedLocations: [currentEmployee.location || '']
-        }));
-      }
-      
-      if (currentEmployee.department) {
-        setAdvancedFilters(prev => ({
-          ...prev,
-          selectedDepartments: [currentEmployee.department || '']
-        }));
-      }
     } else if (allEmployees.length > 0) {
       // Si no hay empleado seleccionado en el contexto, usar el primero de la lista
       console.log('No hay empleado seleccionado, usando el primero de la lista');
@@ -136,7 +134,7 @@ export function SchedulingScreen() {
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col h-screen bg-gray-100">
-      {/* Top Bar con filtros y controles */}
+      {/* Top Bar con filtros y controles actualizados */}
       <TopBar 
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -152,12 +150,11 @@ export function SchedulingScreen() {
         setStartDate={setStartDate}
         endDate={endDate}
         setEndDate={setEndDate}
-        // Nuevas props para filtros avanzados
+        // Props para los filtros
         locations={locations}
         departments={departments}
-
         employees={allEmployees}
-        onAdvancedFilterChange={handleAdvancedFilterChange}
+        onAdvancedFilterChange={handleFilterChange}
       />
 
       <div className="flex-1 overflow-hidden flex p-4">
@@ -174,9 +171,6 @@ export function SchedulingScreen() {
               </div>
             ) : (
               filteredEmployees.map((employee) => {
-                // Convertir el empleado al formato específico para esta pantalla
-                // const displayEmployee = convertToSpecificModel(employee, 'scheduling');
-                
                 return (
                   <button
                     key={employee.id}

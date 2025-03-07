@@ -1,5 +1,5 @@
-import React from 'react';
-import { MapPin, Users, Clock, Camera, Fingerprint, CreditCard, Key, Check, X, Briefcase } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { MapPin, Users, Clock, Camera, Fingerprint, CreditCard, Key, Check, X, Briefcase, AlertCircle, Calendar } from 'lucide-react';
 import type { Employee, Marcaje } from '../interface/types';
 
 // Extender la interfaz Employee para incluir nuevos campos
@@ -9,6 +9,11 @@ interface ExtendedEmployee extends Employee {
   horaEntrada?: string;
   horaSalida?: string;
   marcajes?: Marcaje[];
+  tieneContrato?: boolean; // Nuevo campo para determinar si tiene contrato asignado
+  tardanza?: {
+    tiene: boolean;
+    tiempo: string;
+  };
 }
 
 interface EmployeeCardProps {
@@ -17,6 +22,20 @@ interface EmployeeCardProps {
 }
 
 const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
+  // Estado local para el tooltip
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const tooltipTimeout = useRef(null);
+  
+  // Limpiar timeout cuando el componente se desmonte
+  useEffect(() => {
+    return () => {
+      if (tooltipTimeout.current) {
+        clearTimeout(tooltipTimeout.current);
+      }
+    };
+  }, []);
+
   // Función para obtener el color y el ícono según el estado
   const getEstadoInfo = (estado: string) => {
     switch(estado) {
@@ -75,14 +94,82 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
     }
   };
 
+  // Determinar si mostrar indicador de 'Sin horario' o 'Tardanza'
+  const getIndicadorEstado = () => {
+    // Si es un permiso, mostrar indicador de permiso
+    if (empleado.estado === 'permiso') {
+      return {
+        show: true,
+        type: 'permiso',
+        text: 'Permiso',
+        color: 'bg-indigo-500',
+        textColor: 'text-white',
+        icon: <Calendar className="w-4 h-4 text-white" />,
+        tooltipText: 'Permiso'
+      };
+    }
+    
+    // Si no tiene contrato, mostrar "Sin horario"
+    if (!empleado.tieneContrato) {
+      return {
+        show: true,
+        type: 'sin-horario',
+        text: `Sin horario: ${empleado.horas}`,
+        color: 'bg-blue-400',
+        textColor: 'text-white',
+        icon: <Clock className="w-4 h-4 text-white" />,
+        tooltipText: `Sin horario: ${empleado.horas}`
+      };
+    }
+    
+    // Si tiene tardanza, mostrar indicador
+    if (empleado.tardanza?.tiene) {
+      return {
+        show: true,
+        type: 'tardanza',
+        text: `Tardanza: ${empleado.tardanza.tiempo}`,
+        color: 'bg-gray-700',
+        textColor: 'text-white',
+        icon: <AlertCircle className="w-4 h-4 text-white" />,
+        tooltipText: `Tardanza: ${empleado.tardanza.tiempo}`
+      };
+    }
+    
+    return { show: false };
+  };
+
   // Información del estado para este empleado
   const estadoInfo = getEstadoInfo(empleado.estado);
+  
+  // Información de indicador (sin horario/tardanza/permiso)
+  const indicadorInfo = getIndicadorEstado();
   
   // Handler para el clic en la tarjeta
   const handleCardClick = () => {
     if (onSelect) {
       onSelect(empleado);
     }
+  };
+
+  // Handler para mostrar tooltip
+  const handleIndicadorMouseEnter = (e) => {
+    if (tooltipTimeout.current) {
+      clearTimeout(tooltipTimeout.current);
+    }
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipPosition({
+      x: rect.left + (rect.width / 2),
+      y: rect.top + window.scrollY
+    });
+    setShowTooltip(true);
+  };
+
+  // Handler para ocultar tooltip
+  const handleIndicadorMouseLeave = () => {
+    tooltipTimeout.current = setTimeout(() => {
+      setShowTooltip(false);
+    }, 100);
   };
 
   // Texto del estado
@@ -175,9 +262,42 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
 
   return (
     <div 
-      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105 h-[255px] flex flex-col"
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105 h-[255px] flex flex-col relative"
       onClick={handleCardClick}
     >
+      {/* Indicador sin horario/tardanza si existe - solo icono */}
+      {indicadorInfo.show && (
+        <div 
+          className={`absolute right-2 top-2 ${indicadorInfo.color} ${indicadorInfo.textColor} p-1.5 rounded-full z-10 cursor-pointer shadow-sm`}
+          onMouseEnter={handleIndicadorMouseEnter}
+          onMouseLeave={handleIndicadorMouseLeave}
+        >
+          {indicadorInfo.icon}
+        </div>
+      )}
+      
+      {/* Tooltip estilo material */}
+      {showTooltip && (
+        <div 
+          className="absolute z-30 bg-white shadow-lg rounded-md py-2 px-3 text-sm"
+          style={{
+            top: (tooltipPosition.y - 45) + 'px',
+            left: tooltipPosition.x + 'px',
+            transform: 'translateX(-80%)',
+            whiteSpace: 'nowrap',
+            filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.06))'
+          }}
+        >
+          <div className="text-gray-800 font-medium">
+            {indicadorInfo.tooltipText}
+          </div>
+          <div 
+            className="absolute h-3 w-3 bg-white transform rotate-45" 
+            style={{ bottom: '-6px', left: '85%', marginLeft: '-6px', boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.08)' }}
+          ></div>
+        </div>
+      )}
+
       {/* Encabezado con la información principal - altura fija */}
       <div className="p-4 bg-white flex-grow flex flex-col">
         {/* Foto y nombre - espacio fijo */}

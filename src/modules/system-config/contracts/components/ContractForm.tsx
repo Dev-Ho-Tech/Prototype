@@ -1,7 +1,121 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save } from 'lucide-react';
+import { X, Save, ChevronDown, X as XIcon } from 'lucide-react';
 import { Contract, ContractFormProps, ContractType } from '../interfaces/types';
 import TimeSelector from './TimeSelector';
+
+// Componente para la selección múltiple de conceptos
+const MultiSelect = ({ value = [], onChange, options }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Función para manejar la selección de una opción
+  const handleSelect = (option) => {
+    if (!value.includes(option.value)) {
+      const newValue = [...value, option.value];
+      onChange(newValue);
+    }
+    setSearchTerm('');
+  };
+  
+  // Función para eliminar una opción seleccionada
+  const handleRemove = (optionValue) => {
+    const newValue = value.filter(val => val !== optionValue);
+    onChange(newValue);
+  };
+  
+  // Obtener etiquetas para las opciones seleccionadas
+  const getOptionLabel = (optionValue) => {
+    const option = options.find(opt => opt.value === optionValue);
+    return option ? option.label : optionValue;
+  };
+  
+  // Filtrar opciones basado en el término de búsqueda
+  const filteredOptions = options.filter(option => 
+    option.label.toLowerCase().includes(searchTerm.toLowerCase()) && 
+    !value.includes(option.value)
+  );
+  
+  return (
+    <div className="relative">
+      {/* Área de visualización de selecciones */}
+      <div 
+        className="w-full p-2 border border-gray-300 rounded-md min-h-[42px] flex flex-wrap gap-1 cursor-pointer"
+        onClick={() => setIsOpen(true)}
+      >
+        {value.length > 0 ? (
+          value.map(val => (
+            <div key={val} className="flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+              {getOptionLabel(val)}
+              <button 
+                type="button" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(val);
+                }}
+                className="ml-1 text-blue-600 hover:text-blue-800"
+              >
+                <XIcon size={14} />
+              </button>
+            </div>
+          ))
+        ) : (
+          <div className="text-gray-500">Selecciona conceptos...</div>
+        )}
+        <div className="ml-auto flex items-center">
+          <ChevronDown size={18} className="text-gray-500" />
+        </div>
+      </div>
+      
+      {/* Dropdown para la selección */}
+      {isOpen && (
+        <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200">
+          <div className="p-2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar..."
+              className="w-full p-2 border border-gray-300 rounded-md"
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+          <ul className="max-h-60 overflow-auto py-1">
+            {filteredOptions.map(option => (
+              <li 
+                key={option.value}
+                className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
+                onClick={() => handleSelect(option)}
+              >
+                {option.label}
+              </li>
+            ))}
+            {filteredOptions.length === 0 && (
+              <li className="px-4 py-2 text-gray-500">No hay opciones disponibles</li>
+            )}
+          </ul>
+          <div className="p-2 border-t border-gray-200">
+            <button
+              type="button"
+              className="w-full p-2 bg-gray-100 text-gray-700 rounded-md text-sm"
+              onClick={() => setIsOpen(false)}
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Overlay para cerrar el dropdown cuando se hace clic fuera */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-0" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
 
 export const ContractForm: React.FC<ContractFormProps> = ({
   contract,
@@ -10,6 +124,14 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   scheduleLimitGroups
 }) => {
   const isEdit = !!contract;
+  
+  // Opciones para el campo de conceptos
+  const conceptOptions = [
+    { value: "horas-fuera-horario", label: "Horas fuera de horario" },
+    { value: "horas-fuera-horario-nocturna", label: "Horas fuera de horario nocturnas" },
+    { value: "horas-feriado", label: "Horas en día feriado" },
+    { value: "horas-especiales", label: "Horas especiales" }
+  ];
   
   // Estado inicial para un nuevo contrato
   const [formData, setFormData] = useState<Contract>({
@@ -27,6 +149,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
       startDay: 'Lunes',
       scheduleLimitGroup: 'Semanal'
     },
+    concepts: [], // Nuevo campo para conceptos
     overtimeAllowed: false,
     crossDays: false,
     autoApprove: false,
@@ -38,7 +161,10 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   // Cargar datos del contrato si estamos en modo edición
   useEffect(() => {
     if (contract) {
-      setFormData(contract);
+      setFormData({
+        ...contract,
+        concepts: contract.concepts || [] // Asegurarse de que concepts exista
+      });
     }
   }, [contract]);
 
@@ -75,6 +201,14 @@ export const ContractForm: React.FC<ContractFormProps> = ({
         ...formData.workingHours,
         [name]: parsedValue
       }
+    });
+  };
+
+  // Manejador para el cambio en la selección de conceptos
+  const handleConceptsChange = (newConcepts) => {
+    setFormData({
+      ...formData,
+      concepts: newConcepts
     });
   };
 
@@ -136,6 +270,17 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 onChange={handleChange}
                 required
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="concepts" className="block text-sm font-medium text-gray-700 mb-1">
+                Conceptos
+              </label>
+              <MultiSelect
+                value={formData.concepts}
+                onChange={handleConceptsChange}
+                options={conceptOptions}
               />
             </div>
             
