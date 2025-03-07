@@ -110,102 +110,108 @@ const TopBar: React.FC<TopBarProps> = ({
 
   return (
     <div className="relative p-4 border-b border-gray-200 bg-white shadow-sm">
-      <div className="flex flex-col space-y-4">
-        {/* Primera fila: Componente de búsqueda y filtros */}
-        <div className="flex items-center">
-          <div className="flex-1">
-            <SearchFilterComponent
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onFilterChange={handleFilterChange}
-              onClearFilters={clearAllFilters}
-              employees={employees}
-            />
-          </div>
+      {/* IMPORTANTE: Este div se mantiene como contenedor principal */}
+      <div className="flex" style={{ minHeight: '42px' }}>
+        {/* Componente de búsqueda a la izquierda con position relative y z-index para que los filtros se muestren por encima */}
+        <div className="w-1/3 relative" style={{ zIndex: 30 }}>
+          <SearchFilterComponent
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onFilterChange={handleFilterChange}
+            onClearFilters={clearAllFilters}
+            employees={employees}
+          />
         </div>
 
-        {/* Segunda fila: Controles de periodo y fecha */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex flex-col">
-              <label className="text-sm text-gray-500 mb-1">Periodo</label>
-              <select
-                value={selectedPeriod}
-                onChange={handlePeriodChange}
-                className="px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option>Diario</option>
-                <option>Semanal</option>
-                <option>Mensual</option>
-                <option>Seleccionar fechas</option>
-              </select>
-            </div>
-
-            {showDateRange ? (
-              <>
-                <div className="flex flex-col">
-                  <label className="text-sm text-gray-500 mb-1">Fecha desde</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="date"
-                      value={localStartDate}
-                      onChange={(e) => setLocalStartDate(e.target.value)}
-                      className="w-48 pl-9 pr-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="text-sm text-gray-500 mb-1">Fecha hasta</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="date"
-                      value={localEndDate}
-                      onChange={(e) => setLocalEndDate(e.target.value)}
-                      className="w-48 pl-9 pr-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <button 
-                  className="px-4 py-2 mt-5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-                  onClick={handleSearchDateRange}
-                >
-                  Buscar
-                </button>
-                <div className="w-[3px] h-6 bg-gray-300 mt-5"></div>
-              </>
-            ) : (
-              <>
-                <div className="flex flex-col">
-                  <label className="text-sm text-gray-500 mb-1">Fecha</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="date"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      className="w-48 pl-9 pr-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <button 
-                  className="px-4 py-2 mt-5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-                  onClick={goToToday}
-                >
-                  Hoy
-                </button>
-              </>
-            )}
+        {/* CAMBIO IMPORTANTE: Controles de la derecha con position absolute para que estén fijos independiente de los filtros */}
+        <div 
+          className="flex items-center space-x-2" 
+          style={{ 
+            position: 'absolute', 
+            right: '1rem', 
+            top: '1rem',
+            zIndex: 20
+          }}
+        >
+          <div className="flex flex-col">
+            <label className="text-xs text-gray-500 mb-1">Periodo</label>
+            <select
+              value={selectedPeriod}
+              onChange={handlePeriodChange}
+              className="px-2 py-1 pr-6 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option>Diario</option>
+              <option>Semanal</option>
+              <option>Mensual</option>
+              <option>Seleccionar fechas</option>
+            </select>
           </div>
 
-          <div className="flex items-center space-x-4">
+          {showDateRange ? (
+            <>
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-500 mb-1">Fecha desde</label>
+                <div className="relative">
+                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
+                  <input
+                    type="date"
+                    value={localStartDate}
+                    onChange={(e) => setLocalStartDate(e.target.value)}
+                    className="w-36 pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-500 mb-1">Fecha hasta</label>
+                <div className="relative">
+                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
+                  <input
+                    type="date"
+                    value={localEndDate}
+                    onChange={(e) => setLocalEndDate(e.target.value)}
+                    className="w-36 pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <button 
+                className="px-3 py-1 mt-5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                onClick={handleSearchDateRange}
+              >
+                Buscar
+              </button>
+              <div className="w-[2px] h-6 bg-gray-300 mt-5 mx-1"></div>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-500 mb-1">Fecha</label>
+                <div className="relative">
+                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-36 pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <button 
+                className="px-3 py-1 mt-5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                onClick={goToToday}
+              >
+                Hoy
+              </button>
+            </>
+          )}
+          
+          {/* Botones de acciones a la derecha */}
+          <div className="flex items-center space-x-2 ml-2">
             <button
               onClick={() => setShowShifts(!showShifts)}
-              className={`px-4 py-2 rounded-lg text-sm border ${
+              className={`px-3 py-1 rounded-lg text-sm border ${
                 showShifts ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-300 text-gray-700'
               }`}
             >
@@ -213,14 +219,14 @@ const TopBar: React.FC<TopBarProps> = ({
             </button>
             <button
               onClick={() => setShowLicenses(!showLicenses)}
-              className={`px-4 py-2 rounded-lg text-sm border ${
+              className={`px-3 py-1 rounded-lg text-sm border ${
                 showLicenses ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-300 text-gray-700'
               }`}
             >
               Licencias y permisos
             </button>
             <button
-              className="px-4 py-2 rounded-lg text-sm border border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="px-3 py-1 rounded-lg text-sm border border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               Guardar cambios
             </button>
