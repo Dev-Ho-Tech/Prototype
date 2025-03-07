@@ -1,4 +1,4 @@
-import { employees as managementEmployees } from '../../../modules/employees/management/data';
+import { employees as managementEmployees } from '../data';
 
 import { Employee as SchedulingEmployee } from '../interfaces/types';
 import { employees, mapEmployeeToOrganization } from '../data';

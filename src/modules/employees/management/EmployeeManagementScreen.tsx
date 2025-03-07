@@ -2,13 +2,13 @@
 import { useState, useEffect } from 'react';
 import { Search, Plus, Download, Settings, Clock, Fingerprint, ArrowLeft, ChevronDown } from 'lucide-react';
 import { CustomPieChart } from '../../../components/common/PieChart';
-import { departmentData, locationData } from '../data';
+import { departmentData, locationData } from './temp/data_kpis';
 import { EmployeeProfileForm } from './components/EmployeeProfile';
 import { MarkingMethodComponent } from './components/kpiAndCards/MarkingMethodComponent';
 import { StatsSection } from './components/kpiAndCards/StatsSection';
 import AdvancedFilters from './components/Search/AdvancedFilters';
 import { Pagination } from './components/Pagination';
-// Importar el contexto de estado global
+
 import { useAppState } from '../../../global/context/AppStateContext';
 import { convertToSpecificModel, UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 
@@ -233,7 +233,7 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
                     onSearchTermChange={onSearchTermChange}
                     onFilterChange={handleFilterChange}
                     onClearFilters={clearAllFilters}
-                    employees={allEmployees}
+                    employees={allEmployees.map(emp => convertToSpecificModel(emp, 'employee'))}
                   />
                 </div>
               ) : (

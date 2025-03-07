@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Plus, Download, Filter, ChevronDown, Settings, LogOut } from 'lucide-react';
 import { CustomPieChart } from '../../components/common/PieChart';
-import { locationData, departmentData, employeeData } from './data';
+import { locationData, departmentData, employeeData } from './management/temp/data_kpis';
 import { EmployeeForm } from './components/EmployeeForm';
 import type { Employee } from '../../types';
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { Employee } from '../../interface/types';
+import { UnifiedEmployee } from '../../../../../global/interfaces/unifiedTypes';
 
 // Interfaces
 interface FilterOption {
@@ -33,7 +33,7 @@ interface AdvancedFiltersProps {
   onSearchTermChange: (term: string) => void;
   searchTerm: string;
   onClearFilters: () => void;
-  employees: Employee[];
+  employees: UnifiedEmployee[];
 }
 
 const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
@@ -51,7 +51,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
   });
 
   // Extraer opciones únicas de los datos de empleados
-  const getUniqueOptions = (key: keyof Employee): FilterOption[] => {
+  const getUniqueOptions = (key: keyof UnifiedEmployee): FilterOption[] => {
     const uniqueValues = new Set<string>();
     
     employees.forEach(employee => {
