@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState,  useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, Users, AlertTriangle } from 'lucide-react';
 import { NovedadCard, StatisticsPanelsProps } from '../interface/statistic';
-import InteractivePieChart from '../panels/CustomTooltip';
-import ClickTooltip from '../panels/ClickTooltip';
+import InteractivePieChart, { ChartTooltip } from '../components/card_and_kpi/InteractivePieChart';
+
+console.log("Cargando módulo StatisticsPanels");
 
 // Componente de tarjeta individual con tooltip
 const NovedadCardItem = ({ card }: { card: NovedadCard }) => {
@@ -50,7 +51,21 @@ const NovedadCardItem = ({ card }: { card: NovedadCard }) => {
 };
 
 // Componente para una tarjeta de gráfico circular
-const ChartCard = ({ title, chartData, centerLabel, id, onChartClick}: any) => {
+const ChartCard = ({ 
+  title, 
+  chartData, 
+  centerLabel, 
+  id, 
+  activeSegment,
+  onChartClick 
+}: any) => {
+  console.log(`Renderizando ChartCard ${id}:`, { 
+    title, 
+    centerLabel, 
+    activeSegment,
+    dataCount: chartData.length 
+  });
+  
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <h2 className="font-bold text-gray-700 mb-3">{title}</h2>
@@ -59,6 +74,7 @@ const ChartCard = ({ title, chartData, centerLabel, id, onChartClick}: any) => {
           data={chartData} 
           centerLabel={centerLabel} 
           sectionId={id}
+          activeSegment={activeSegment}
           onSegmentClick={onChartClick}
         />
         <div className="space-y-2 ml-4">
@@ -87,6 +103,18 @@ const ChartCard = ({ title, chartData, centerLabel, id, onChartClick}: any) => {
       </div>
     </div>
   );
+};
+
+// Comprobar que los datos están correctos
+const validateData = (data: any[]) => {
+  return data && Array.isArray(data) && data.length > 0 && 
+    data.every(item => 
+      typeof item === 'object' && 
+      item !== null && 
+      'name' in item && 
+      'value' in item && 
+      'color' in item
+    );
 };
 
 const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({ 
@@ -161,8 +189,20 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
     },
   ]
 }) => {
-  const [clickedSegment, setClickedSegment] = useState<any>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null);
+  const [activeData, setActiveData] = useState<any>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<any>({ x: 0, y: 0 });
+  
+  console.log("StatisticsPanels - datos recibidos:", {
+    estadoDelDiaData: validateData(estadoDelDiaData) ? `${estadoDelDiaData.length} items` : "datos inválidos",
+    tiemposData: validateData(tiemposData) ? `${tiemposData.length} items` : "datos inválidos"
+  });
+  
+  console.log("StatisticsPanels - estado:", {
+    activeSegmentId,
+    activeData: activeData ? `${activeData.name} (${activeData.value})` : "null",
+    tooltipPosition
+  });
   
   // Preparar datos con información adicional para los tooltips
   const enhancedEstadoDelDiaData = estadoDelDiaData.map(entry => ({
@@ -180,13 +220,53 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
   }));
   
   // Función para manejar el clic en un segmento del gráfico
-  const handleChartClick = (data: any, position: { x: number, y: number }) => {
-    // Si ya está seleccionado, lo cerramos
-    if (clickedSegment && clickedSegment.name === data.name) {
-      setClickedSegment(null);
+  const handleChartClick = (segmentId: string, event: React.MouseEvent) => {
+    console.log(`StatisticsPanels - handleChartClick: ${segmentId}`, event);
+    
+    // Extraer el ID de la sección (estado, tiempo, novedad)
+    const [sectionId, segmentIndex] = segmentId.split('-');
+    
+    // Obtener el conjunto de datos correspondiente
+    let dataSet;
+    if (sectionId === 'estado') {
+      dataSet = enhancedEstadoDelDiaData;
+    } else if (sectionId === 'tiempo') {
+      dataSet = enhancedTiemposData;
+    } else if (sectionId === 'novedad') {
+      dataSet = novedadesTiempoData;
     } else {
-      // Si es nuevo o diferente, lo seleccionamos
-      setClickedSegment(data);
+      console.error(`ID de sección desconocido: ${sectionId}`);
+      return;
+    }
+    
+    // Obtener los datos del segmento
+    const index = parseInt(segmentIndex);
+    if (index < 0 || index >= dataSet.length) {
+      console.error(`Índice fuera de rango: ${index}, longitud: ${dataSet.length}`);
+      return;
+    }
+    
+    const segmentData = dataSet[index];
+    console.log("Datos del segmento:", segmentData);
+    
+    // Si ya está seleccionado, lo cerramos
+    if (activeSegmentId === segmentId) {
+      console.log("Cerrando tooltip (mismo segmento)");
+      setActiveSegmentId(null);
+      setActiveData(null);
+    } else {
+      // Calcular la posición para el tooltip basada en el evento
+      const rect = (event.currentTarget as SVGPathElement).getBoundingClientRect();
+      const position = {
+        x: rect.left + (rect.width / 2),
+        y: rect.top
+      };
+      
+      console.log("Posición del tooltip:", position);
+      
+      // Actualizar estados
+      setActiveSegmentId(segmentId);
+      setActiveData(segmentData);
       setTooltipPosition(position);
     }
   };
@@ -194,9 +274,12 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
   // Detectar clics fuera para cerrar el tooltip
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      console.log("Click en documento, verificando si debe cerrar tooltip");
       // Si el clic no fue en un tooltip, cerramos el tooltip
       if (!(event.target as HTMLElement).closest('.tooltip-click')) {
-        setClickedSegment(null);
+        console.log("Cerrando tooltip (clic fuera)");
+        setActiveSegmentId(null);
+        setActiveData(null);
       }
     };
     
@@ -209,14 +292,16 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
   return (
     <div className="space-y-4 relative">
       {/* Tooltip para los segmentos clickeados */}
-      {clickedSegment && (
-        <ClickTooltip 
-          visible={!!clickedSegment} 
-          data={clickedSegment} 
-          position={tooltipPosition} 
-          onClick={() => setClickedSegment(null)}
-        />
-      )}
+      <ChartTooltip 
+        visible={!!activeData} 
+        data={activeData} 
+        position={tooltipPosition} 
+        onClose={() => { 
+          console.log("Cerrando tooltip (botón cerrar)");
+          setActiveSegmentId(null); 
+          setActiveData(null); 
+        }}
+      />
       
       {/* Fila de tarjetas KPI con hover effect */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
@@ -233,8 +318,8 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
           chartData={enhancedEstadoDelDiaData}
           centerLabel="3"
           id="estado"
+          activeSegment={activeSegmentId}
           onChartClick={handleChartClick}
-          selectedItem={clickedSegment}
         />
 
         {/* Tiempos */}
@@ -243,8 +328,8 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
           chartData={enhancedTiemposData}
           centerLabel="139hs"
           id="tiempo"
+          activeSegment={activeSegmentId}
           onChartClick={handleChartClick}
-          selectedItem={clickedSegment}
         />
 
         {/* Novedades de tiempos */}
@@ -253,8 +338,8 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
           chartData={novedadesTiempoData}
           centerLabel="149hs"
           id="novedad"
+          activeSegment={activeSegmentId}
           onChartClick={handleChartClick}
-          selectedItem={clickedSegment}
         />
       </div>
       
