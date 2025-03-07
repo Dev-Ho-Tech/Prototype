@@ -1,11 +1,12 @@
 import React from 'react';
-import { Employee, ScheduleEntry, WorkShift, License } from '../interfaces/types';
+import { ScheduleEntry, WorkShift, License } from '../interfaces/types';
+import { UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 import ScheduleEntryComponent from './ScheduleEntryComponent';
 
 interface DayRowProps {
   day: string;
   date: string;
-  employee: Employee | null;
+  employee: UnifiedEmployee | null;
   workShifts: WorkShift[];
   licenses: License[];
   onMouseDown: (e: React.MouseEvent, scheduleEntry: ScheduleEntry) => void;
@@ -27,7 +28,7 @@ const DayRow: React.FC<DayRowProps> = ({
   const formattedShortDate = date.split('-').slice(1).join('/');
   
   // Encontrar el horario del empleado para este día
-  const schedule = employee?.schedule.find(s => s.date === date);
+  const schedule = employee?.schedule?.find(s => s.date === date);
 
   return (
     <React.Fragment>
