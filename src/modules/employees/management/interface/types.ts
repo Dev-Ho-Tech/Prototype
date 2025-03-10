@@ -1,5 +1,5 @@
 // //Interface de EmployeeManagementScreen
-// import { ReactNode } from "react";
+import { ReactNode } from "react";
 
 // export interface Employee {
 //   primerNombre?: string;
@@ -141,38 +141,7 @@
 
 
 
-// export interface LocationSelection {
-//   id: string;
-//   name: string;
-//   path?: string;
-// }
 
-// export interface TreeNodeProps {
-//   node: TreeNodeData;
-//   level?: number;
-//   selectedLocations: string[];
-//   onToggleSelect: (nodeId: string) => void;
-//   searchTerm: string;
-// }
-
-// export interface StructureModalProps {
-//   isOpen: boolean;
-//   onClose: () => void;
-//   onSelectLocations?: (selectedLocations: LocationSelection[]) => void;
-//   initialSelectedLocations?: string[];
-// }
-
-// export interface TreeNodeData {
-//   id: string;
-//   name: string;
-//   type?: string;
-//   manager?: string;
-//   employeeCount?: number;
-//   icon?: ReactNode;
-//   color?: string;
-//   expanded?: boolean;
-//   children: TreeNodeData[];
-// }
 
 // export interface TreeNodeProps {
 //   node: TreeNodeData;
@@ -196,3 +165,41 @@
 //   onSelectLocations?: (locations: LocationSelection[]) => void;
 //   initialSelectedLocations?: string[];
 // }
+
+export interface LocationSelection {
+  id: string;
+  name: string;
+  path?: string;
+  manager?: string;
+  employeeCount?: number;
+  hierarchyPath?: string[]; 
+  code?: string; 
+}
+
+export interface TreeNodeProps {
+  node: TreeNodeData;
+  level?: number;
+  selectedLocations: string[];
+  onToggleSelect: (nodeId: string) => void;
+  searchTerm: string;
+}
+
+export interface StructureModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelectLocations?: (selectedLocations: LocationSelection[]) => void;
+  initialSelectedLocations?: string[];
+}
+
+export interface TreeNodeData {
+  id: string;
+  name: string;
+  type?: string;
+  manager?: string;
+  employeeCount?: number;
+  icon?: ReactNode;
+  color?: string;
+  expanded?: boolean;
+  children: TreeNodeData[];
+  
+}
