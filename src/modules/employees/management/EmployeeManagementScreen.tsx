@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
-import { Search, Plus, Download, Settings, Clock, Fingerprint, ArrowLeft, ChevronDown, User } from 'lucide-react';
+import { useState, useEffect, SVGProps } from 'react';
+import { Search, Plus, Download, Settings, Clock, Fingerprint, ArrowLeft, ChevronDown } from 'lucide-react';
 import { CustomPieChart } from '../../../components/common/PieChart';
 import { departmentData, locationData } from './temp/data_kpis';
 import { EmployeeProfileForm } from './components/EmployeeProfile';
@@ -11,6 +11,7 @@ import { Pagination } from './components/Pagination';
 
 import { useAppState } from '../../../global/context/AppStateContext';
 import { convertToSpecificModel, UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
+import { JSX } from 'react/jsx-runtime';
 
 interface EmployeeManagementScreenProps {
   setCurrentView: (view: string) => void;
@@ -25,7 +26,7 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
     setCurrentScreen 
   } = useAppState();
   
-  const UserIcon = (props) => (
+  const UserIcon = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <circle cx="12" cy="8" r="4" fill="currentColor"/>
       <path d="M4 20C4 17.2386 6.23858 15 9 15H15C17.7614 15 20 17.2386 20 20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V20Z" fill="currentColor"/>

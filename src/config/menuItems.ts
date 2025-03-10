@@ -81,7 +81,7 @@ export const menuItems: MenuItem[] = [
       },
       {
         id: 'contracts',
-        label: 'Contratos',
+        label: 'Modalidad De Tiempo',
         icon: FileText,
         path: '/system-config/contracts'
       },

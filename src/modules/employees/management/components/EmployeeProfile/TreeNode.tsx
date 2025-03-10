@@ -202,27 +202,91 @@ function findChildrenMatchingSearch(node: TreeNodeData, searchTerm: string): boo
   );
 }
 
-// Función para obtener nodos seleccionados
+// Función para generar un código único basado en el ID
+const generateCode = (id: string): string => {
+  // Extraer las primeras letras y convertirlas a mayúsculas
+  const initials = id
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase())
+    .join('');
+  
+  // Generar un número secuencial único
+  const numericPart = Math.floor(100000 + Math.random() * 900000);
+  
+  // Formato final: CA121552-001
+  return `${initials}${numericPart}-${String(Math.floor(Math.random() * 999)).padStart(3, '0')}`;
+};
+
+// Función para obtener la jerarquía completa
+const getHierarchyPath = (root: TreeNodeData, nodeId: string): string[] => {
+  const path: string[] = [];
+  
+  const findPath = (node: TreeNodeData, pathSoFar: string[]): boolean => {
+    // Añadimos el nodo actual al camino
+    const currentPath = [...pathSoFar, node.name];
+    
+    // Si es el nodo que buscamos, hemos encontrado el camino
+    if (node.id === nodeId) {
+      path.splice(0, path.length, ...currentPath);
+      return true;
+    }
+    
+    // Si tiene hijos, buscamos en ellos
+    if (node.children && node.children.length > 0) {
+      for (const child of node.children) {
+        if (findPath(child, currentPath)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  };
+  
+  findPath(root, []);
+  return path;
+};
+
+// Función para obtener nodos seleccionados con jerarquía
 const getSelectedNodesInfo = (root: TreeNodeData, selectedIds: string[]): LocationSelection[] => {
   const result: LocationSelection[] = [];
   
-  const findSelectedNodes = (node: TreeNodeData) => {
-    if (selectedIds.includes(node.id)) {
+  selectedIds.forEach(id => {
+    // Obtener la jerarquía completa para este nodo
+    const hierarchyPath = getHierarchyPath(root, id);
+    
+    // Generar un código único para este nodo
+    const code = generateCode(id);
+    
+    // Buscar el nodo para obtener sus detalles
+    const findNode = (node: TreeNodeData): TreeNodeData | null => {
+      if (node.id === id) return node;
+      
+      if (node.children && node.children.length > 0) {
+        for (const child of node.children) {
+          const found = findNode(child);
+          if (found) return found;
+        }
+      }
+      
+      return null;
+    };
+    
+    const node = findNode(root);
+    
+    if (node) {
       result.push({ 
         id: node.id, 
         name: node.name,
         type: node.type,
         manager: node.manager,
-        employeeCount: node.employeeCount
+        employeeCount: node.employeeCount,
+        hierarchyPath,
+        code
       });
     }
-    
-    if (node.children && node.children.length > 0) {
-      node.children.forEach(childNode => findSelectedNodes(childNode));
-    }
-  };
+  });
   
-  findSelectedNodes(root);
   return result;
 };
 
@@ -232,22 +296,35 @@ const SelectedNode: React.FC<{
   onRemove: (id: string) => void 
 }> = ({ node, onRemove }) => {
   return (
-    <div className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-md">
-      <div className="flex-1">
-        <div className="font-medium text-sm">{node.name}</div>
-        {node.manager && <div className="text-xs text-gray-500">{node.manager}</div>}
-        {node.employeeCount && (
-          <div className="text-xs text-gray-600">
-            {node.employeeCount} empleados
-          </div>
-        )}
+    <div className="flex flex-col p-3 hover:bg-gray-50 rounded-md border border-gray-100">
+      {/* Jerarquía completa */}
+      <div className="text-xs text-gray-500 mb-1">
+        {node.hierarchyPath && node.hierarchyPath.join(' > ')}
       </div>
-      <button 
-        onClick={() => onRemove(node.id)} 
-        className="p-1 hover:bg-red-100 rounded-full"
-      >
-        <X className="w-4 h-4 text-red-500" />
-      </button>
+      
+      {/* Código */}
+      <div className="text-xs text-blue-600 font-mono mb-2">
+        ID: {node.code}
+      </div>
+      
+      {/* Información del nodo */}
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <div className="font-medium text-sm">{node.name}</div>
+          {node.manager && <div className="text-xs text-gray-500">{node.manager}</div>}
+          {node.employeeCount && (
+            <div className="text-xs text-gray-600">
+              {node.employeeCount} empleados
+            </div>
+          )}
+        </div>
+        <button 
+          onClick={() => onRemove(node.id)} 
+          className="p-1 hover:bg-red-100 rounded-full"
+        >
+          <X className="w-4 h-4 text-red-500" />
+        </button>
+      </div>
     </div>
   );
 };
@@ -384,7 +461,7 @@ export const StructureModal: React.FC<StructureModalProps> = ({
             {/* Lista de selecciones */}
             <div className="overflow-y-auto flex-1 border border-gray-200 rounded-md p-2 bg-white">
               {selectedNodes.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {selectedNodes.map(node => (
                     <SelectedNode 
                       key={node.id} 

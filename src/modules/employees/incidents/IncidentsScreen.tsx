@@ -14,6 +14,12 @@ import AdvancedFilters from './components/AdvancedFilters';
 // Función para generar un ID único
 const generateId = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
 
+// Definir enum para tipos de marcaje
+enum TipoMarcaje {
+  ENTRADA = 'Entrada',
+  SALIDA = 'Salida'
+}
+
 // Definir interface para el estado de filtros
 interface FilterState {
   sedes: string[];
@@ -114,10 +120,34 @@ const IncidenciasScreen: React.FC = () => {
         longitud: -69.95589601299955,
       };
   
+      const fechaFormateada = data.fecha.split('-').reverse().join('-'); // Convertir a formato DD-MM-YYYY
+      
+      // Determinar hora inicio y fin según el tipo de marcaje
+      let horaInicio: string | undefined = undefined;
+      let horaFin: string | undefined = undefined;
+      
+      if (data.tipoMarcaje === TipoMarcaje.ENTRADA) {
+        // Si es entrada, la hora inicio es la misma hora del marcaje
+        horaInicio = data.hora;
+        horaFin = undefined;
+      } else if (data.tipoMarcaje === TipoMarcaje.SALIDA) {
+        // Si es salida, buscar el marcaje de entrada correspondiente para obtener la hora inicio
+        const entradaDelDia = marcajes.find(m => 
+          m.empleadoId === selectedEmployee.id && 
+          m.fecha === fechaFormateada && 
+          m.tipoMarcaje === TipoMarcaje.ENTRADA
+        );
+        
+        horaInicio = entradaDelDia?.hora;
+        horaFin = data.hora;
+      }
+    
       const newMarcaje: Marcaje = {
         id: generateId(),
-        fecha: data.fecha.split('-').reverse().join('-'), // Convertir a formato DD-MM-YYYY
+        fecha: fechaFormateada,
         hora: data.hora,
+        horaInicio: horaInicio,
+        horaFin: horaFin,
         empleadoId: selectedEmployee.id,
         dispositivo: dispositivos.find(d => d.id === data.dispositivo)?.nombre || data.dispositivo,
         tipoVerificacion: data.tipoVerificacion,
@@ -126,12 +156,12 @@ const IncidenciasScreen: React.FC = () => {
         observaciones: data.observaciones,
         usuarioRegistro: 'Usuario Actual',
         timestampRegistro: new Date().toISOString(),
-        coordenadas: coordenadas, // Añadir coordenadas
-        resultado: "Verificado" // Añadir resultado por defecto
+        coordenadas: coordenadas,
+        resultado: "Verificado"
       };
       
       setMarcajes([...marcajes, newMarcaje]);
-      setSelectedMarcaje(newMarcaje); // Seleccionar automáticamente el nuevo marcaje
+      setSelectedMarcaje(newMarcaje);
       setAddModalOpen(false);
     }
   };
@@ -177,6 +207,41 @@ const IncidenciasScreen: React.FC = () => {
     // Resetear a la primera página cuando cambian los filtros
     setCurrentPage(1);
   };
+
+  useEffect(() => {
+    if (selectedEmployee) {
+      // Filtrar marcajes por empleado y fecha
+      const filtered = marcajes.filter(
+        m => m.empleadoId === selectedEmployee.id && m.fecha === dateFilter
+      );
+      setFilteredMarcajes(filtered);
+      
+      // Si hay marcajes filtrados, seleccionar el más reciente para mostrar sus datos
+      if (filtered.length > 0 && !selectedMarcaje) {
+        // Ordenar por hora para encontrar el más reciente
+        const sortedMarcajes = [...filtered].sort((a, b) => {
+          // Convertir a formato 24h para comparar correctamente
+          const getHour24 = (timeStr: string) => {
+            const [time, ampm] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            if (ampm === 'PM' && hours < 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+            return hours * 60 + minutes;
+          };
+          
+          return getHour24(b.hora) - getHour24(a.hora);
+        });
+        
+        setSelectedMarcaje(sortedMarcajes[0]);
+      } else if (filtered.length === 0) {
+        // Limpiar selección si no hay marcajes
+        setSelectedMarcaje(null);
+      }
+    } else {
+      setFilteredMarcajes([]);
+      setSelectedMarcaje(null);
+    }
+  }, [selectedEmployee, marcajes, dateFilter]);
 
   // Función de búsqueda avanzada
   const filterEmployees = () => {
@@ -480,46 +545,55 @@ const IncidenciasScreen: React.FC = () => {
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
               <h3 className="text-sm font-medium text-gray-700 mb-3">Fechas de incidencias</h3>
               
-              <div className="grid grid-cols-4 gap-4 mb-4">
-                <div className="col-span-1">
-                  <label className="block text-xs text-gray-500 mb-1">
-                    Fecha:
-                  </label>
-                  <input
-                    type="text"
-                    value={dateFilter}
-                    onChange={(e) => setDateFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  />
-                </div>
-                
-                <div className="col-span-1">
-                  <label className="block text-xs text-gray-500 mb-1">
-                    Hora:
-                  </label>
-                  <div className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-sm">
-                    {selectedMarcaje?.hora || "---"}
-                  </div>
-                </div>
-                
-                <div className="col-span-1">
-                  <label className="block text-xs text-gray-500 mb-1">
-                    Dispositivo:
-                  </label>
-                  <div className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-sm">
-                    {selectedMarcaje?.dispositivo || "---"}
-                  </div>
-                </div>
-                
-                <div className="col-span-1">
-                  <label className="block text-xs text-gray-500 mb-1">
-                    Tipo De Verificación:
-                  </label>
-                  <div className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-sm">
-                    {selectedMarcaje?.tipoVerificacion || "---"}
-                  </div>
+              <div className="grid grid-cols-5 gap-4 mb-4">
+              <div className="col-span-1">
+                <label className="block text-xs text-gray-500 mb-1">
+                  Fecha:
+                </label>
+                <input
+                  type="text"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+              
+              <div className="col-span-1">
+                <label className="block text-xs text-gray-500 mb-1">
+                  Hora Inicio:
+                </label>
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-sm">
+                  {selectedMarcaje?.horaInicio || selectedMarcaje?.hora || "---"}
                 </div>
               </div>
+              
+              <div className="col-span-1">
+                <label className="block text-xs text-gray-500 mb-1">
+                  Hora Fin:
+                </label>
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-sm">
+                  {selectedMarcaje?.horaFin || "---"}
+                </div>
+              </div>
+              
+              <div className="col-span-1">
+                <label className="block text-xs text-gray-500 mb-1">
+                  Dispositivo:
+                </label>
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-sm">
+                  {selectedMarcaje?.dispositivo || "---"}
+                </div>
+              </div>
+              
+              <div className="col-span-1">
+                <label className="block text-xs text-gray-500 mb-1">
+                  Tipo De Verificación:
+                </label>
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-sm">
+                  {selectedMarcaje?.tipoVerificacion || "---"}
+                </div>
+              </div>
+            </div>
               
               {/* Visor de línea de tiempo */}
               <div className="mb-4">

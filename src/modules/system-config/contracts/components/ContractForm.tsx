@@ -1,15 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, ChevronDown, X as XIcon } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Save, ChevronDown, X as XIcon, Plus } from 'lucide-react';
 import { Contract, ContractFormProps, ContractType } from '../interfaces/types';
 import TimeSelector from './TimeSelector';
 
+// Interfaces para el MultiSelect
+interface MultiSelectOption {
+  value: string;
+  label: string;
+}
+
+interface MultiSelectProps {
+  value: string[];
+  onChange: (value: string[]) => void;
+  options: MultiSelectOption[];
+  placeholder?: string;
+}
+
 // Componente para la selección múltiple de conceptos
-const MultiSelect = ({ value = [], onChange, options }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+const MultiSelect: React.FC<MultiSelectProps> = ({ 
+  value = [], 
+  onChange, 
+  options, 
+  placeholder = "Selecciona conceptos..." 
+}) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Cerrar el dropdown cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   
   // Función para manejar la selección de una opción
-  const handleSelect = (option) => {
+  const handleSelect = (option: MultiSelectOption) => {
     if (!value.includes(option.value)) {
       const newValue = [...value, option.value];
       onChange(newValue);
@@ -18,13 +51,14 @@ const MultiSelect = ({ value = [], onChange, options }) => {
   };
   
   // Función para eliminar una opción seleccionada
-  const handleRemove = (optionValue) => {
+  const handleRemove = (optionValue: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Evitar que se abra el dropdown
     const newValue = value.filter(val => val !== optionValue);
     onChange(newValue);
   };
   
   // Obtener etiquetas para las opciones seleccionadas
-  const getOptionLabel = (optionValue) => {
+  const getOptionLabel = (optionValue: string) => {
     const option = options.find(opt => opt.value === optionValue);
     return option ? option.label : optionValue;
   };
@@ -36,30 +70,41 @@ const MultiSelect = ({ value = [], onChange, options }) => {
   );
   
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       {/* Área de visualización de selecciones */}
       <div 
-        className="w-full p-2 border border-gray-300 rounded-md min-h-[42px] flex flex-wrap gap-1 cursor-pointer"
-        onClick={() => setIsOpen(true)}
+        className="w-full p-2 border border-gray-300 rounded-md min-h-[42px] flex flex-wrap gap-2 cursor-pointer bg-white"
+        onClick={() => setIsOpen(!isOpen)}
       >
         {value.length > 0 ? (
-          value.map(val => (
-            <div key={val} className="flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-              {getOptionLabel(val)}
-              <button 
-                type="button" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(val);
-                }}
-                className="ml-1 text-blue-600 hover:text-blue-800"
-              >
-                <XIcon size={14} />
-              </button>
-            </div>
-          ))
+          <>
+            {value.map(val => (
+              <div key={val} className="flex items-center bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-sm">
+                {getOptionLabel(val)}
+                <button 
+                  type="button" 
+                  onClick={(e) => handleRemove(val, e)}
+                  className="ml-1 text-indigo-600 hover:text-indigo-800"
+                >
+                  <XIcon size={14} />
+                </button>
+              </div>
+            ))}
+            {/* Botón Agregar */}
+            <button 
+              type="button"
+              className="flex items-center text-gray-500 hover:text-gray-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(true);
+              }}
+            >
+              <Plus size={16} className="mr-1" />
+              <span className="text-sm">Agregar</span>
+            </button>
+          </>
         ) : (
-          <div className="text-gray-500">Selecciona conceptos...</div>
+          <div className="text-gray-500">{placeholder}</div>
         )}
         <div className="ml-auto flex items-center">
           <ChevronDown size={18} className="text-gray-500" />
@@ -105,14 +150,6 @@ const MultiSelect = ({ value = [], onChange, options }) => {
           </div>
         </div>
       )}
-      
-      {/* Overlay para cerrar el dropdown cuando se hace clic fuera */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-0" 
-          onClick={() => setIsOpen(false)}
-        />
-      )}
     </div>
   );
 };
@@ -126,7 +163,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   const isEdit = !!contract;
   
   // Opciones para el campo de conceptos
-  const conceptOptions = [
+  const conceptOptions: MultiSelectOption[] = [
     { value: "horas-fuera-horario", label: "Horas fuera de horario" },
     { value: "horas-fuera-horario-nocturna", label: "Horas fuera de horario nocturnas" },
     { value: "horas-feriado", label: "Horas en día feriado" },
@@ -205,7 +242,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   };
 
   // Manejador para el cambio en la selección de conceptos
-  const handleConceptsChange = (newConcepts) => {
+  const handleConceptsChange = (newConcepts: string[]) => {
     setFormData({
       ...formData,
       concepts: newConcepts
@@ -224,7 +261,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
     
     // Crear un ID para nuevos contratos
     const completeData: Contract = {
-      ...formData as Contract,
+      ...formData,
       id: contract?.id || `contract-${Date.now()}`
     };
     
@@ -239,9 +276,10 @@ export const ContractForm: React.FC<ContractFormProps> = ({
         </h2>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Sección 1: Información básica */}
+      <form onSubmit={handleSubmit} className="p-6">
+        {/* Layout reorganizado en 3 columnas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4">
+          {/* Columna 1: Información básica */}
           <div>
             <div className="mb-4">
               <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
@@ -281,6 +319,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 value={formData.concepts}
                 onChange={handleConceptsChange}
                 options={conceptOptions}
+                placeholder="Selecciona conceptos..."
               />
             </div>
             
@@ -325,32 +364,113 @@ export const ContractForm: React.FC<ContractFormProps> = ({
             </div>
           </div>
           
-          {/* Sección 2: Horario nocturno */}
+          {/* Columna 2: Horario nocturno y Sin Horario */}
           <div>
-          <div className="mb-4">
-            <TimeSelector
-              id="nightShiftStart"
-              name="nightShiftStart"
-              value={formData.workingHours?.nightShiftStart}
-              onChange={handleWorkingHoursChange}
-              label="Inicio del recargo nocturno"
-            />
-          </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Inicio del recargo nocturno
+              </label>
+              <TimeSelector
+                id="nightShiftStart"
+                name="nightShiftStart"
+                value={formData.workingHours?.nightShiftStart}
+                onChange={handleWorkingHoursChange}
+                label=""
+              />
+            </div>
+              
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Fin del recargo nocturno
+              </label>
+              <TimeSelector
+                id="nightShiftEnd"
+                name="nightShiftEnd"
+                value={formData.workingHours?.nightShiftEnd}
+                onChange={handleWorkingHoursChange}
+                label=""
+              />
+            </div>
             
-          <div className="mb-4">
-            <TimeSelector
-              id="nightShiftEnd"
-              name="nightShiftEnd"
-              value={formData.workingHours?.nightShiftEnd}
-              onChange={handleWorkingHoursChange}
-              label="Fin del recargo nocturno"
-            />
-          </div>
+            <div className="mb-4">
+              <h3 className="text-md font-medium text-gray-700 mb-2">Sin Horario</h3>
+              <label htmlFor="maxDailyHours" className="block text-sm font-medium text-gray-700 mb-1">
+                Máx. horas a trabajar
+              </label>
+              <input
+                type="number"
+                id="maxDailyHours"
+                name="maxDailyHours"
+                value={formData.workingHours?.maxDailyHours}
+                onChange={handleWorkingHoursChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="flex items-center">
+                <span className="text-sm text-gray-700 mr-2">¿Cruzar días?</span>
+                <label className="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="crossDays"
+                    checked={formData.crossDays}
+                    onChange={(e) => setFormData({...formData, crossDays: e.target.checked})}
+                    className="sr-only peer"
+                  />
+                  <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <span className="text-sm text-gray-700 mr-2">¿Auto aprobar?</span>
+                <label className="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="autoApprove"
+                    checked={formData.autoApprove}
+                    onChange={(e) => setFormData({...formData, autoApprove: e.target.checked})}
+                    className="sr-only peer"
+                  />
+                  <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center">
+                <span className="text-sm text-gray-700 mr-2">Ignorar ausencias</span>
+                <label className="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="ignoreAbsences"
+                    checked={formData.ignoreAbsences}
+                    onChange={(e) => setFormData({...formData, ignoreAbsences: e.target.checked})}
+                    className="sr-only peer"
+                  />
+                  <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <span className="text-sm text-gray-700 mr-2">¿Primer y último marcaje?</span>
+                <label className="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="firstLastCheck"
+                    checked={formData.firstLastCheck}
+                    onChange={(e) => setFormData({...formData, firstLastCheck: e.target.checked})}
+                    className="sr-only peer"
+                  />
+                  <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
           </div>
           
-          {/* Sección 3: Horas semanales */}
+          {/* Columna 3: Horas semanales */}
           <div>
-            <h3 className="text-md font-medium text-gray-700 mb-3">Horas semanales</h3>
+            <h3 className="text-md font-medium text-gray-700 mb-2">Horas semanales</h3>
             
             <div className="mb-4">
               <label htmlFor="perWeek" className="block text-sm font-medium text-gray-700 mb-1">
@@ -396,94 +516,9 @@ export const ContractForm: React.FC<ContractFormProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Sección Sin Horario */}
-        <div className="px-6 pb-4">
-          <h3 className="text-md font-medium text-gray-700 mb-3">Sin Horario</h3>
-          
-          <div className="mb-4">
-            <label htmlFor="maxDailyHours" className="block text-sm font-medium text-gray-700 mb-1">
-              Máx. horas a trabajar
-            </label>
-            <input
-              type="number"
-              id="maxDailyHours"
-              name="maxDailyHours"
-              value={formData.workingHours?.maxDailyHours}
-              onChange={handleWorkingHoursChange}
-              className="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="flex items-center">
-              <div className="mr-4">
-                <span className="text-sm text-gray-700">¿Cruzar días?</span>
-              </div>
-              <label className="inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="crossDays"
-                  checked={formData.crossDays}
-                  onChange={(e) => setFormData({...formData, crossDays: e.target.checked})}
-                  className="sr-only peer"
-                />
-                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <div className="mr-4">
-                <span className="text-sm text-gray-700">¿Auto aprobar?</span>
-              </div>
-              <label className="inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="autoApprove"
-                  checked={formData.autoApprove}
-                  onChange={(e) => setFormData({...formData, autoApprove: e.target.checked})}
-                  className="sr-only peer"
-                />
-                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <div className="mr-4">
-                <span className="text-sm text-gray-700">Ignorar ausencias</span>
-              </div>
-              <label className="inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="ignoreAbsences"
-                  checked={formData.ignoreAbsences}
-                  onChange={(e) => setFormData({...formData, ignoreAbsences: e.target.checked})}
-                  className="sr-only peer"
-                />
-                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <div className="mr-4">
-                <span className="text-sm text-gray-700">¿Primer y último marcaje?</span>
-              </div>
-              <label className="inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="firstLastCheck"
-                  checked={formData.firstLastCheck}
-                  onChange={(e) => setFormData({...formData, firstLastCheck: e.target.checked})}
-                  className="sr-only peer"
-                />
-                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          </div>
-        </div>
         
         {/* Botones de acción */}
-        <div className="px-6 py-4 flex justify-end space-x-3 border-t border-gray-200">
+        <div className="mt-6 pt-4 flex justify-end space-x-3 border-t border-gray-200">
           <button
             type="button"
             onClick={onCancel}

@@ -56,6 +56,9 @@ export interface Marcaje {
   observaciones?: string;
   coordenadas?: Coordenadas; 
   resultado?: "Verificado" | "No Verificado" | "Pendiente";
+  horaInicio?: string;
+  horaFin?: string;  
+  
 }
 
 export interface Incidencia {

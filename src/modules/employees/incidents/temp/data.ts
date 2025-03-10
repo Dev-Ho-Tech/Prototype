@@ -230,68 +230,97 @@ export const employees: Employee[] = [
     containerType: 'Departamentos'
   }
 ];
-
 export const marcajes: Marcaje[] = [
   // Marcajes para empleado 1001
   {
     id: '1',
     fecha: '14-02-2025',
     hora: '07:52 AM',
+    horaInicio: '07:52 AM',
+    horaFin: '---',
     empleadoId: '1001',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T07:52:00Z',
+    resultado: "Verificado"
   },
   {
     id: '2',
     fecha: '14-02-2025',
     hora: '06:00 PM',
+    horaInicio: '07:52 AM',
+    horaFin: '06:00 PM',
     empleadoId: '1001',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T18:00:00Z',
+    resultado: "Verificado"
   },
   {
     id: '3',
     fecha: '15-02-2025',
     hora: '07:55 AM',
+    horaInicio: '07:55 AM',
+    horaFin: '---',
     empleadoId: '1001',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-15T07:55:00Z',
+    resultado: "Verificado"
   },
   {
     id: '4',
     fecha: '15-02-2025',
     hora: '06:05 PM',
+    horaInicio: '07:55 AM',
+    horaFin: '06:05 PM',
     empleadoId: '1001',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-15T18:05:00Z',
+    resultado: "Verificado"
   },
   {
     id: '5',
     fecha: '16-02-2025',
     hora: '08:10 AM',
+    horaInicio: '08:10 AM',
+    horaFin: '---',
     empleadoId: '1001',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-16T08:10:00Z',
+    resultado: "Verificado"
   },
   {
     id: '6',
     fecha: '16-02-2025',
     hora: '05:45 PM',
+    horaInicio: '08:10 AM',
+    horaFin: '05:45 PM',
     empleadoId: '1001',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-16T17:45:00Z',
+    resultado: "Verificado"
   },
 
   // Marcajes para empleado 1002
@@ -299,41 +328,61 @@ export const marcajes: Marcaje[] = [
     id: '7',
     fecha: '14-02-2025',
     hora: '08:00 AM',
+    horaInicio: '08:00 AM',
+    horaFin: '---',
     empleadoId: '1002',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.ROSTRO,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T08:00:00Z',
+    resultado: "Verificado"
   },
   {
     id: '8',
     fecha: '14-02-2025',
     hora: '05:00 PM',
+    horaInicio: '08:00 AM',
+    horaFin: '05:00 PM',
     empleadoId: '1002',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.ROSTRO,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T17:00:00Z',
+    resultado: "Verificado"
   },
   {
     id: '9',
     fecha: '15-02-2025',
     hora: '08:15 AM',
+    horaInicio: '08:15 AM',
+    horaFin: '---',
     empleadoId: '1002',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.ROSTRO,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-15T08:15:00Z',
+    resultado: "Verificado"
   },
   {
     id: '10',
     fecha: '15-02-2025',
     hora: '05:10 PM',
+    horaInicio: '08:15 AM',
+    horaFin: '05:10 PM',
     empleadoId: '1002',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.ROSTRO,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-15T17:10:00Z',
+    resultado: "Verificado"
   },
 
   // Marcajes para empleado 1003
@@ -341,21 +390,31 @@ export const marcajes: Marcaje[] = [
     id: '11',
     fecha: '14-02-2025',
     hora: '08:30 AM',
+    horaInicio: '08:30 AM',
+    horaFin: '---',
     empleadoId: '1003',
     dispositivo: 'ACC-GA-001',
     tipoVerificacion: TipoVerificacion.TARJETA,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T08:30:00Z',
+    resultado: "Verificado"
   },
   {
     id: '12',
     fecha: '14-02-2025',
     hora: '05:30 PM',
+    horaInicio: '08:30 AM',
+    horaFin: '05:30 PM',
     empleadoId: '1003',
     dispositivo: 'ACC-GA-001',
     tipoVerificacion: TipoVerificacion.TARJETA,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T17:30:00Z',
+    resultado: "Verificado"
   },
 
   // Marcajes para empleado 1004
@@ -363,21 +422,31 @@ export const marcajes: Marcaje[] = [
     id: '13',
     fecha: '14-02-2025',
     hora: '09:00 AM',
+    horaInicio: '09:00 AM',
+    horaFin: '---',
     empleadoId: '1004',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T09:00:00Z',
+    resultado: "Verificado"
   },
   {
     id: '14',
     fecha: '14-02-2025',
     hora: '06:00 PM',
+    horaInicio: '09:00 AM',
+    horaFin: '06:00 PM',
     empleadoId: '1004',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T18:00:00Z',
+    resultado: "Verificado"
   },
   
   // Marcajes para empleado 1005
@@ -385,21 +454,31 @@ export const marcajes: Marcaje[] = [
     id: '15',
     fecha: '14-02-2025',
     hora: '06:30 AM',
+    horaInicio: '06:30 AM',
+    horaFin: '---',
     empleadoId: '1005',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T06:30:00Z',
+    resultado: "Verificado"
   },
   {
     id: '16',
     fecha: '14-02-2025',
     hora: '02:30 PM',
+    horaInicio: '06:30 AM',
+    horaFin: '02:30 PM',
     empleadoId: '1005',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T14:30:00Z',
+    resultado: "Verificado"
   },
   
   // Marcajes para empleado 1006
@@ -407,21 +486,31 @@ export const marcajes: Marcaje[] = [
     id: '17',
     fecha: '14-02-2025',
     hora: '07:00 AM',
+    horaInicio: '07:00 AM',
+    horaFin: '---',
     empleadoId: '1006',
     dispositivo: 'ACC-GA-001',
     tipoVerificacion: TipoVerificacion.TARJETA,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T07:00:00Z',
+    resultado: "Verificado"
   },
   {
     id: '18',
     fecha: '14-02-2025',
     hora: '07:00 PM',
+    horaInicio: '07:00 AM',
+    horaFin: '07:00 PM',
     empleadoId: '1006',
     dispositivo: 'ACC-GA-001',
     tipoVerificacion: TipoVerificacion.TARJETA,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T19:00:00Z',
+    resultado: "Verificado"
   },
   
   // Marcajes para empleado 1007
@@ -429,20 +518,30 @@ export const marcajes: Marcaje[] = [
     id: '19',
     fecha: '14-02-2025',
     hora: '08:00 AM',
+    horaInicio: '08:00 AM',
+    horaFin: '---',
     empleadoId: '1007',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.ENTRADA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T08:00:00Z',
+    resultado: "Verificado"
   },
   {
     id: '20',
     fecha: '14-02-2025',
     hora: '04:00 PM',
+    horaInicio: '08:00 AM',
+    horaFin: '04:00 PM',
     empleadoId: '1007',
     dispositivo: 'BIO-GA-001',
     tipoVerificacion: TipoVerificacion.HUELLA,
     tipoMarcaje: TipoMarcaje.SALIDA,
-    esManual: false
+    esManual: false,
+    usuarioRegistro: 'Sistema',
+    timestampRegistro: '2025-02-14T16:00:00Z',
+    resultado: "Verificado"
   }
 ];

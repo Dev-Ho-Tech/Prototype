@@ -18,6 +18,12 @@ export const EmployeeProfileForm = ({
 }) => {
   const { setCurrentEmployee } = useAppState();
   const [showStructureModal, setShowStructureModal] = useState(false);
+  
+  // Estado para controlar los métodos de marcaje seleccionados
+  const [selectedBiometrics, setSelectedBiometrics] = useState<string[]>(
+    employee?.biometricMethods || ['rostro']
+  );
+
   const [personalData, setPersonalData] = useState({
     primerNombre: employee?.primerNombre || '',
     segundoNombre: employee?.segundoNombre || '',
@@ -44,6 +50,16 @@ export const EmployeeProfileForm = ({
     perfilesMarcaje: employee?.perfilesMarcaje || ['Principal'],
   });
 
+  // Función para manejar la selección de métodos biométricos
+  const handleBiometricToggle = (biometricId: string) => {
+    setSelectedBiometrics(prev => {
+      if (prev.includes(biometricId)) {
+        return prev.filter(id => id !== biometricId);
+      } else {
+        return [...prev, biometricId];
+      }
+    });
+  };
 
   const handlePersonalDataChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value, type } = e.target;
@@ -64,7 +80,6 @@ export const EmployeeProfileForm = ({
     });
   };
   
-
   const handleSave = () => {
     // Creamos un empleado unificado con los datos actualizados
     const updatedEmployee: UnifiedEmployee = {
@@ -99,6 +114,9 @@ export const EmployeeProfileForm = ({
       position: laborData.cargo,
       cargo: laborData.cargo,
       perfilesMarcaje: laborData.perfilesMarcaje,
+      
+      // Agregar los métodos biométricos seleccionados
+      biometricMethods: selectedBiometrics,
       
       // Calcular campos derivados
       fullName: `${personalData.primerNombre} ${personalData.segundoNombre ? personalData.segundoNombre + ' ' : ''}${personalData.primerApellido} ${personalData.segundoApellido || ''}`.trim(),
@@ -438,19 +456,51 @@ export const EmployeeProfileForm = ({
                 </div>
               </div>
               
+              {/* Perfiles de Marcaje con Permitir visitas */}
+              <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                <div>
+                  <PerfilesMarcajeSelector
+                    selectedProfiles={laborData.perfilesMarcaje}
+                    onChange={(newProfiles) => {
+                      setLaborData({
+                        ...laborData,
+                        perfilesMarcaje: newProfiles
+                      });
+                    }}
+                  />
+                </div>
 
-              <div>
-            <PerfilesMarcajeSelector
-              selectedProfiles={laborData.perfilesMarcaje}
-              onChange={(newProfiles) => {
-                setLaborData({
-                  ...laborData,
-                  perfilesMarcaje: newProfiles
-                });
-              }}
-            />
-            </div>
-
+                
+                <div className="flex items-center">
+                  <label htmlFor="permitir-visitas" className="mr-2 text-sm font-medium text-gray-700">
+                    Permitir visitas
+                  </label>
+                  <div className="relative inline-block w-10 mr-2 align-middle select-none">
+                    <input 
+                      type="checkbox" 
+                      name="permitirVisitas" 
+                      id="permitir-visitas" 
+                      checked={personalData.permitirVisitas}
+                      onChange={handlePersonalDataChange}
+                      className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                    />
+                    <label 
+                      htmlFor="permitir-visitas" 
+                      className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
+                    ></label>
+                  </div>
+                  <div>
+                  <button 
+                    type="button" 
+                    className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                    onClick={() => setShowStructureModal(true)}
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    Ver estructura
+                  </button>
+                </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -464,48 +514,27 @@ export const EmployeeProfileForm = ({
                 Métodos de marcajes permitidos
               </h4>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <label htmlFor="permitir-visitas" className="mr-2 text-sm font-medium text-gray-700">
-                  Permitir visitas
-                </label>
-                <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                  <input 
-                    type="checkbox" 
-                    name="permitirVisitas" 
-                    id="permitir-visitas" 
-                    checked={personalData.permitirVisitas}
-                    onChange={handlePersonalDataChange}
-                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                  />
-                  <label 
-                    htmlFor="permitir-visitas" 
-                    className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
-                  ></label>
-                </div>
-              </div>
-              <button 
-                type="button" 
-                className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                onClick={() => setShowStructureModal(true)}
-              >
-                <Eye className="w-4 h-4 mr-1" />
-                Ver estructura
-              </button>
-            </div>
+
           </div>
 
-          <div className="grid grid-cols-7 gap-4 mt-2">
-            {biometricOptions.map((option) => (
-              <div key={option.id} className="flex flex-col items-center">
-                <div className={`w-14 h-14 rounded-md flex items-center justify-center ${option.active ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-300'}`}>
-                  {option.icon}
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4 mt-2">
+            {biometricOptions.map((option) => {
+              const isSelected = selectedBiometrics.includes(option.id);
+              return (
+                <div 
+                  key={option.id} 
+                  className="flex flex-col items-center cursor-pointer"
+                  onClick={() => handleBiometricToggle(option.id)}
+                >
+                  <div className={`w-14 h-14 rounded-md flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-300 hover:bg-gray-200'}`}>
+                    {option.icon}
+                  </div>
+                  <span className={`text-xs mt-2 ${isSelected ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
+                    {option.label}
+                  </span>
                 </div>
-                <span className={`text-xs mt-2 ${option.active ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
-                  {option.label}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         
           {/* Botones de acción */}
