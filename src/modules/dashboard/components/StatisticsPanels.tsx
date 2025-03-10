@@ -7,17 +7,36 @@ import InteractivePieChart, { ChartTooltip } from '../components/card_and_kpi/In
 console.log("Cargando módulo StatisticsPanels");
 
 // Componente de tarjeta individual con tooltip
-const NovedadCardItem = ({ card }: { card: NovedadCard }) => {
+const NovedadCardItem = ({ 
+  card, 
+  isActive = false, 
+  onClick 
+}: { 
+  card: NovedadCard; 
+  isActive?: boolean;
+  onClick: (cardId: string) => void;
+}) => {
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Determinar estilos basados en el estado activo
+  const cardStyle = {
+    backgroundColor: isActive ? card.color : card.bgColor,
+    transform: isActive || isHovered ? 'scale(1.05)' : 'none',
+    boxShadow: isActive ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)' : ''
+  };
+
+  // Determinar estilos del texto basados en el estado activo
+  const textStyle = {
+    color: isActive ? 'white' : card.color
+  };
   
   return (
     <div 
-      className={`bg-white rounded-lg shadow relative overflow-hidden transition-all duration-200 cursor-pointer ${
-        isHovered ? 'transform scale-105 shadow-md' : ''
-      }`}
-      style={{ backgroundColor: card.bgColor }}
+      className={`rounded-lg shadow relative overflow-hidden transition-all duration-200 cursor-pointer`}
+      style={cardStyle}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={() => onClick(card.id)}
     >
       {/* Tooltip */}
       {isHovered && card.tooltip && (
@@ -35,14 +54,14 @@ const NovedadCardItem = ({ card }: { card: NovedadCard }) => {
       {/* Contenido de la tarjeta */}
       <div className="p-3">
         <div className="flex justify-between items-center">
-          <div className="text-3xl font-bold" style={{ color: card.color }}>
+          <div className="text-3xl font-bold" style={textStyle}>
             {card.count}
           </div>
-          <div style={{ color: card.color }}>
+          <div style={textStyle}>
             {card.icon}
           </div>
         </div>
-        <div className="mt-1" style={{ color: card.color }}>
+        <div className="mt-1" style={textStyle}>
           <span className="text-sm">{card.label}</span>
         </div>
       </div>
@@ -117,49 +136,57 @@ const validateData = (data: any[]) => {
     );
 };
 
-const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({ 
+// Actualizada interfaz con nuevas props para el filtro
+interface ExtendedStatisticsPanelsProps extends StatisticsPanelsProps {
+  activeKpiFilter?: string | null;
+  onKpiFilterChange?: (kpiId: string) => void;
+}
+
+const StatisticsPanels: React.FC<ExtendedStatisticsPanelsProps> = ({ 
   estadoDelDiaData, 
   tiemposData,
+  activeKpiFilter = null,
+  onKpiFilterChange = () => {},
   novedadesTiempoData = [
-    { name: 'Tardanzas', value: 30, color: '#10b981', details: '0h 32m' },
-    { name: 'Intempestivas', value: 15, color: '#3b82f6', details: '1h 27m' },
+    { name: 'Tardanzas', value: 30, color: '#10b981', details: '4h 45m' },
+    { name: 'Intempestivas', value: 15, color: '#3b82f6', details: '15h 30m' },
     { name: 'Permisos', value: 20, color: '#f59e0b', details: '47h 58m' },
     { name: 'Ausencias', value: 25, color: '#ef4444', details: '84h 0m' },
   ],
   novedadesCards = [
     { 
       id: 'tardanzas', 
-      count: 1, 
+      count: 4, 
       label: 'Tardanzas', 
       color: '#f4a72c', 
       bgColor: '#fff9e6', 
       icon: <Clock className="w-5 h-5" />,
       borderColor: '#f4a72c',
-      tooltip: 'Empleados que llegaron tarde: 1'
+      tooltip: 'Empleados que llegaron tarde: 3'
     },
     { 
       id: 'permisos', 
-      count: 2, 
+      count: 4, 
       label: 'Permisos', 
       color: '#5c6cfa', 
       bgColor: '#eef0ff', 
       icon: <Clock className="w-5 h-5" />,
       borderColor: '#5c6cfa',
-      tooltip: 'Permisos aprobados: 2'
+      tooltip: 'Permisos aprobados: 5'
     },
     { 
       id: 'salidas', 
-      count: 2, 
+      count: 10, 
       label: 'Salidas Intemp.', 
       color: '#5c6cfa', 
       bgColor: '#eef0ff', 
       icon: <Users className="w-5 h-5" />,
       borderColor: '#5c6cfa',
-      tooltip: 'Salidas intempestivas: 2'
+      tooltip: 'Salidas intempestivas: 3'
     },
     { 
       id: 'ausencias', 
-      count: 9, 
+      count: 5, 
       label: 'Ausencias', 
       color: '#fa5c5c', 
       bgColor: '#ffeef0', 
@@ -169,23 +196,23 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
     },
     { 
       id: 'sin-horario', 
-      count: 0, 
+      count: 5, 
       label: 'Sin Horario', 
       color: '#9333ea', 
       bgColor: '#f5eeff', 
       icon: <AlertTriangle className="w-5 h-5" />,
       borderColor: '#9333ea',
-      tooltip: 'Empleados sin horario asignado: 0'
+      tooltip: 'Empleados sin horario asignado: 5'
     },
     { 
       id: 'horas-extras', 
-      count: 0, 
+      count: 7, 
       label: 'Horas Extras', 
       color: '#d946ef', 
       bgColor: '#fceeff', 
       icon: <Clock className="w-5 h-5" />,
       borderColor: '#d946ef',
-      tooltip: 'Total de horas extras: 0'
+      tooltip: 'Total de horas extras: 7'
     },
   ]
 }) => {
@@ -198,11 +225,13 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
     tiemposData: validateData(tiemposData) ? `${tiemposData.length} items` : "datos inválidos"
   });
   
-  console.log("StatisticsPanels - estado:", {
-    activeSegmentId,
-    activeData: activeData ? `${activeData.name} (${activeData.value})` : "null",
-    tooltipPosition
-  });
+  // Manejador para cuando se hace clic en una tarjeta KPI
+  const handleCardClick = (cardId: string) => {
+    console.log(`Click en tarjeta KPI: ${cardId}`);
+    if (onKpiFilterChange) {
+      onKpiFilterChange(cardId);
+    }
+  };
   
   // Preparar datos con información adicional para los tooltips
   const enhancedEstadoDelDiaData = estadoDelDiaData.map(entry => ({
@@ -306,7 +335,12 @@ const StatisticsPanels: React.FC<StatisticsPanelsProps> = ({
       {/* Fila de tarjetas KPI con hover effect */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
         {novedadesCards.map((card) => (
-          <NovedadCardItem key={card.id} card={card} />
+          <NovedadCardItem 
+            key={card.id} 
+            card={card} 
+            isActive={activeKpiFilter === card.id} 
+            onClick={handleCardClick}
+          />
         ))}
       </div>
 

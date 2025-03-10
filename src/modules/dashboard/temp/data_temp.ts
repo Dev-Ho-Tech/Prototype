@@ -40,7 +40,7 @@ const marcajesData: Record<number, Marcaje[]> = {
       localizacion: 'Remoto'
     }
   ],
-  // Marcajes para empleado ID 9 (Jose Del Nardo)
+  // Marcajes para empleado ID 9 (Jose Del Nardo) - Horas Extras
   9: [
     {
       fecha: '2023-10-15',
@@ -59,7 +59,7 @@ const marcajesData: Record<number, Marcaje[]> = {
       localizacion: 'Oficina Secundaria'
     }
   ],
-  // Marcajes para empleado ID 4 (Carlos Peña)
+  // Marcajes para empleado ID 4 (Carlos Peña) - Horas Extras
   4: [
     {
       fecha: '2023-10-15',
@@ -78,7 +78,7 @@ const marcajesData: Record<number, Marcaje[]> = {
       localizacion: 'Remoto'
     }
   ],
-  // Marcajes para empleado ID 13 (Ana Mendoza)
+  // Marcajes para empleado ID 13 (Ana Mendoza) - Tardanza
   13: [
     {
       fecha: '2023-10-15',
@@ -89,7 +89,7 @@ const marcajesData: Record<number, Marcaje[]> = {
       localizacion: 'Sucursal Norte'
     }
   ],
-  // Marcajes para empleado ID 15 (Valentina Romero)
+  // Marcajes para empleado ID 15 (Valentina Romero) - Horas Extras
   15: [
     {
       fecha: '2023-10-15',
@@ -100,7 +100,7 @@ const marcajesData: Record<number, Marcaje[]> = {
       localizacion: 'Oficina Principal'
     }
   ],
-  // Marcajes para empleado ID 19 (Mariana López)
+  // Marcajes para empleado ID 19 (Mariana López) - Normal
   19: [
     {
       fecha: '2023-10-15',
@@ -118,31 +118,141 @@ const marcajesData: Record<number, Marcaje[]> = {
       metodo: 'facial',
       localizacion: 'Oficina Principal'
     }
+  ],
+  // Marcajes para empleado ID 17 (Carolina Jiménez) - Tardanza
+  17: [
+    {
+      fecha: '2023-10-15',
+      hora: '09:45',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    }
+  ],
+  // Marcajes para empleado ID 20 (Eduardo Torres) - Tardanza
+  20: [
+    {
+      fecha: '2023-10-15',
+      hora: '10:30',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    }
+  ],
+  // Marcajes para nuevos empleados con salidas intempestivas
+  25: [
+    {
+      fecha: '2023-10-15',
+      hora: '07:30',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '12:30',
+      tipo: 'salida',
+      dispositivo: 'smartphone',
+      metodo: 'manual',
+      localizacion: 'Remoto'
+    }
+  ],
+  26: [
+    {
+      fecha: '2023-10-15',
+      hora: '08:00',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '14:00',
+      tipo: 'salida',
+      dispositivo: 'smartphone',
+      metodo: 'manual',
+      localizacion: 'Remoto'
+    }
+  ],
+  // Marcajes para nuevos empleados con horas extras
+  27: [
+    {
+      fecha: '2023-10-15',
+      hora: '07:00',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '18:30',
+      tipo: 'salida',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    }
+  ],
+  28: [
+    {
+      fecha: '2023-10-15',
+      hora: '06:30',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '17:45',
+      tipo: 'salida',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    }
+  ],
+  29: [
+    {
+      fecha: '2023-10-15',
+      hora: '07:10',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '19:15',
+      tipo: 'salida',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    }
+  ],
+  30: [
+    {
+      fecha: '2023-10-15',
+      hora: '08:00',
+      tipo: 'entrada',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    },
+    {
+      fecha: '2023-10-15',
+      hora: '18:00',
+      tipo: 'salida',
+      dispositivo: 'computadora',
+      metodo: 'facial',
+      localizacion: 'Oficina Principal'
+    }
   ]
 };
 
-// Departamentos y cargos
-// const departamentos = [
-//   'Marketing', 
-//   'Recursos Humanos', 
-//   'Finanzas', 
-//   'Ventas', 
-//   'Desarrollo', 
-//   'Diseño', 
-//   'Operaciones', 
-//   'Atención al Cliente'
-// ];
-
-// const cargos = [
-//   'Analista', 
-//   'Gerente', 
-//   'Coordinador', 
-//   'Asistente', 
-//   'Director', 
-//   'Diseñador', 
-//   'Desarrollador', 
-//   'Consultor'
-// ];
 export const empleadosDataEnriquecida: Employee[] = [
   {
     id: 1,
@@ -188,7 +298,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Carlos Peña',
     foto: 'https://randomuser.me/api/portraits/men/34.jpg',
     estado: 'trabajando',
-    horas: '8 hrs 45 min',
+    horas: '8 hrs 45 min', // Ya está bien para horas extras
     pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '06:45',
     ultimaAccion2: '15:30',
@@ -239,7 +349,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Maria Guerra',
     foto: 'https://randomuser.me/api/portraits/women/33.jpg',
     estado: 'trabajando',
-    horas: '9 hrs 15 min',
+    horas: '9 hrs 15 min', // Ya está bien para horas extras
     pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '07:30',
     dispositivo: 'smartphone',
@@ -254,7 +364,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Jose Del Nardo',
     foto: 'https://randomuser.me/api/portraits/men/38.jpg',
     estado: 'trabajando',
-    horas: '11 hrs 05 min',
+    horas: '11 hrs 05 min', // Ya está bien para horas extras
     pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '08:15',
     ultimaAccion2: '19:20',
@@ -269,12 +379,13 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Fernando Martinez',
     foto: null,
     estado: 'planificado',
-    horas: '0 hrs 0 min',
+    horas: null, // Sin horario
     pais: 'Hodelpa Garden Court',
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Supervisión de Sucursales',
-    cargo: 'Desarrollador'
+    cargo: 'Desarrollador',
+    tieneContrato: false
   },
   {
     id: 11,
@@ -311,11 +422,15 @@ export const empleadosDataEnriquecida: Employee[] = [
     estado: 'trabajando',
     horas: '7 hrs 30 min',
     pais: 'Hodelpa Hotels & Resorts',
-    ultimaAccion: '08:30',
+    ultimaAccion: '08:30', // Tardanza (después de las 8:00)
     dispositivo: 'smartphone',
     departamento: 'Nómina y Compensación',
     cargo: 'Gerente',
-    marcajes: marcajesData[13]
+    marcajes: marcajesData[13],
+    tardanza: {
+      tiene: true,
+      tiempo: '00:30'
+    }
   },
   {
     id: 14,
@@ -334,7 +449,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Valentina Romero',
     foto: 'https://randomuser.me/api/portraits/women/42.jpg',
     estado: 'trabajando',
-    horas: '8 hrs 45 min',
+    horas: '8 hrs 45 min', // Ya está bien para horas extras
     pais: 'Banco Popular Dominicano',
     ultimaAccion: '07:15',
     dispositivo: 'computadora',
@@ -361,22 +476,28 @@ export const empleadosDataEnriquecida: Employee[] = [
     estado: 'trabajando',
     horas: '6 hrs 15 min',
     pais: 'Hodelpa Gran Almirante',
-    ultimaAccion: '09:45',
+    ultimaAccion: '09:45', // Tardanza (después de las 8:00)
     dispositivo: 'computadora',
     departamento: 'Recepción',
-    cargo: 'Supervisora'
+    cargo: 'Supervisora',
+    marcajes: marcajesData[17],
+    tardanza: {
+      tiene: true,
+      tiempo: '01:45'
+    }
   },
   {
     id: 18,
     nombre: 'Roberto Flores',
     foto: 'https://randomuser.me/api/portraits/men/44.jpg',
     estado: 'planificado',
-    horas: '0 hrs 0 min',
+    horas: null, // Sin horario
     pais: 'Supermercados Nacional',
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Operaciones Retail',
-    cargo: 'Analista'
+    cargo: 'Analista',
+    tieneContrato: false
   },
   {
     id: 19,
@@ -400,10 +521,15 @@ export const empleadosDataEnriquecida: Employee[] = [
     estado: 'trabajando',
     horas: '4 hrs 30 min',
     pais: 'Hodelpa Garden Court',
-    ultimaAccion: '10:30',
+    ultimaAccion: '10:30', // Tardanza (después de las 8:00)
     dispositivo: 'computadora',
     departamento: 'Habitaciones',
-    cargo: 'Desarrollador'
+    cargo: 'Desarrollador',
+    marcajes: marcajesData[20],
+    tardanza: {
+      tiene: true,
+      tiempo: '02:30'
+    }
   },
   {
     id: 21,
@@ -454,10 +580,142 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: 'computadora',
     departamento: 'Evaluación y Desarrollo',
     cargo: 'Director'
+  },
+  // Nuevos empleados con salidas intempestivas
+  {
+    id: 25,
+    nombre: 'Laura Castillo',
+    foto: 'https://randomuser.me/api/portraits/women/50.jpg',
+    estado: 'trabajando',
+    horas: '5 hrs 0 min',
+    pais: 'Hodelpa Gran Almirante',
+    ultimaAccion: '07:30',
+    ultimaAccion2: '12:30', // Salida intempestiva
+    dispositivo: 'computadora',
+    dispositivo2: 'smartphone',
+    departamento: 'Ventas',
+    cargo: 'Ejecutiva',
+    marcajes: marcajesData[25]
+  },
+  {
+    id: 26,
+    nombre: 'Manuel Rodriguez',
+    foto: 'https://randomuser.me/api/portraits/men/50.jpg',
+    estado: 'trabajando',
+    horas: '6 hrs 0 min',
+    pais: 'Hodelpa Garden Court',
+    ultimaAccion: '08:00',
+    ultimaAccion2: '14:00', // Salida intempestiva
+    dispositivo: 'computadora',
+    dispositivo2: 'smartphone',
+    departamento: 'Finanzas',
+    cargo: 'Contador',
+    marcajes: marcajesData[26]
+  },
+  // Agregar más empleados sin horario
+  {
+    id: 27,
+    nombre: 'Daniel Ortega',
+    foto: 'https://randomuser.me/api/portraits/men/51.jpg',
+    estado: 'trabajando',
+    horas: '11 hrs 30 min', // Horas extras
+    pais: 'Hodelpa Gran Almirante',
+    ultimaAccion: '07:00',
+    ultimaAccion2: '18:30',
+    dispositivo: 'computadora',
+    dispositivo2: 'computadora',
+    departamento: 'Sistemas',
+    cargo: 'Analista IT',
+    marcajes: marcajesData[27]
+  },
+  {
+    id: 28,
+    nombre: 'Lucía Mendez',
+    foto: 'https://randomuser.me/api/portraits/women/51.jpg',
+    estado: 'trabajando',
+    horas: '11 hrs 15 min', // Horas extras
+    pais: 'Hodelpa Garden Court',
+    ultimaAccion: '06:30',
+    ultimaAccion2: '17:45',
+    dispositivo: 'computadora',
+    dispositivo2: 'computadora',
+    departamento: 'Contabilidad',
+    cargo: 'Contadora',
+    marcajes: marcajesData[28]
+  },
+  {
+    id: 29,
+    nombre: 'Javier Santos',
+    foto: 'https://randomuser.me/api/portraits/men/52.jpg',
+    estado: 'trabajando',
+    horas: '12 hrs 5 min', // Horas extras
+    pais: 'Hodelpa Gran Almirante',
+    ultimaAccion: '07:10',
+    ultimaAccion2: '19:15',
+    dispositivo: 'computadora',
+    dispositivo2: 'computadora',
+    departamento: 'Seguridad',
+    cargo: 'Supervisor',
+    marcajes: marcajesData[29]
+  },
+  {
+    id: 30,
+    nombre: 'Clara Duarte',
+    foto: 'https://randomuser.me/api/portraits/women/52.jpg',
+    estado: 'trabajando',
+    horas: '10 hrs 0 min', // Horas extras
+    pais: 'Hodelpa Garden Court',
+    ultimaAccion: '08:00',
+    ultimaAccion2: '18:00',
+    dispositivo: 'computadora',
+    dispositivo2: 'computadora',
+    departamento: 'Marketing',
+    cargo: 'Diseñadora',
+    marcajes: marcajesData[30]
+  },
+  // Empleados sin horario
+  {
+    id: 31,
+    nombre: 'Miguel Torres',
+    foto: 'https://randomuser.me/api/portraits/men/53.jpg',
+    estado: 'planificado',
+    horas: null, // Sin horario
+    pais: 'Hodelpa Gran Almirante',
+    ultimaAccion: null,
+    dispositivo: null,
+    departamento: 'Mantenimiento',
+    cargo: 'Técnico',
+    tieneContrato: false
+  },
+  {
+    id: 32,
+    nombre: 'Elena Gomez',
+    foto: 'https://randomuser.me/api/portraits/women/53.jpg',
+    estado: 'planificado',
+    horas: null, // Sin horario
+    pais: 'Hodelpa Garden Court',
+    ultimaAccion: null,
+    dispositivo: null,
+    departamento: 'Limpieza',
+    cargo: 'Supervisora',
+    tieneContrato: false
+  },
+  {
+    id: 33,
+    nombre: 'Carlos Martinez',
+    foto: 'https://randomuser.me/api/portraits/men/54.jpg',
+    estado: 'planificado',
+    horas: null, // Sin horario
+    pais: 'Hodelpa Gran Almirante',
+    ultimaAccion: null,
+    dispositivo: null,
+    departamento: 'Cocina',
+    cargo: 'Chef',
+    tieneContrato: false
   }
 ];
 
-// Datos para estadísticas
+// Datos para estadísticas actualizados con los nuevos conteos
 export const estadoDelDiaData = [
   { name: 'Trabajando', value: 15, color: '#4ade80' },
   { name: 'Trabajaron', value: 12, color: '#60a5fa' },
@@ -469,10 +727,10 @@ export const tiemposData = [
 ];
 
 export const novedadesData = [
-  { name: 'Tardanzas', value: 1, label: '3h 32m', color: '#bef264' },
-  { name: 'Intempestivas', value: 2, label: '13h 27m', color: '#93c5fd' },
-  { name: 'Permisos', value: 2, label: '47h 58m', color: '#fb923c' },
+  { name: 'Tardanzas', value: 3, label: '4h 45m', color: '#bef264' },
+  { name: 'Intempestivas', value: 3, label: '15h 30m', color: '#93c5fd' },
+  { name: 'Permisos', value: 5, label: '47h 58m', color: '#fb923c' },
   { name: 'Ausencias', value: 9, label: '84h 0m', color: '#fca5a5' },
-  { name: 'Sin Horario', value: 0, label: '0h 0m', color: '#a78bfa' },
-  { name: 'Horas Extras', value: 0, label: '0h 0m', color: '#f472b6' },
+  { name: 'Sin Horario', value: 5, label: '0h 0m', color: '#a78bfa' },
+  { name: 'Horas Extras', value: 7, label: '25h 30m', color: '#f472b6' },
 ];

@@ -22,6 +22,7 @@ export interface Marcaje {
   dispositivo: 'computadora' | 'smartphone';
   metodo: 'facial' | 'manual' | 'smartphone' | 'computadora';
   localizacion: string;
+  
 }
 
 export interface Planificacion {

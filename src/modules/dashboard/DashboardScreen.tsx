@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Grid, List, ArrowLeft } from 'lucide-react';
+import { Search, Grid, List, ArrowLeft, X } from 'lucide-react';
 import { empleadosDataEnriquecida, estadoDelDiaData, tiemposData } from './temp/data_temp';
 import EmployeeListView from './components/EmployeeListView';
 import StatisticsPanels from './components/StatisticsPanels';
@@ -12,21 +12,69 @@ const DashboardScreen: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showEmployeeDetail, setShowEmployeeDetail] = useState(false);
-  const [showOldDashboard, setShowOldDashboard] = useState(false); 
+  const [showOldDashboard, setShowOldDashboard] = useState(false);
+  
+  // Nuevo estado para rastrear el filtro activo de KPI
+  const [activeKpiFilter, setActiveKpiFilter] = useState<string | null>(null);
+  
+  // Función para convertir hora (HH:MM) a minutos desde medianoche
+  const parseTimeToMinutes = (timeStr: string) => {
+    if (!timeStr) return 0;
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
   
   // Definir itemsPerPage según el modo de vista
   const itemsPerPage = viewMode === 'grid' ? 18 : 8;
 
-  // Filtrar empleados según el término de búsqueda
-  const filteredEmpleados = empleadosDataEnriquecida.filter(empleado => 
-    empleado.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    empleado.pais.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filtrar empleados según el término de búsqueda y el filtro KPI activo
+  const filteredEmpleados = empleadosDataEnriquecida.filter(empleado => {
+    // Primero aplicar filtro de búsqueda
+    const matchesSearch = 
+      empleado.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      empleado.pais.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Si no hay filtro KPI activo, solo aplicar la búsqueda
+    if (!activeKpiFilter) {
+      return matchesSearch;
+    }
+    
+    // Aplicar filtro según el KPI seleccionado y también la búsqueda
+    switch (activeKpiFilter) {
+      case 'tardanzas':
+        // Filtra empleados con tardanzas (asumo que tienen una propiedad tardanza o algún indicador)
+        return matchesSearch && empleado.estado === 'trabajando' && 
+               (empleado.ultimaAccion && parseTimeToMinutes(empleado.ultimaAccion) > 480); // 8:00 AM en minutos
+      
+      case 'permisos':
+        return matchesSearch && empleado.estado === 'permiso';
+      
+      case 'salidas':
+        // Asumimos que salidas intempestivas son aquellos que tienen salida antes de tiempo
+        return matchesSearch && empleado.estado === 'trabajando' && empleado.ultimaAccion2;
+      
+      case 'ausencias':
+        return matchesSearch && empleado.estado === 'ausencia';
+      
+      case 'sin-horario':
+        // Asumimos que sin horario son empleados sin horas planificadas
+        return matchesSearch && !empleado.horas;
+      
+      case 'horas-extras':
+        // Para horas extras, buscamos empleados que trabajaron más de 8 horas
+        return matchesSearch && 
+               empleado.horas && 
+               parseFloat(empleado.horas.split(' ')[0]) > 8;
+      
+      default:
+        return matchesSearch;
+    }
+  });
   
   // Reiniciar a la primera página cuando cambie el modo de vista o el término de búsqueda
   useEffect(() => {
     // No necesitamos manejar la página actual aquí, ya que ahora lo hace el componente EmployeeListView
-  }, [viewMode, searchTerm]);
+  }, [viewMode, searchTerm, activeKpiFilter]);
 
   const handleEmployeeSelect = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -36,6 +84,22 @@ const DashboardScreen: React.FC = () => {
   const handleBackToDashboard = () => {
     setShowEmployeeDetail(false);
     setSelectedEmployee(null);
+  };
+  
+  // Handler para cuando se hace clic en un KPI
+  const handleKpiFilterChange = (kpiId: string) => {
+    if (activeKpiFilter === kpiId) {
+      // Si ya está seleccionado, lo deseleccionamos
+      setActiveKpiFilter(null);
+    } else {
+      // Si no está seleccionado, lo seleccionamos
+      setActiveKpiFilter(kpiId);
+    }
+  };
+  
+  // Función para limpiar el filtro activo
+  const clearActiveFilter = () => {
+    setActiveKpiFilter(null);
   };
 
   if (showOldDashboard) {
@@ -72,7 +136,7 @@ const DashboardScreen: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-2">
-          <button
+            <button
               onClick={() => setShowOldDashboard(true)}
               className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
               title="Panel anterior"
@@ -104,10 +168,33 @@ const DashboardScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Paneles de estadísticas */}
+        {/* Filtro activo (mostrar solo si hay un filtro seleccionado) */}
+        {activeKpiFilter && (
+          <div className="bg-blue-50 p-3 rounded-lg mb-4 flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="font-medium text-blue-700">
+                Filtro activo: {activeKpiFilter.charAt(0).toUpperCase() + activeKpiFilter.slice(1)}
+              </span>
+              <span className="ml-2 text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 text-sm">
+                {filteredEmpleados.length} resultados
+              </span>
+            </div>
+            <button
+              onClick={clearActiveFilter}
+              className="text-blue-700 hover:text-blue-900 flex items-center"
+            >
+              <X className="w-4 h-4 mr-1" />
+              <span>Limpiar filtro</span>
+            </button>
+          </div>
+        )}
+
+        {/* Paneles de estadísticas con handler para filtro */}
         <StatisticsPanels 
           estadoDelDiaData={estadoDelDiaData}
           tiemposData={tiemposData}
+          activeKpiFilter={activeKpiFilter}
+          onKpiFilterChange={handleKpiFilterChange}
         />
 
         {/* Vista de lista/cuadrícula de empleados */}
@@ -116,6 +203,7 @@ const DashboardScreen: React.FC = () => {
           viewMode={viewMode}
           onEmployeeSelect={handleEmployeeSelect}
           itemsPerPage={itemsPerPage}
+          activeFilter={activeKpiFilter} 
         />
       </div>
     </div>

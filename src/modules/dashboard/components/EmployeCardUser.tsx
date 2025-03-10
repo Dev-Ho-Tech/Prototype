@@ -19,9 +19,10 @@ interface ExtendedEmployee extends Employee {
 interface EmployeeCardProps {
   empleado: ExtendedEmployee;
   onSelect?: (empleado: ExtendedEmployee) => void;
+  activeFilter?: string | null; // Agregamos el filtro activo como prop
 }
 
-const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
+const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeFilter }) => {
   // Estado local para el tooltip
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -38,6 +39,54 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
 
   // Función para obtener el color y el ícono según el estado
   const getEstadoInfo = (estado: string) => {
+    // Si estamos filtrando por un tipo específico, mostrar ese estado en vez del estado actual
+    if (activeFilter) {
+      switch (activeFilter) {
+        case 'tardanzas':
+          return { 
+            bgColor: 'bg-amber-100', 
+            textColor: 'text-amber-800',
+            icon: <Clock className="w-5 h-5 mr-2 text-amber-500" />
+          };
+        
+        case 'permisos':
+          return { 
+            bgColor: 'bg-blue-100', 
+            textColor: 'text-blue-800',
+            icon: <Calendar className="w-5 h-5 mr-2 text-blue-500" />
+          };
+        
+        case 'salidas':
+          return { 
+            bgColor: 'bg-indigo-100', 
+            textColor: 'text-indigo-800',
+            icon: <Users className="w-5 h-5 mr-2 text-indigo-500" />
+          };
+        
+        case 'ausencias':
+          return { 
+            bgColor: 'bg-red-100', 
+            textColor: 'text-red-800',
+            icon: <X className="w-5 h-5 mr-2 text-red-500" />
+          };
+        
+        case 'sin-horario':
+          return { 
+            bgColor: 'bg-purple-100', 
+            textColor: 'text-purple-800',
+            icon: <AlertCircle className="w-5 h-5 mr-2 text-purple-500" />
+          };
+        
+        case 'horas-extras':
+          return { 
+            bgColor: 'bg-pink-100', 
+            textColor: 'text-pink-800',
+            icon: <Clock className="w-5 h-5 mr-2 text-pink-500" />
+          };
+      }
+    }
+    
+    // Si no hay filtro activo o no es un filtro conocido, usar el estado normal
     switch(estado) {
       case 'trabajando':
         return { 
@@ -138,6 +187,43 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
     return { show: false };
   };
 
+  // Texto del estado
+  const getEstadoTexto = (estado: string) => {
+    // Si estamos filtrando por un tipo específico, mostrar ese texto en vez del estado actual
+    if (activeFilter) {
+      switch (activeFilter) {
+        case 'tardanzas':
+          return 'Tardanza';
+        case 'permisos':
+          return 'Permiso';
+        case 'salidas':
+          return 'Salida Intemp.';
+        case 'ausencias':
+          return 'Ausencia';
+        case 'sin-horario':
+          return 'Sin Horario';
+        case 'horas-extras':
+          return 'Horas Extras';
+      }
+    }
+    
+    // Si no hay filtro activo o no es un filtro conocido, usar el estado normal
+    switch(estado) {
+      case 'trabajando':
+        return 'Trabajando';
+      case 'permiso':
+        return 'Permiso';
+      case 'ausencia':
+        return 'Ausencia';
+      case 'planificado':
+        return 'Planificado';
+      case 'trabajó':
+        return 'Trabajó';
+      default:
+        return estado;
+    }
+  };
+
   // Información del estado para este empleado
   const estadoInfo = getEstadoInfo(empleado.estado);
   
@@ -170,24 +256,6 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect }) => {
     tooltipTimeout.current = setTimeout(() => {
       setShowTooltip(false);
     }, 100);
-  };
-
-  // Texto del estado
-  const getEstadoTexto = (estado: string) => {
-    switch(estado) {
-      case 'trabajando':
-        return 'Trabajando';
-      case 'permiso':
-        return 'Permiso';
-      case 'ausencia':
-        return 'Ausencia';
-      case 'planificado':
-        return 'Planificado';
-      case 'trabajó':
-        return 'Trabajó';
-      default:
-        return estado;
-    }
   };
 
   // Determinar información de marcajes

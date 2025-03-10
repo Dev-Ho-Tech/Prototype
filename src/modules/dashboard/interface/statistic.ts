@@ -20,12 +20,16 @@ export interface NovedadCard {
   bgColor: string;
   icon: React.ReactNode;
   borderColor: string;
-  tooltip?: string; // Tooltip adicional para mostrar información extra
+  tooltip?: string;
 }
 
 export interface StatisticsPanelsProps {
-  estadoDelDiaData: DataEntry[];
-  tiemposData: DataEntry[];
-  novedadesTiempoData?: NovedadesTiempoEntry[];
+  estadoDelDiaData: { name: string; value: number; color: string; details?: string }[];
+  tiemposData: { name: string; value: number; color: string; details?: string }[];
+  novedadesTiempoData?: { name: string; value: number; color: string; details?: string }[];
   novedadesCards?: NovedadCard[];
+  
+  // Nuevas propiedades para manejar el filtro
+  activeKpiFilter?: string | null;
+  onKpiFilterChange?: (kpiId: string) => void;
 }
