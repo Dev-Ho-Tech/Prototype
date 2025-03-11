@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { UnifiedEmployee } from '../../../../../global/interfaces/unifiedTypes';
+import { UnifiedEmployee } from '../../../../global/interfaces/unifiedTypes';
 
 // Interfaces
 interface FilterOption {
@@ -34,7 +34,6 @@ interface AdvancedFiltersDashboardProps {
   searchTerm: string;
   onClearFilters: () => void;
   employees?: UnifiedEmployee[];
-  initialFilters?: FilterState;
 }
 
 const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
@@ -42,27 +41,17 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
   onSearchTermChange,
   searchTerm,
   onClearFilters,
-  employees = [], // Valor por defecto vacío para evitar errores
-  initialFilters
+  employees = [] // Valor por defecto vacío para evitar errores
 }) => {
-  // Estado inicial de filtros con valores iniciales si se proporcionan
-  const [filterState, setFilterState] = useState<FilterState>(
-    initialFilters || {
-      sedes: [],
-      departamentos: [],
-      secciones: [],
-      unidades: []
-    }
-  );
+  // Estado inicial de filtros
+  const [filterState, setFilterState] = useState<FilterState>({
+    sedes: [],
+    departamentos: [],
+    secciones: [],
+    unidades: []
+  });
 
-  // Actualizar el estado de filtros cuando cambien los filtros iniciales
-  useEffect(() => {
-    if (initialFilters) {
-      setFilterState(initialFilters);
-    }
-  }, [initialFilters]);
-
-  // Extraer opciones únicas de los datos de empleados y marcar las seleccionadas
+  // Extraer opciones únicas de los datos de empleados
   const getUniqueOptions = (key: keyof UnifiedEmployee): FilterOption[] => {
     if (!employees || employees.length === 0) {
       return []; // Retornar arreglo vacío si no hay empleados
@@ -70,33 +59,17 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     
     const uniqueValues = new Set<string>();
     
-    // Recolectar valores únicos
     employees.forEach(employee => {
       if (employee && employee[key]) {
         uniqueValues.add(employee[key] as string);
       }
     });
     
-    // Convertir a array de opciones y marcar las que están en filterState
-    return Array.from(uniqueValues).map(value => {
-      const checked = filterState[getFilterStateKeyForEmployeeKey(key)].includes(value);
-      return {
-        id: value,
-        nombre: value,
-        checked
-      };
-    });
-  };
-
-  // Mapear claves de empleado a claves de filterState
-  const getFilterStateKeyForEmployeeKey = (key: keyof UnifiedEmployee): keyof FilterState => {
-    switch (key) {
-      case 'location': return 'sedes';
-      case 'department': return 'departamentos';
-      case 'section': return 'secciones';
-      case 'unit': return 'unidades';
-      default: return 'sedes';
-    }
+    return Array.from(uniqueValues).map(value => ({
+      id: value,
+      nombre: value,
+      checked: false
+    }));
   };
 
   // Estado para las secciones de filtro
@@ -146,138 +119,106 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
   // Inicializar las opciones cuando los empleados estén disponibles
   useEffect(() => {
     if (employees && employees.length > 0) {
-      // Inicializar opciones de sedes
-      const sedesOptions = getUniqueOptions('location');
-      
-      // Inicializar opciones para las demás secciones
       setFilterSections(prevSections => 
         prevSections.map(section => {
           if (section.id === 'sedes') {
             return {
               ...section,
-              options: sedesOptions
+              options: getUniqueOptions('location')
+            };
+          } else if (section.id === 'departamentos') {
+            return {
+              ...section,
+              options: getUniqueOptions('department')
+            };
+          } else if (section.id === 'secciones') {
+            return {
+              ...section,
+              options: getUniqueOptions('section')
             };
           }
           return section;
         })
       );
-
-      // Actualizar listas dependientes
-      updateDependentLists();
     }
-  }, [employees]); // Solo se ejecuta cuando cambian los empleados
+  }, [employees]);
 
-  // Actualizar las opciones dependientes cuando cambia el estado de filtros
+  // Actualizar las opciones de secciones basado en la selección de departamentos
   useEffect(() => {
-    updateDependentLists();
-  }, [filterState]); // Se ejecuta cuando cambia el estado de filtros
-
-  // Función para actualizar las listas dependientes
-  const updateDependentLists = () => {
-    if (!employees || employees.length === 0) return;
-    
-    // Si hay sedes seleccionadas, actualizar departamentos
-    if (filterState.sedes.length > 0) {
-      // Filtrar departamentos basados en las sedes seleccionadas
-      const filteredDepartments = new Set<string>();
+    const updateFilterOptions = () => {
+      // Verificar si hay empleados disponibles
+      if (!employees || employees.length === 0) return;
       
-      employees.forEach(employee => {
-        if (employee.location && 
-            filterState.sedes.includes(employee.location) && 
-            employee.department) {
-          filteredDepartments.add(employee.department);
-        }
-      });
-      
-      // Actualizar opciones de departamentos
-      setFilterSections(prevSections => 
-        prevSections.map(section => {
-          if (section.id === 'departamentos') {
-            const currentDeptOptions = Array.from(filteredDepartments).map(dept => ({
-              id: dept,
-              nombre: dept,
-              checked: filterState.departamentos.includes(dept)
-            }));
-            
-            return {
-              ...section,
-              options: currentDeptOptions
-            };
+      // Actualizamos las listas dependientes
+      if (filterState.sedes.length > 0) {
+        // Filtrar departamentos basados en las sedes seleccionadas
+        const filteredDepartments = new Set<string>();
+        
+        employees.forEach(employee => {
+          if (employee && employee.location && filterState.sedes.includes(employee.location) && employee.department) {
+            filteredDepartments.add(employee.department);
           }
-          return section;
-        })
-      );
-    }
-    
-    // Si hay departamentos seleccionados, actualizar secciones
-    if (filterState.departamentos.length > 0) {
-      // Filtrar secciones basadas en los departamentos seleccionados
-      const filteredSections = new Set<string>();
+        });
+        
+        // Actualizar opciones de departamentos
+        setFilterSections(prevSections => 
+          prevSections.map(section => {
+            if (section.id === 'departamentos') {
+              const currentDeptOptions = Array.from(filteredDepartments).map(dept => ({
+                id: dept,
+                nombre: dept,
+                checked: filterState.departamentos.includes(dept)
+              }));
+              
+              return {
+                ...section,
+                options: currentDeptOptions
+              };
+            }
+            return section;
+          })
+        );
+      }
       
-      employees.forEach(employee => {
-        if (employee.department && 
-            filterState.departamentos.includes(employee.department) && 
-            employee.section) {
-          filteredSections.add(employee.section);
-        }
-      });
-      
-      // Actualizar opciones de secciones
-      setFilterSections(prevSections => 
-        prevSections.map(section => {
-          if (section.id === 'secciones') {
-            const currentSectionOptions = Array.from(filteredSections).map(sec => ({
-              id: sec,
-              nombre: sec,
-              checked: filterState.secciones.includes(sec)
-            }));
-            
-            return {
-              ...section,
-              options: currentSectionOptions
-            };
+      if (filterState.departamentos.length > 0) {
+        // Filtrar secciones basadas en los departamentos seleccionados
+        const filteredSections = new Set<string>();
+        
+        employees.forEach(employee => {
+          if (employee && employee.department && filterState.departamentos.includes(employee.department) && employee.section) {
+            filteredSections.add(employee.section);
           }
-          return section;
-        })
-      );
-    }
+        });
+        
+        // Actualizar opciones de secciones
+        setFilterSections(prevSections => 
+          prevSections.map(section => {
+            if (section.id === 'secciones') {
+              const currentSectionOptions = Array.from(filteredSections).map(sec => ({
+                id: sec,
+                nombre: sec,
+                checked: filterState.secciones.includes(sec)
+              }));
+              
+              return {
+                ...section,
+                options: currentSectionOptions
+              };
+            }
+            return section;
+          })
+        );
+      }
+    };
     
-    // Si hay secciones seleccionadas, actualizar unidades
-    if (filterState.secciones.length > 0) {
-      // Filtrar unidades basadas en las secciones seleccionadas
-      const filteredUnits = new Set<string>();
-      
-      employees.forEach(employee => {
-        if (employee.section && 
-            filterState.secciones.includes(employee.section) && 
-            employee.unit) {
-          filteredUnits.add(employee.unit);
-        }
-      });
-      
-      // Actualizar opciones de unidades
-      setFilterSections(prevSections => 
-        prevSections.map(section => {
-          if (section.id === 'unidades') {
-            const currentUnitOptions = Array.from(filteredUnits).map(unit => ({
-              id: unit,
-              nombre: unit,
-              checked: filterState.unidades.includes(unit)
-            }));
-            
-            return {
-              ...section,
-              options: currentUnitOptions
-            };
-          }
-          return section;
-        })
-      );
-    }
-  };
+    updateFilterOptions();
+  }, [employees, filterState.sedes, filterState.departamentos, filterState.secciones]);
 
   // Función para manejar el cambio de estado de una opción de filtro
   const handleOptionChange = (sectionId: string, optionId: string, checked: boolean) => {
+    // Verificar si hay empleados disponibles
+    if (!employees || employees.length === 0) return;
+    
     // Actualizar estado de secciones de filtro (para controlar checkboxes)
     setFilterSections(sections => 
       sections.map(section => {
@@ -320,9 +261,7 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
         const validDepartamentos = new Set<string>();
         
         employees.forEach(employee => {
-          if (employee.location && 
-              employee.department && 
-              remainingSedes.includes(employee.location)) {
+          if (employee && employee.location && employee.department && remainingSedes.includes(employee.location)) {
             validDepartamentos.add(employee.department);
           }
         });
@@ -343,9 +282,7 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
         const validSecciones = new Set<string>();
         
         employees.forEach(employee => {
-          if (employee.department && 
-              remainingDepartamentos.includes(employee.department) &&
-              employee.section) {
+          if (employee && employee.department && remainingDepartamentos.includes(employee.department)) {
             validSecciones.add(employee.section);
           }
         });
@@ -389,16 +326,14 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
 
   // Limpiar todos los filtros
   const handleClearFilters = () => {
-    const emptyState = {
+    setFilterState({
       sedes: [],
       departamentos: [],
       secciones: [],
       unidades: []
-    };
+    });
     
-    setFilterState(emptyState);
-    
-    // Reiniciar las opciones de las secciones
+    // Reiniciar las opciones de las secciones, solo si hay empleados disponibles
     if (employees && employees.length > 0) {
       setFilterSections(sections => 
         sections.map(section => {
@@ -411,13 +346,13 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
           } else if (section.id === 'departamentos') {
             return {
               ...section,
-              options: [],
+              options: getUniqueOptions('department').map(opt => ({ ...opt, checked: false })),
               expanded: true
             };
           } else if (section.id === 'secciones') {
             return {
               ...section,
-              options: [],
+              options: getUniqueOptions('section').map(opt => ({ ...opt, checked: false })),
               expanded: true
             };
           } else {
@@ -435,7 +370,6 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     onClearFilters();
   };
 
-  // Renderizar los filtros
   return (
     <div className="p-4">
       {/* Título de Filtros y botón Limpiar */}
@@ -494,7 +428,7 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
                     <p className="text-sm text-gray-500 italic">
                       {section.dependsOn?.message}
                     </p>
-                  ) : section.options.length > 0 ? (
+                  ) : (
                     section.options.map((option) => (
                       <div key={option.id} className="flex items-center">
                         <input
@@ -512,10 +446,6 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
                         </label>
                       </div>
                     ))
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">
-                      No hay opciones disponibles
-                    </p>
                   )}
                 </div>
               )}
