@@ -37,6 +37,7 @@ import ComedorScreen from './modules/system-config/diner/ComedorScreen';
 // Importa el proveedor de contexto
 import { AppStateProvider } from './global/context/AppStateContext';
 import GeofenceModule from './modules/employees/geocerca/geocercaScreen';
+import EmailTemplatesPage from './modules/system-config/emial/emailScreen';
 
 // Variable para almacenar el estado global (podemos mantenerla por compatibilidad)
 // eslint-disable-next-line react-refresh/only-export-components
@@ -138,6 +139,7 @@ function AppContent() {
           <Route path="/system-config/employee-types" element={<EmployeeTypesScreen />} />
           <Route path="/system-config/contracts" element={<ContractsScreen />} />
           <Route path="/system-config/diner" element={<ComedorScreen />} />
+          <Route path="/system-config/email" element={<EmailTemplatesPage />} />
           <Route path="/time-control/calendar" element={<CalendarScreen />} />
           <Route path="/time-control/checks" element={<ChecksScreen />} />
           <Route path="/time-control/hours-approval" element={<HoursApprovalScreen />} />

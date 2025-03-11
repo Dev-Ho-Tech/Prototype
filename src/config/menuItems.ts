@@ -1,4 +1,4 @@
-import { BarChart2, Users, Clock, Coffee, DoorClosed, Settings, Building2, Briefcase, Fingerprint, UserCheck, FileText, Mail, Utensils, LucideIcon } from 'lucide-react';
+import { BarChart2, Users, Clock, DoorClosed, Settings, Building2, Briefcase, Fingerprint, UserCheck, FileText, Mail, Utensils, LucideIcon } from 'lucide-react';
 
 export interface MenuItem {
   id: string;
@@ -106,50 +106,50 @@ export const menuItems: MenuItem[] = [
       // }
     ]
   },
-  {
-    id: 'dining',
-    label: 'Control de Comedor',
-    icon: Coffee,
-    path: '/dining',
-    children: [
-      {
-        id: 'dining-rooms',
-        label: 'Comedores',
-        icon: Coffee,
-        path: '/dining/rooms'
-      },
-      {
-        id: 'dining-schedule',
-        label: 'Horarios de Comida',
-        icon: Clock,
-        path: '/dining/schedule'
-      },
-      {
-        id: 'dining-access',
-        label: 'Control de Acceso',
-        icon: DoorClosed,
-        path: '/dining/access'
-      },
-      {
-        id: 'dining-reports',
-        label: 'Reportes de Uso',
-        icon: BarChart2,
-        path: '/dining/reports'
-      }
-    ]
-  },
+  // {
+  //   id: 'dining',
+  //   label: 'Control de Comedor',
+  //   icon: Coffee,
+  //   path: '/dining',
+  //   children: [
+  //     {
+  //       id: 'dining-rooms',
+  //       label: 'Comedores',
+  //       icon: Coffee,
+  //       path: '/dining/rooms'
+  //     },
+  //     {
+  //       id: 'dining-schedule',
+  //       label: 'Horarios de Comida',
+  //       icon: Clock,
+  //       path: '/dining/schedule'
+  //     },
+  //     {
+  //       id: 'dining-access',
+  //       label: 'Control de Acceso',
+  //       icon: DoorClosed,
+  //       path: '/dining/access'
+  //     },
+  //     {
+  //       id: 'dining-reports',
+  //       label: 'Reportes de Uso',
+  //       icon: BarChart2,
+  //       path: '/dining/reports'
+  //     }
+  //   ]
+  // },
   {
     id: 'access-control',
     label: 'Control de Acceso',
     icon: DoorClosed,
     path: '/access',
     children: [
-      {
-        id: 'doors',
-        label: 'Puertas',
-        icon: DoorClosed,
-        path: '/access/doors'
-      },
+      // {//11-03-25
+      //   id: 'doors',
+      //   label: 'Puertas',
+      //   icon: DoorClosed,
+      //   path: '/access/doors'
+      // },
       {
         id: 'visitors',
         label: 'Visitantes',
@@ -162,12 +162,12 @@ export const menuItems: MenuItem[] = [
         icon: UserCheck,
         path: '/access/permissions'
       },
-      {
-        id: 'monitoring',
-        label: 'Monitoreo',
-        icon: BarChart2,
-        path: '/access/monitoring'
-      }
+      // { //11-03-25
+      //   id: 'monitoring',
+      //   label: 'Monitoreo',
+      //   icon: BarChart2,
+      //   path: '/access/monitoring'
+      // }
     ]
   },
   {
