@@ -1,587 +1,351 @@
-import { useState, useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react"
+import { Search, Plus, Filter, ChevronDown } from "lucide-react"
+import { Button } from "./components/ui/button"
+import { Input } from "./components/ui/input"
+import { Card, CardContent} from "./components/ui/card"
+import { DataTable } from "./components/data-table"
+import { geocercas } from "./temp/mock-data"
+import { Badge } from "./components/ui/badge"
+import { 
+  DropdownMenu,
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "./components/ui/dropdown"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from "./components/ui/tabs"
+import { Geocerca } from "./interfaces/Geocerca"
+import { GeocercaDetalle } from "./components/GeocercaDetalle"
+import { GeocercaEditar } from "./components/geocerca-editar"
 
-// Fix for default marker icons in Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+// Importaciones para las columnas
+import { ArrowUpDown, MapPin, Edit, Trash, Eye } from "lucide-react"
+import type { ColumnDef } from "@tanstack/react-table"
 
-// Custom marker icon
-const redMarkerIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
+// Tipo de vista
+type Vista = 'lista' | 'detalle' | 'editar' | 'crear';
 
-// Main component
-function GeofenceModule() {
-  const [employee, setEmployee] = useState({
-    name: 'SANTIAGO',
-    profile: 'Remote App',
-    location: 'HODELPA GRAN ALMIRANTE',
-  });
-  
-  const [mapType, setMapType] = useState('mapa');
-  const [geofenceRadius, setGeofenceRadius] = useState(250);
-  const [center] = useState([18.4855, -69.8731]); // Santo Domingo, Republica dominicana
-  const [isExpanded, setIsExpanded] = useState(true);
-  const mapRef = useRef(null);
-  
-  // Handle checkbox click
-  const handleEmployeeSelection = () => {
-    setIsExpanded(!isExpanded);
-  };
-  
-  // Change radius of geofence
-  const handleRadiusChange = (newRadius) => {
-    setGeofenceRadius(newRadius);
-    
-    // Update circle if map is initialized
-    if (mapRef.current && mapRef.current.circle) {
-      mapRef.current.circle.setRadius(newRadius);
-    }
-  };
-
-  // Initialize map after component mounts and when expanded
-  useEffect(() => {
-    if (isExpanded && !mapRef.current) {
-      // Small delay to ensure the container is rendered
-      setTimeout(() => {
-        const container = document.getElementById('map');
-        if (!container) return;
-        
-        // Initialize the map
-        const map = L.map(container, {
-          center: center,
-          zoom: 15,
-          zoomControl: false
-        });
-        
-        // Add tile layer based on mapType
-        mapRef.current = {
-          map: map,
-          layers: {}
-        };
-        
-        updateMapType(mapType);
-        
-        // Add circle for geofence
-        const circle = L.circle(center, {
-          radius: geofenceRadius,
-          fillColor: '#6366f1',
-          fillOpacity: 0.2,
-          color: '#4f46e5',
-          weight: 2
-        }).addTo(map);
-        
-        mapRef.current.circle = circle;
-        
-        // Add marker
-        L.marker(center, {icon: redMarkerIcon}).addTo(map);
-
-        // Add attribution
-        L.control.attribution({
-          position: 'bottomright'
-        }).addAttribution('© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>').addTo(map);
-      }, 100);
-    }
-  }, [isExpanded, center, mapType, geofenceRadius]);
-  
-  // Handle map type changes
-  useEffect(() => {
-    updateMapType(mapType);
-  }, [mapType]);
-  
-  const updateMapType = (type) => {
-    if (!mapRef.current || !mapRef.current.map) return;
-    
-    const map = mapRef.current.map;
-    const layers = mapRef.current.layers;
-    
-    // Remove existing layers
-    if (layers.tile) {
-      map.removeLayer(layers.tile);
-    }
-    
-    // Add new layer based on type
-    if (type === 'mapa') {
-      layers.tile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(map);
-    } else {
-      layers.tile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-      }).addTo(map);
-    }
-  };
-  
-  // Zoom in function
-  const handleZoomIn = () => {
-    if (mapRef.current && mapRef.current.map) {
-      mapRef.current.map.zoomIn();
-    }
-  };
-  
-  // Zoom out function
-  const handleZoomOut = () => {
-    if (mapRef.current && mapRef.current.map) {
-      mapRef.current.map.zoomOut();
-    }
-  };
-  
-  return (
-    <div className="geofence-container" style={{ 
-      fontFamily: 'Inter, system-ui, sans-serif', 
-      width: '100%', 
-      margin: '0 auto',
-      backgroundColor: '#f8fafc',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      <div className="search-bar" style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        padding: '15px 20px', 
-        backgroundColor: 'white', 
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10
-      }}>
-        <input 
-          type="text" 
-          placeholder="Buscar en conceptos" 
-          style={{ 
-            flex: 1, 
-            padding: '10px 16px', 
-            border: '1px solid #e2e8f0', 
-            borderRadius: '8px',
-            marginRight: '12px',
-            fontSize: '14px'
-          }}
-        />
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button 
-            style={{ 
-              backgroundColor: '#9333ea', 
-              border: 'none', 
-              borderRadius: '50%', 
-              width: '40px', 
-              height: '40px', 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              color: 'white',
-              boxShadow: '0 2px 4px rgba(147, 51, 234, 0.2)'
-            }}
-            title="Menú"
-          >
-            <span style={{ fontSize: '18px' }}>≡</span>
-          </button>
-          <button 
-            style={{ 
-              backgroundColor: '#4f46e5', 
-              border: 'none', 
-              borderRadius: '50%', 
-              width: '40px', 
-              height: '40px', 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              color: 'white',
-              boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)'
-            }}
-            title="Añadir"
-          >
-            <span style={{ fontSize: '24px' }}>+</span>
-          </button>
+// Función para crear las columnas que usa handlers de clic en lugar de navegación
+const createGeocercaColumns = (
+  onView: (geocerca: Geocerca) => void,
+  onEdit: (geocerca: Geocerca) => void,
+  onDelete: (geocerca: Geocerca) => void
+): ColumnDef<Geocerca>[] => [
+  {
+    accessorKey: "nombre",
+    header: "Nombre",
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => onView(row.original)}>
+          <MapPin className="h-4 w-4 text-blue-600" />
+          <div>
+            <div className="font-medium">{row.getValue("nombre")}</div>
+            <div className="text-xs text-gray-500 truncate max-w-[200px]">{row.original.direccion}</div>
+          </div>
         </div>
-      </div>
+      )
+    },
+  },
+  {
+    accessorKey: "sede",
+    header: ({ column }) => {
+      return (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Sede
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: "radio",
+    header: "Radio",
+    cell: ({ row }) => {
+      return <div>{row.getValue("radio")}m</div>
+    },
+  },
+  {
+    accessorKey: "empleadosAsignados",
+    header: "Empleados",
+    cell: ({ row }) => {
+      return <div className="text-center">{row.getValue("empleadosAsignados")}</div>
+    },
+  },
+  {
+    accessorKey: "estado",
+    header: "Estado",
+    cell: ({ row }) => {
+      const estado = row.getValue("estado") as string
+      return (
+        <Badge
+          variant={estado === "Activa" ? "default" : "secondary"}
+          className={estado === "Activa" ? "bg-green-100 text-green-800" : ""}
+        >
+          {estado}
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: "fechaCreacion",
+    header: "Fecha de creación",
+  },
+  {
+    id: "acciones",
+    cell: ({ row }) => {
+      const geocerca = row.original
+
+      return (
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(geocerca);
+            }}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(geocerca);
+            }}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-red-600 hover:text-red-700"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(geocerca);
+            }}
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        </div>
+      )
+    },
+  },
+]
+
+export default function GeocercasPage() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filtroEstado, setFiltroEstado] = useState<"todos" | "activas" | "inactivas">("activas")
+  const [vistaActual, setVistaActual] = useState<Vista>('lista')
+  const [geocercaSeleccionada, setGeocercaSeleccionada] = useState<Geocerca | null>(null)
+  const [listaGeocercas, setListaGeocercas] = useState<Geocerca[]>(geocercas)
+  
+  // Manejadores para las acciones de las geocercas
+  const handleViewGeocerca = (geocerca: Geocerca) => {
+    setGeocercaSeleccionada(geocerca);
+    setVistaActual('detalle');
+  };
+  
+  const handleEditGeocerca = (geocerca: Geocerca) => {
+    setGeocercaSeleccionada(geocerca);
+    setVistaActual('editar');
+  };
+  
+  const handleDeleteGeocerca = (geocerca: Geocerca) => {
+    if (window.confirm(`¿Está seguro de eliminar la geocerca ${geocerca.nombre}?`)) {
+      // Eliminar la geocerca de la lista
+      const nuevasGeocercas = listaGeocercas.filter(g => g.id !== geocerca.id);
+      setListaGeocercas(nuevasGeocercas);
       
-      <div className="content" style={{ padding: '16px 20px', flex: 1 }}>
-        <div className="employee-list" style={{ 
-          backgroundColor: 'white', 
-          borderRadius: '12px', 
-          overflow: 'hidden',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}>
-          <div 
-            className="employee-item" 
-            style={{ 
-              padding: '14px 20px', 
-              borderBottom: '1px solid #e2e8f0', 
-              display: 'flex', 
-              alignItems: 'center',
-              backgroundColor: '#f8fafc',
-              fontWeight: 600,
-              fontSize: '14px',
-              color: '#475569'
-            }}
-          >
-            <input 
-              type="checkbox" 
-              checked={true} 
-              readOnly
-              style={{ 
-                marginRight: '12px',
-                width: '18px',
-                height: '18px',
-                accentColor: '#4f46e5'
-              }}
-            />
-            <span>Nombre</span>
-          </div>
-          
-          <div 
-            className="employee-item clickable" 
-            onClick={handleEmployeeSelection}
-            style={{ 
-              padding: '14px 20px', 
-              backgroundColor: isExpanded ? '#eff6ff' : 'white', 
-              display: 'flex', 
-              alignItems: 'center',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s',
-              borderBottom: isExpanded ? '1px solid #bfdbfe' : 'none'
-            }}
-          >
-            <input 
-              type="checkbox" 
-              checked={isExpanded} 
-              onChange={handleEmployeeSelection} 
-              style={{ 
-                marginRight: '12px',
-                width: '18px',
-                height: '18px',
-                accentColor: '#4f46e5'
-              }}
-            />
-            <span style={{ fontWeight: isExpanded ? 500 : 400 }}>Santiago</span>
-          </div>
-          
-          {isExpanded && (
-            <div className="employee-details" style={{ padding: '24px', backgroundColor: 'white' }}>
-              <div className="form-row" style={{ display: 'flex', gap: '20px', marginBottom: '24px', flexWrap: 'wrap' }}>
-                <div className="form-group" style={{ flex: '1', minWidth: '200px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500, color: '#4b5563' }}>
-                    Nombre <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    value={employee.name} 
-                    onChange={(e) => setEmployee({...employee, name: e.target.value})}
-                    style={{ 
-                      width: '100%', 
-                      padding: '10px 12px', 
-                      border: '1px solid #e2e8f0', 
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-                
-                <div className="form-group" style={{ flex: '1', minWidth: '200px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500, color: '#4b5563' }}>
-                    Perfiles de marcaje
-                  </label>
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    width: '100%', 
-                    border: '1px solid #e2e8f0', 
-                    borderRadius: '8px', 
-                    padding: '5px 12px',
-                    backgroundColor: 'white'
-                  }}>
-                    <span style={{ 
-                      backgroundColor: '#f1f5f9', 
-                      padding: '5px 10px', 
-                      borderRadius: '6px', 
-                      fontSize: '13px', 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      marginRight: '8px'
-                    }}>
-                      Remote App
-                      <button style={{ 
-                        marginLeft: '6px', 
-                        border: 'none', 
-                        background: 'none', 
-                        cursor: 'pointer',
-                        color: '#64748b',
-                        fontSize: '16px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '0',
-                        width: '16px',
-                        height: '16px'
-                      }}>×</button>
-                    </span>
-                    <select style={{ 
-                      flex: '1', 
-                      padding: '5px', 
-                      border: 'none', 
-                      backgroundColor: 'transparent',
-                      fontSize: '14px' 
-                    }}>
-                      <option value=""></option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="form-group" style={{ flex: '1', minWidth: '200px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500, color: '#4b5563' }}>
-                    Turnos
-                  </label>
-                  <select style={{ 
-                    width: '100%', 
-                    padding: '10px 12px', 
-                    border: '1px solid #e2e8f0', 
-                    borderRadius: '8px',
-                    backgroundColor: 'white',
-                    fontSize: '14px',
-                    appearance: 'none',
-                    backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M7 10l5 5 5-5z\'/%3E%3C/svg%3E")',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 10px center',
-                    backgroundSize: '20px'
-                  }}>
-                    <option>Buscar</option>
-                  </select>
-                </div>
-                
-                <div className="form-group" style={{ flex: '1', minWidth: '200px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500, color: '#4b5563' }}>
-                    Dirección de la geocerca
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder=""
-                    style={{ 
-                      width: '100%', 
-                      padding: '10px 12px', 
-                      border: '1px solid #e2e8f0', 
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-              </div>
-              
-              <div className="location-tag" style={{ marginBottom: '20px' }}>
-                <span style={{ 
-                  backgroundColor: '#f1f5f9', 
-                  padding: '6px 12px', 
-                  borderRadius: '6px', 
-                  fontSize: '13px', 
-                  display: 'inline-flex', 
-                  alignItems: 'center',
-                  marginRight: '8px',
-                  color: '#334155'
-                }}>
-                  {employee.location}
-                  <button style={{ 
-                    marginLeft: '8px', 
-                    border: 'none', 
-                    background: 'none', 
-                    cursor: 'pointer',
-                    color: '#64748b',
-                    fontSize: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>×</button>
-                </span>
-              </div>
-              
-              <div className="map-section" style={{ marginBottom: '24px' }}>
-                <div 
-                  className="map-container" 
-                  style={{ 
-                    height: '500px', 
-                    position: 'relative', 
-                    border: '1px solid #e2e8f0', 
-                    borderRadius: '12px', 
-                    overflow: 'hidden',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                  }}
-                >
-                  <div id="map" style={{ height: '100%', width: '100%' }}></div>
-                  
-                  <div className="map-controls" style={{ position: 'absolute', bottom: '16px', right: '16px', zIndex: 1000 }}>
-                    <div className="zoom-controls" style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      backgroundColor: 'white', 
-                      borderRadius: '8px', 
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                      overflow: 'hidden'
-                    }}>
-                      <button 
-                        onClick={handleZoomIn}
-                        style={{ 
-                          width: '36px', 
-                          height: '36px', 
-                          border: 'none', 
-                          borderBottom: '1px solid #e2e8f0', 
-                          display: 'flex', 
-                          justifyContent: 'center', 
-                          alignItems: 'center',
-                          cursor: 'pointer',
-                          backgroundColor: 'white',
-                          fontSize: '18px'
-                        }}
-                      >
-                        +
-                      </button>
-                      <button 
-                        onClick={handleZoomOut}
-                        style={{ 
-                          width: '36px', 
-                          height: '36px', 
-                          border: 'none', 
-                          display: 'flex', 
-                          justifyContent: 'center', 
-                          alignItems: 'center',
-                          cursor: 'pointer',
-                          backgroundColor: 'white',
-                          fontSize: '18px'
-                        }}
-                      >
-                        −
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="map-type-selector" style={{ 
-                    position: 'absolute', 
-                    top: '16px', 
-                    left: '16px', 
-                    zIndex: 1000, 
-                    backgroundColor: 'white', 
-                    borderRadius: '8px', 
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)', 
-                    display: 'flex',
-                    overflow: 'hidden'
-                  }}>
-                    <button 
-                      onClick={() => setMapType('mapa')} 
-                      style={{ 
-                        padding: '8px 16px', 
-                        border: 'none', 
-                        borderRight: '1px solid #e2e8f0', 
-                        backgroundColor: mapType === 'mapa' ? '#4f46e5' : 'white',
-                        color: mapType === 'mapa' ? 'white' : '#334155',
-                        cursor: 'pointer',
-                        fontWeight: 500,
-                        fontSize: '14px',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      Mapa
-                    </button>
-                    <button 
-                      onClick={() => setMapType('satélite')} 
-                      style={{ 
-                        padding: '8px 16px', 
-                        border: 'none', 
-                        backgroundColor: mapType === 'satélite' ? '#4f46e5' : 'white',
-                        color: mapType === 'satélite' ? 'white' : '#334155',
-                        cursor: 'pointer',
-                        fontWeight: 500,
-                        fontSize: '14px',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      Satélite
-                    </button>
-                  </div>
-                  
-                  <div className="geofence-controls" style={{ 
-                    position: 'absolute', 
-                    top: '70px', 
-                    left: '16px', 
-                    zIndex: 1000, 
-                    backgroundColor: 'white', 
-                    borderRadius: '8px', 
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)', 
-                    padding: '12px 16px',
-                    minWidth: '220px'
-                  }}>
-                    <label style={{ 
-                      display: 'block', 
-                      marginBottom: '10px', 
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      color: '#334155'
-                    }}>
-                      Radio de geocerca: <span style={{ color: '#4f46e5', fontWeight: 600 }}>{geofenceRadius}m</span>
-                    </label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '12px', color: '#64748b' }}>50m</span>
-                      <input 
-                        type="range" 
-                        min="50" 
-                        max="500" 
-                        step="10" 
-                        value={geofenceRadius} 
-                        onChange={(e) => handleRadiusChange(parseInt(e.target.value))}
-                        style={{ 
-                          flex: 1,
-                          accentColor: '#4f46e5',
-                          height: '6px'
-                        }}
-                      />
-                      <span style={{ fontSize: '12px', color: '#64748b' }}>500m</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="action-buttons" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                <button style={{ 
-                  padding: '10px 20px', 
-                  backgroundColor: 'white', 
-                  border: '1px solid #e2e8f0', 
-                  borderRadius: '8px', 
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: '#475569',
-                  transition: 'all 0.2s'
-                }}>
-                  Cancelar
-                </button>
-                <button style={{ 
-                  padding: '10px 20px', 
-                  backgroundColor: '#4f46e5', 
-                  color: 'white', 
-                  border: 'none', 
-                  borderRadius: '8px', 
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)',
-                  transition: 'all 0.2s'
-                }}>
-                  Guardar
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+      // Si estamos en la vista de detalle de la geocerca eliminada, volver a la lista
+      if (vistaActual === 'detalle' && geocercaSeleccionada?.id === geocerca.id) {
+        setVistaActual('lista');
+      }
+    }
+  };
+  
+  const handleCreateGeocerca = () => {
+    setGeocercaSeleccionada(null);
+    setVistaActual('crear');
+  };
+  
+  const handleSaveGeocerca = (geocerca: Geocerca) => {
+    if (vistaActual === 'crear') {
+      // Agregar nueva geocerca
+      setListaGeocercas([...listaGeocercas, geocerca]);
+    } else {
+      // Actualizar geocerca existente
+      const nuevasGeocercas = listaGeocercas.map(g => 
+        g.id === geocerca.id ? geocerca : g
+      );
+      setListaGeocercas(nuevasGeocercas);
+    }
+    
+    // Volver a la vista de detalle con la geocerca actualizada
+    setGeocercaSeleccionada(geocerca);
+    setVistaActual('detalle');
+  };
+  
+  const handleCancelEdicion = () => {
+    if (vistaActual === 'crear') {
+      // Si estábamos creando, volver a la lista
+      setVistaActual('lista');
+    } else {
+      // Si estábamos editando, volver al detalle
+      setVistaActual('detalle');
+    }
+  };
+  
+  const handleVolverALista = () => {
+    setVistaActual('lista');
+  };
+  
+  // Crear las columnas con manejadores de eventos
+  const columns = createGeocercaColumns(
+    handleViewGeocerca,
+    handleEditGeocerca,
+    handleDeleteGeocerca
+  );
+
+  // Filtrar geocercas según el estado seleccionado
+  const geocercasFiltradas = listaGeocercas.filter(g => {
+    if (filtroEstado === "todos") return true;
+    if (filtroEstado === "activas") return g.estado === "Activa";
+    if (filtroEstado === "inactivas") return g.estado === "Inactiva";
+    return true;
+  });
+
+  // Contador de estados para las pestañas
+  const totalActivas = listaGeocercas.filter(g => g.estado === "Activa").length;
+  const totalInactivas = listaGeocercas.filter(g => g.estado === "Inactiva").length;
+
+  // Renderizado condicional según la vista actual
+  if (vistaActual === 'detalle' && geocercaSeleccionada) {
+    return (
+      <div className="container mx-auto py-6">
+        <GeocercaDetalle 
+          geocerca={geocercaSeleccionada}
+          onBack={handleVolverALista}
+          onEdit={handleEditGeocerca}
+          onDelete={handleDeleteGeocerca}
+        />
       </div>
+    );
+  }
+
+  if (vistaActual === 'editar' || vistaActual === 'crear') {
+    return (
+      <div className="container mx-auto py-6">
+        <GeocercaEditar 
+          geocerca={vistaActual === 'editar' ? geocercaSeleccionada : null}
+          onSave={handleSaveGeocerca}
+          onCancel={handleCancelEdicion}
+        />
+      </div>
+    );
+  }
+
+  // Vista de lista (por defecto)
+  return (
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Geocercas</h1>
+          <p className="text-gray-500">Gestione las zonas geográficas válidas para marcajes de asistencia</p>
+        </div>
+        <Button onClick={handleCreateGeocerca}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nueva Geocerca
+        </Button>
+      </div>
+
+      <Tabs defaultValue="activas" onValueChange={(value) => setFiltroEstado(value as any)}>
+        <div className="flex items-center justify-between mb-4">
+          <TabsList>
+            <TabsTrigger value="activas">
+              Activas <Badge className="ml-2 bg-green-100 text-green-800">{totalActivas}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="inactivas">
+              Inactivas <Badge className="ml-2 bg-gray-100 text-gray-800">{totalInactivas}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="todos">
+              Todas <Badge className="ml-2 bg-gray-100 text-gray-600">{listaGeocercas.length}</Badge>
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Input
+                type="search"
+                placeholder="Buscar geocercas..."
+                icon={<Search className="h-4 w-4" />}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-[250px] md:w-[300px]"
+              />
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filtrar
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                <DropdownMenuItem onClick={() => console.log("Filtro por sede")}>Por sede</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => console.log("Filtro por radio")}>Por radio</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => console.log("Filtro por empleados")}>Por empleados</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => console.log("Filtro por fecha")}>Por fecha</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        <TabsContent value="activas">
+          <Card>
+            <CardContent className="p-0">
+              <DataTable
+                columns={columns}
+                data={geocercasFiltradas}
+                searchQuery={searchQuery}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="inactivas">
+          <Card>
+            <CardContent className="p-0">
+              <DataTable
+                columns={columns}
+                data={geocercasFiltradas}
+                searchQuery={searchQuery}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="todos">
+          <Card>
+            <CardContent className="p-0">
+              <DataTable
+                columns={columns}
+                data={geocercasFiltradas}
+                searchQuery={searchQuery}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
     </div>
   );
 }
-
-export default GeofenceModule;
