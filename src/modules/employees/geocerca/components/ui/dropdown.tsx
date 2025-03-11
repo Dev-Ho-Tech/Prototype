@@ -30,14 +30,14 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({ children, className 
       if (child.type === DropdownMenuTrigger) {
         return React.cloneElement(child, {
           onClick: () => setIsOpen(!isOpen),
-        });
+        } as React.ComponentProps<typeof DropdownMenuTrigger>);
       }
       
       // Si es el Content, le pasamos el estado
       if (child.type === DropdownMenuContent) {
         return React.cloneElement(child, {
           isOpen,
-        });
+        } as React.ComponentProps<typeof DropdownMenuContent>);
       }
     }
     return child;
@@ -65,11 +65,13 @@ export const DropdownMenuTrigger: React.FC<DropdownMenuTriggerProps> = ({
 }) => {
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
-      onClick: (e: React.MouseEvent) => {
-        onClick && onClick();
-        children.props.onClick && children.props.onClick(e);
+      onClick: (e: React.MouseEvent<HTMLElement>) => {
+        onClick?.();
+        if (children.props.onClick) {
+          children.props.onClick(e);
+        }
       },
-    });
+    } as React.HTMLAttributes<HTMLElement>);
   }
   
   return (
@@ -83,7 +85,7 @@ export const DropdownMenuTrigger: React.FC<DropdownMenuTriggerProps> = ({
   );
 };
 
-interface DropdownMenuContentProps {
+interface DropdownMenuContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   isOpen?: boolean;
   align?: 'start' | 'end' | 'center';

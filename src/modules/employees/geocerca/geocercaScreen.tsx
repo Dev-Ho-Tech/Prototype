@@ -3,7 +3,7 @@ import { useState } from "react"
 import { Search, Plus, Filter, ChevronDown } from "lucide-react"
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
-import { Card, CardContent} from "./components/ui/card"
+import { Card, CardContent } from "./components/ui/card"
 import { DataTable } from "./components/data-table"
 import { geocercas } from "./temp/mock-data"
 import { Badge } from "./components/ui/badge"
@@ -145,15 +145,19 @@ export default function GeocercasPage() {
   const [vistaActual, setVistaActual] = useState<Vista>('lista')
   const [geocercaSeleccionada, setGeocercaSeleccionada] = useState<Geocerca | null>(null)
   const [listaGeocercas, setListaGeocercas] = useState<Geocerca[]>(geocercas)
+  // Guarda la vista anterior para volver correctamente
+  const [vistaAnterior, setVistaAnterior] = useState<Vista>('lista')
   
   // Manejadores para las acciones de las geocercas
   const handleViewGeocerca = (geocerca: Geocerca) => {
     setGeocercaSeleccionada(geocerca);
+    setVistaAnterior(vistaActual);
     setVistaActual('detalle');
   };
   
   const handleEditGeocerca = (geocerca: Geocerca) => {
     setGeocercaSeleccionada(geocerca);
+    setVistaAnterior(vistaActual);
     setVistaActual('editar');
   };
   
@@ -172,6 +176,7 @@ export default function GeocercasPage() {
   
   const handleCreateGeocerca = () => {
     setGeocercaSeleccionada(null);
+    setVistaAnterior(vistaActual);
     setVistaActual('crear');
   };
   
@@ -193,13 +198,8 @@ export default function GeocercasPage() {
   };
   
   const handleCancelEdicion = () => {
-    if (vistaActual === 'crear') {
-      // Si estábamos creando, volver a la lista
-      setVistaActual('lista');
-    } else {
-      // Si estábamos editando, volver al detalle
-      setVistaActual('detalle');
-    }
+    // Siempre volver a la vista anterior
+    setVistaActual(vistaAnterior);
   };
   
   const handleVolverALista = () => {
@@ -213,8 +213,21 @@ export default function GeocercasPage() {
     handleDeleteGeocerca
   );
 
+  // Buscar primero, filtrar después
+  const geocercasBuscadas = listaGeocercas.filter(g => {
+    if (!searchQuery) return true;
+    
+    // Búsqueda insensible a mayúsculas/minúsculas
+    const query = searchQuery.toLowerCase();
+    return (
+      g.nombre.toLowerCase().includes(query) ||
+      g.sede.toLowerCase().includes(query) ||
+      g.direccion.toLowerCase().includes(query)
+    );
+  });
+
   // Filtrar geocercas según el estado seleccionado
-  const geocercasFiltradas = listaGeocercas.filter(g => {
+  const geocercasFiltradas = geocercasBuscadas.filter(g => {
     if (filtroEstado === "todos") return true;
     if (filtroEstado === "activas") return g.estado === "Activa";
     if (filtroEstado === "inactivas") return g.estado === "Inactiva";
@@ -265,7 +278,7 @@ export default function GeocercasPage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="activas" onValueChange={(value) => setFiltroEstado(value as any)}>
+      <Tabs value={filtroEstado} onValueChange={(value) => setFiltroEstado(value as any)}>
         <div className="flex items-center justify-between mb-4">
           <TabsList>
             <TabsTrigger value="activas">
@@ -345,7 +358,6 @@ export default function GeocercasPage() {
           </Card>
         </TabsContent>
       </Tabs>
-
     </div>
   );
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 
@@ -106,6 +107,9 @@ interface SelectProps {
   className?: string;
 }
 
+// Ayudante para tipar los elementos correctamente
+type ReactElement = React.ReactElement<any, any>;
+
 export const Select: React.FC<SelectProps> = ({
   value,
   onValueChange,
@@ -118,57 +122,69 @@ export const Select: React.FC<SelectProps> = ({
   const selectRef = useRef<HTMLDivElement>(null);
   
   // Find SelectValue and update it with current value
-  const selectedItem = React.Children.toArray(children).find(
-    (child) => React.isValidElement(child) && child.props.value === value
+  const childrenArray = React.Children.toArray(children);
+  const selectedItem = childrenArray.find(
+    (child) => React.isValidElement(child) && 
+               React.isValidElement((child as ReactElement).props.children) && 
+               (child as ReactElement).props.children.props?.value === value
   );
   
-  const displayValue = selectedItem && React.isValidElement(selectedItem) 
-    ? selectedItem.props.children 
-    : null;
+  const displayValue = selectedItem ? 
+    (React.isValidElement(selectedItem) ? 
+      (React.isValidElement((selectedItem as ReactElement).props.children) ? 
+        (selectedItem as ReactElement).props.children.props.children : null) : null) : null;
   
-  // Map children to include onClick handlers
+  // Map children para aplicar los handlers necesarios
   const mappedChildren = React.Children.map(children, (child) => {
-    if (React.isValidElement(child) && child.type === SelectContent) {
-      // Map SelectContent children
-      const contentChildren = React.Children.map(child.props.children, (contentChild) => {
-        if (React.isValidElement(contentChild) && contentChild.type === SelectItem) {
-          return React.cloneElement(contentChild, {
+    if (!React.isValidElement(child)) return child;
+    
+    const element = child as ReactElement;
+    
+    // Si es SelectContent, aplicar la prop open
+    if (element.type === SelectContent) {
+      // Procesar los children de SelectContent
+      const contentChildren = React.Children.map(element.props.children, (contentChild) => {
+        if (!React.isValidElement(contentChild)) return contentChild;
+        
+        const contentElement = contentChild as ReactElement;
+        if (contentElement.type === SelectItem) {
+          return React.cloneElement(contentElement, {
             onClick: (itemValue: string) => {
+              // eslint-disable-next-line @typescript-eslint/no-unused-expressions
               onValueChange && onValueChange(itemValue);
               setOpen(false);
-            }
-          });
+            },
+          } as any);
         }
         return contentChild;
       });
       
-      return React.cloneElement(child, { 
-        ...child.props,
+      return React.cloneElement(element, { 
         open,
         children: contentChildren
-      });
+      } as any);
     }
     
-    if (React.isValidElement(child) && child.type === SelectTrigger) {
-      return React.cloneElement(child, {
-        ...child.props,
+    // Si es SelectTrigger, aplicar onClick
+    if (element.type === SelectTrigger) {
+      return React.cloneElement(element, {
         onClick: () => setOpen(!open),
-        disabled
-      });
+        disabled,
+      } as any);
     }
     
-    if (React.isValidElement(child) && child.type === SelectValue) {
-      return React.cloneElement(child, {
-        ...child.props,
+    // Si es SelectValue, aplicar el placeholder y displayValue
+    if (element.type === SelectValue) {
+      return React.cloneElement(element, {
         placeholder,
-        children: displayValue
-      });
+        children: displayValue,
+      } as any);
     }
     
     return child;
   });
   
-  // Close the select when clicking outside
+  // Cerrar el select cuando se hace click fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (selectRef.current && !selectRef.current.contains(event.target as Node)) {

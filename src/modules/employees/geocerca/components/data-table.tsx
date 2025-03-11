@@ -70,8 +70,13 @@ export function DataTable<TData, TValue>({
     },
   })
 
+  // Convertir pageSize a string para evitar errores de tipo
+  const pageSizeString = String(table.getState().pagination.pageSize);
+
   return (
     <div>
+      <div className="h-[15px]"></div>
+      
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -131,15 +136,15 @@ export function DataTable<TData, TValue>({
           <div className="flex items-center space-x-2">
             <p className="text-sm font-medium">Filas por página</p>
             <Select
-              value={`${table.getState().pagination.pageSize}`}
+              value={pageSizeString}
               onValueChange={(value) => {
                 table.setPageSize(Number(value))
               }}
             >
               <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={table.getState().pagination.pageSize} />
+                <SelectValue placeholder="10" />
               </SelectTrigger>
-              <SelectContent side="top">
+              <SelectContent open={false} side="top">
                 {[10, 20, 30, 40, 50].map((pageSize) => (
                   <SelectItem key={pageSize} value={`${pageSize}`}>
                     {pageSize}

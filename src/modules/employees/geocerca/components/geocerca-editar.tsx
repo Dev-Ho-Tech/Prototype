@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Save, X } from 'lucide-react';
+import { MapPin, Save, ArrowLeft } from 'lucide-react';
 import { Geocerca } from '../interfaces/Geocerca';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -97,21 +97,22 @@ export const GeocercaEditar: React.FC<GeocercaEditarProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {geocerca ? 'Editar Geocerca' : 'Crear Nueva Geocerca'}
-          </h1>
-          <p className="text-gray-500">
-            {geocerca 
-              ? `Modifique los datos de la geocerca ${geocerca.nombre}` 
-              : 'Defina una nueva zona geográfica para marcajes de asistencia'}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel}>
-            <X className="mr-2 h-4 w-4" />
-            Cancelar
+        <div className="flex items-center">
+          <Button variant="ghost" size="icon" onClick={onCancel} className="mr-2">
+            <ArrowLeft className="h-5 w-5" />
           </Button>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {geocerca ? 'Editar Geocerca' : 'Crear Nueva Geocerca'}
+            </h1>
+            <p className="text-gray-500">
+              {geocerca 
+                ? `Modifique los datos de la geocerca ${geocerca.nombre}` 
+                : 'Defina una nueva zona geográfica para marcajes de asistencia'}
+            </p>
+          </div>
+        </div>
+        <div>
           <Button onClick={handleSave}>
             <Save className="mr-2 h-4 w-4" />
             {geocerca ? 'Guardar Cambios' : 'Guardar'}
