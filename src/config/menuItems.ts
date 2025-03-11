@@ -202,6 +202,12 @@ export const menuItems: MenuItem[] = [
         icon: UserCheck,
         path: '/administration/users'
       },
+      {
+        id: 'perfil',
+        label: 'Perfiles',
+        icon: Users,
+        path: '/administration/perfil'
+      },
      
     ]
   },

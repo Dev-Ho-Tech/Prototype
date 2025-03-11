@@ -38,6 +38,7 @@ import ComedorScreen from './modules/system-config/diner/ComedorScreen';
 import { AppStateProvider } from './global/context/AppStateContext';
 import GeofenceModule from './modules/employees/geocerca/geocercaScreen';
 import EmailTemplatesPage from './modules/system-config/emial/emailScreen';
+import { ProfileManagementScreen } from './modules/administration/profiles/ProfileManagementScreen';
 
 // Variable para almacenar el estado global (podemos mantenerla por compatibilidad)
 // eslint-disable-next-line react-refresh/only-export-components
@@ -132,6 +133,7 @@ function AppContent() {
           <Route path="/employees/incidencias" element={<IncidenciasScreen />} />
           <Route path="/administration/licenses" element={<LicensesScreen />} />
           <Route path="/administration/users" element={<UsersScreen />} />
+          <Route path="/administration/perfil" element={<ProfileManagementScreen />} />
           <Route path="/administration/config" element={<ConfigScreen />} />
           <Route path="/system-config/structure" element={<StructureScreen />} />
           <Route path="/system-config/positions" element={<AccessTypesScreen />} />
