@@ -1,38 +1,64 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { Edit, Trash2, Check, X } from 'lucide-react';
+import { EmployeeType } from '../interface/EmployeeType';
 
 interface EmployeeTypeItemProps {
-  type: string;
+  employeeType: EmployeeType;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
   isSelected: boolean;
-  onClick: () => void;
-  intelliTime: boolean;
-  intelliLunch: boolean;
+  onSelect: (id: string) => void;
 }
 
-export const EmployeeTypeItem: React.FC<EmployeeTypeItemProps> = ({ type, isSelected, onClick, intelliTime, intelliLunch }) => {
+export const EmployeeTypeItem: React.FC<EmployeeTypeItemProps> = ({ 
+  employeeType, 
+  onEdit, 
+  onDelete, 
+  isSelected,
+  onSelect
+}) => {
   return (
-    <div 
-      className={`border-b border-gray-200 cursor-pointer ${isSelected ? 'bg-blue-50' : ''}`}
-      onClick={onClick}
-    >
-      <div className="flex items-center p-4">
+    <tr className="border-b hover:bg-gray-50">
+      <td className="py-3 px-4">
         <input
           type="checkbox"
-          className="mr-3 h-4 w-4 text-blue-500 focus:ring-blue-400"
+          className="h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
           checked={isSelected}
-          onChange={(e) => e.stopPropagation()}
+          onChange={() => onSelect(employeeType.id)}
         />
-        <span className="flex-1 text-sm">{type}</span>
-        <div className="flex items-center space-x-8">
-          <div className="w-24 text-center">
-            <div className={`inline-block w-6 h-6 rounded-full ${intelliTime ? 'bg-blue-500' : 'bg-gray-200'}`}></div>
-          </div>
-          <div className="w-24 text-center">
-            <div className={`inline-block w-6 h-6 rounded-full ${intelliLunch ? 'bg-blue-500' : 'bg-gray-200'}`}></div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-gray-400" />
+      </td>
+      <td className="py-3 px-4">{employeeType.name}</td>
+      <td className="py-3 px-4 text-center">
+        {employeeType.intelliTime ? 
+          <Check className="w-5 h-5 text-blue-500 mx-auto" /> : 
+          <X className="w-5 h-5 text-gray-400 mx-auto" />}
+      </td>
+      <td className="py-3 px-4 text-center">
+        {employeeType.intelliLunch ? 
+          <Check className="w-5 h-5 text-blue-500 mx-auto" /> : 
+          <X className="w-5 h-5 text-gray-400 mx-auto" />}
+      </td>
+      <td className="py-3 px-4 text-center">
+        {employeeType.emailRequired ? 
+          <Check className="w-5 h-5 text-blue-500 mx-auto" /> : 
+          <X className="w-5 h-5 text-gray-400 mx-auto" />}
+      </td>
+      <td className="py-3 px-4">
+        <div className="flex items-center justify-center space-x-2">
+          <button 
+            onClick={() => onEdit(employeeType.id)}
+            className="p-1 text-blue-500 hover:text-blue-700"
+          >
+            <Edit className="w-5 h-5" />
+          </button>
+          <button 
+            onClick={() => onDelete(employeeType.id)}
+            className="p-1 text-red-500 hover:text-red-700"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
         </div>
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 };

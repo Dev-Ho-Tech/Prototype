@@ -1,17 +1,3 @@
-// interface EmployeeType {
-//   id: string;
-//   code: string;
-//   name: string;
-//   description: string;
-//   status: 'active' | 'inactive';
-//   checkMethod: string;
-//   accessLevel: string;
-//   diningAccess: boolean;
-//   overtimeAllowed: boolean;
-//   maxHoursPerDay: number;
-//   maxHoursPerWeek: number;
-//   benefits: string[];
-// }
 
 import { EmployeeType } from "./interface/EmployeeType";
 

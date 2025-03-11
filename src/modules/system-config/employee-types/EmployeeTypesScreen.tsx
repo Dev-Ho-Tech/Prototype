@@ -1,77 +1,64 @@
-import React, { useState } from 'react';
-import { Search, Plus, Filter, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Plus } from 'lucide-react';
 import { EmployeeTypeItem } from './components/EmployeeTypeItem';
 import { EmployeeTypeForm } from './components/EmployeeTypeForm';
-
-// Datos de ejemplo para los tipos de empleados
-const employeeTypesInitial = [
-  {
-    id: '1',
-    name: 'Empleado',
-    code: 'EMP',
-    status: 'active',
-    intelliTime: true,
-    intelliLunch: false,
-    emailRequired: true,
-    signatureRequired: true,
-    requiredFields: ['Huella', 'Rostro', 'Perfil De Marcaje', 'Estructura', 'Contrato', 'Fecha Inicial Contrato', 'Fecha Final Contrato', 'Código', 'Cargo', 'Departamento', 'Sección', 'Sede', 'Contenedor', 'Empresa']
-  },
-  {
-    id: '2',
-    name: 'Proveedor',
-    code: 'PRV',
-    status: 'active',
-    intelliTime: false,
-    intelliLunch: false,
-    emailRequired: false,
-    signatureRequired: false,
-    requiredFields: ['Código', 'Empresa', 'Contrato']
-  },
-  {
-    id: '3',
-    name: 'Visitante',
-    code: 'VIS',
-    status: 'active',
-    intelliTime: false,
-    intelliLunch: false,
-    emailRequired: false,
-    signatureRequired: true,
-    requiredFields: ['Huella', 'Empresa Visitada', 'Motivo']
-  },
-];
+import { Modal } from './components/Modal';
+import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
+import { EmployeeType } from './interface/EmployeeType';
+import { employeeTypesData } from './data';
 
 export function EmployeeTypesScreen() {
-  const [employeeTypes, setEmployeeTypes] = useState(employeeTypesInitial);
+  const [employeeTypes, setEmployeeTypes] = useState<EmployeeType[]>(employeeTypesData);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedType, setSelectedType] = useState<typeof employeeTypesInitial[0] | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [selectedEmployeeType, setSelectedEmployeeType] = useState<EmployeeType | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const handleTypeClick = (typeId: string) => {
-    const type = employeeTypes.find(t => t.id === typeId);
+  const filteredTypes = employeeTypes.filter(
+    type => type.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleEditClick = (id: string) => {
+    const type = employeeTypes.find(t => t.id === id);
     if (type) {
-      setSelectedType(type);
+      setSelectedEmployeeType(type);
+      setEditModalOpen(true);
     }
-    setShowForm(true);
   };
 
-  const handleSave = (updatedType: typeof employeeTypesInitial[0]) => {
+  const handleDeleteClick = (id: string) => {
+    const type = employeeTypes.find(t => t.id === id);
+    if (type) {
+      setSelectedEmployeeType(type);
+      setDeleteModalOpen(true);
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedEmployeeType) {
+      setEmployeeTypes(employeeTypes.filter(type => type.id !== selectedEmployeeType.id));
+      setDeleteModalOpen(false);
+      setSelectedEmployeeType(null);
+    }
+  };
+
+  const handleSave = (updatedType: EmployeeType) => {
     setEmployeeTypes(
       employeeTypes.map(type => 
         type.id === updatedType.id ? updatedType : type
       )
     );
-    setShowForm(false);
-    setSelectedType(null);
-  };
-
-  const handleCancel = () => {
-    setShowForm(false);
-    setSelectedType(null);
+    setEditModalOpen(false);
+    setCreateModalOpen(false);
+    setSelectedEmployeeType(null);
   };
 
   const handleAddNew = () => {
-    const newType = {
-      id: String(employeeTypes.length + 1),
+    const newId = String(Math.max(...employeeTypes.map(type => parseInt(type.id))) + 1);
+    const newType: EmployeeType = {
+      id: newId,
       name: '',
       code: '',
       status: 'active',
@@ -81,13 +68,23 @@ export function EmployeeTypesScreen() {
       signatureRequired: false,
       requiredFields: []
     };
-    setSelectedType(newType);
-    setShowForm(true);
+    setSelectedEmployeeType(newType);
+    setCreateModalOpen(true);
   };
 
-  const filteredTypes = employeeTypes.filter(
-    type => type.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleCreateSave = (newType: EmployeeType) => {
+    setEmployeeTypes([...employeeTypes, newType]);
+    setCreateModalOpen(false);
+    setSelectedEmployeeType(null);
+  };
+
+  const toggleSelect = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
 
   return (
     <div className="flex-1 overflow-auto bg-gray-50">
@@ -101,17 +98,14 @@ export function EmployeeTypesScreen() {
             </p>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <button
-              className="p-2 rounded-full bg-gray-200 text-gray-500"
-            >
-              <Filter className="w-5 h-5" />
-            </button>
+          <div className="flex items-center space-x-3">
+
             <button
               onClick={handleAddNew}
-              className="p-2 rounded-full bg-blue-500 text-white"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4 mr-1" />
+              <span>Nuevo Tipo</span>
             </button>
           </div>
         </div>
@@ -127,50 +121,86 @@ export function EmployeeTypesScreen() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-              <ChevronDown className="w-5 h-5 text-gray-400" />
-            </div>
           </div>
         </div>
 
-        {/* Lista de tipos y encabezados */}
-        <div className="bg-white rounded-lg shadow">
-          {/* Encabezados de columna */}
-          <div className="flex items-center p-4 border-b border-gray-200 bg-gray-50">
-            <div className="w-8"></div>
-            <span className="flex-1 font-medium text-sm">Tipo de persona</span>
-            <div className="flex items-center space-x-8">
-              <div className="w-24 text-center text-sm font-medium">Control de Tiempo</div>
-              <div className="w-24 text-center text-sm font-medium">Comedor</div>
-              <div className="w-6"></div>
-            </div>
-          </div>
-
-          {/* Lista de tipos */}
-          <div>
-            {filteredTypes.map(type => (
-              <React.Fragment key={type.id}>
+        {/* Tabla de tipos de personal */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr className="bg-gray-50">
+                <th scope="col" className="px-4 py-3 text-left w-12"></th>
+                <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                  Tipo de persona
+                </th>
+                <th scope="col" className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Control de Tiempo
+                </th>
+                <th scope="col" className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Comedor
+                </th>
+                <th scope="col" className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Email requerido
+                </th>
+                <th scope="col" className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredTypes.map(type => (
                 <EmployeeTypeItem
-                  type={type.name}
-                  isSelected={selectedType?.id === type.id}
-                  onClick={() => handleTypeClick(type.id)}
-                  intelliTime={type.intelliTime}
-                  intelliLunch={type.intelliLunch}
+                  key={type.id}
+                  employeeType={type}
+                  onEdit={handleEditClick}
+                  onDelete={handleDeleteClick}
+                  isSelected={selectedIds.includes(type.id)}
+                  onSelect={toggleSelect}
                 />
-                
-                {selectedType?.id === type.id && showForm && (
-                  <div className="border-b border-gray-200 p-4 bg-gray-50">
-                    <EmployeeTypeForm
-                      employeeType={selectedType}
-                      onSave={handleSave}
-                      onCancel={handleCancel}
-                    />
-                  </div>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
+
+        {/* Modal de edición */}
+        <Modal 
+          isOpen={editModalOpen} 
+          onClose={() => setEditModalOpen(false)}
+          title="Editar tipo de personal"
+          size="md"
+        >
+          {selectedEmployeeType && (
+            <EmployeeTypeForm
+              employeeType={selectedEmployeeType}
+              onSave={handleSave}
+              onCancel={() => setEditModalOpen(false)}
+            />
+          )}
+        </Modal>
+
+        {/* Modal de creación */}
+        <Modal 
+          isOpen={createModalOpen} 
+          onClose={() => setCreateModalOpen(false)}
+          title="Nuevo tipo de personal"
+          size="md"
+        >
+          {selectedEmployeeType && (
+            <EmployeeTypeForm
+              employeeType={selectedEmployeeType}
+              onSave={handleCreateSave}
+              onCancel={() => setCreateModalOpen(false)}
+            />
+          )}
+        </Modal>
+
+        {/* Modal de confirmación de eliminación */}
+        <DeleteConfirmationModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirm={handleDeleteConfirm}
+          typeName={selectedEmployeeType?.name || ''}
+        />
       </div>
     </div>
   );
