@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { Search, Plus, Filter, Users, Fingerprint, Clock, DoorClosed, Coffee, Settings, CheckSquare, MapPin, Camera } from 'lucide-react';
 import { checkProfilesData } from './data';
 
@@ -19,18 +19,6 @@ export function CheckProfilesScreen() {
     }
   };
 
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'attendance':
-        return 'Asistencia';
-      case 'access':
-        return 'Acceso';
-      case 'dining':
-        return 'Comedor';
-      default:
-        return type;
-    }
-  };
 
   return (
     <div className="flex-1 overflow-auto bg-gray-50">

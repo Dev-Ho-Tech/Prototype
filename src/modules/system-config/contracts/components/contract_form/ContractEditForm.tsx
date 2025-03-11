@@ -86,7 +86,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
         allowedCheckMethods: ['face']
       }));
     }
-  }, []);
+  });
 
   const handleWorkDayToggle = (dayId: string) => {
     if (!isEditMode) return;
