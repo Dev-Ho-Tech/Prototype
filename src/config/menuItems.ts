@@ -85,6 +85,13 @@ export const menuItems: MenuItem[] = [
         icon: FileText,
         path: '/system-config/contracts'
       },
+      {
+        id: 'modality',
+        label: 'Turnos de Trabajo',
+        icon: FileText,
+        path: '/system-config/modality'
+      },
+      
 
       // {
       //   id: 'checks',

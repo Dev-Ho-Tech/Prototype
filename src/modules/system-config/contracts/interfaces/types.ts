@@ -2,7 +2,8 @@ export interface Contract {
   id: string;
   code: string;
   name: string;
-  type: ContractType;
+  type: string;
+  // type: ContractType;
   duration?: string;
   workingHours: WorkingHoursConfig;
   overtimeAllowed: boolean;
@@ -13,6 +14,11 @@ export interface Contract {
   status: 'active' | 'inactive';
   employeeCount?: number;
   concepts: string[]; 
+  workDays?: string[];
+  startTime?: string;
+  endTime?: string;
+  shifts?: string[];
+  allowedCheckMethods?: string[];
 }
 
 // Tipo de contrato

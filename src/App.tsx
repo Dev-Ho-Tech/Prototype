@@ -39,6 +39,7 @@ import { AppStateProvider } from './global/context/AppStateContext';
 import GeofenceModule from './modules/employees/geocerca/geocercaScreen';
 import EmailTemplatesPage from './modules/system-config/emial/emailScreen';
 import { ProfileManagementScreen } from './modules/administration/profiles/ProfileManagementScreen';
+import { WorkShiftsScreen } from './modules/system-config/modality/WorkShiftsScreen';
 
 // Variable para almacenar el estado global (podemos mantenerla por compatibilidad)
 // eslint-disable-next-line react-refresh/only-export-components
@@ -140,6 +141,7 @@ function AppContent() {
           <Route path="/system-config/devices" element={<DevicesScreen />} />
           <Route path="/system-config/employee-types" element={<EmployeeTypesScreen />} />
           <Route path="/system-config/contracts" element={<ContractsScreen />} />
+          <Route path="/system-config/modality" element={<WorkShiftsScreen />} />
           <Route path="/system-config/diner" element={<ComedorScreen />} />
           <Route path="/system-config/email" element={<EmailTemplatesPage />} />
           <Route path="/time-control/calendar" element={<CalendarScreen />} />

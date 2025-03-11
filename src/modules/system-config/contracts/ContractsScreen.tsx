@@ -1,10 +1,11 @@
-import{ useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import { Contract,} from './interfaces/types';
+import { Contract } from './interfaces/types';
 import { contractsData, scheduleLimitGroups } from './data';
 import { ContractList } from './components/ContractList';
-import { ContractForm } from './components/ContractForm';
 import { ContractDetail } from './components/ContractDetail';
+import { ContractEditForm } from './components/contract_form/ContractEditForm';
+// import { ContractEditForm } from './components/ContractEditForm';
 
 enum ScreenMode {
   LIST = 'LIST',
@@ -33,7 +34,33 @@ export function ContractsScreen() {
 
   // Manejadores de eventos
   const handleAddContract = () => {
-    setSelectedContract(null);
+    // Crear un nuevo contrato con valores predeterminados
+    const newContract: Contract = {
+      id: `contract-${Date.now()}`,
+      code: String(contracts.length + 1).padStart(3, '0'),
+      name: '',
+      type: 'fixed',
+      workingHours: {
+        perWeek: 40,
+        maxDailyHours: 8,
+        startDay: 'Lunes',
+        scheduleLimitGroup: 'Semanal'
+      },
+      overtimeAllowed: false,
+      crossDays: false,
+      autoApprove: true,
+      ignoreAbsences: false,
+      firstLastCheck: true,
+      status: 'active',
+      workDays: ['mon', 'tue', 'wed', 'thu', 'fri'],
+      shifts: ['morning'],
+      concepts: [],
+      allowedCheckMethods: ['face'],
+      startTime: '7:00 AM',
+      endTime: '3:00 PM'
+    };
+    
+    setSelectedContract(newContract);
     setScreenMode(ScreenMode.ADD);
   };
 
@@ -99,15 +126,26 @@ export function ContractsScreen() {
   const renderContent = () => {
     switch (screenMode) {
       case ScreenMode.ADD:
-      case ScreenMode.EDIT:
-        return (
-          <ContractForm
-            contract={screenMode === ScreenMode.EDIT ? selectedContract || undefined : undefined}
-            scheduleLimitGroups={scheduleLimitGroups}
+        return selectedContract ? (
+          <ContractEditForm
+            contract={selectedContract}
             onSave={handleSaveContract}
-            onCancel={handleBackToList}
+            onBack={handleBackToList}
+            onEdit={() => {}}
+            scheduleLimitGroups={scheduleLimitGroups}
+            isEditMode={true}
           />
-        );
+        ) : null;
+      case ScreenMode.EDIT:
+        return selectedContract ? (
+          <ContractDetail
+            contract={selectedContract}
+            onEdit={handleEditContract}
+            onBack={handleBackToList}
+            onSave={handleSaveContract}
+            isEditMode={true}
+          />
+        ) : null;
       case ScreenMode.DETAIL:
         return selectedContract ? (
           <ContractDetail
