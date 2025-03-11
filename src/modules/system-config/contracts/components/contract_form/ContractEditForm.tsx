@@ -364,7 +364,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
                     value={startTime.hour}
                     onChange={(e) => handleTimeChange('startTime', 'hour', e.target.value)}
                     disabled={!isEditMode}
-                    className={`appearance-none p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
+                    className={`appearance-none p-2 pr-6 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
                   >
                     {hours.map(h => (
                       <option key={h} value={h}>{h}</option>
@@ -380,7 +380,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
                     value={startTime.minute}
                     onChange={(e) => handleTimeChange('startTime', 'minute', e.target.value)}
                     disabled={!isEditMode}
-                    className={`appearance-none p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
+                    className={`appearance-none p-2 pr-7 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
                   >
                     {minutes.map(m => (
                       <option key={m} value={m}>{m}</option>
@@ -395,7 +395,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
                     value={startTime.period}
                     onChange={(e) => handleTimeChange('startTime', 'period', e.target.value)}
                     disabled={!isEditMode}
-                    className={`appearance-none p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
+                    className={`appearance-none p-2 pr-6 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
                   >
                     {ampm.map(p => (
                       <option key={p} value={p}>{p}</option>
@@ -419,7 +419,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
                     value={endTime.hour}
                     onChange={(e) => handleTimeChange('endTime', 'hour', e.target.value)}
                     disabled={!isEditMode}
-                    className={`appearance-none p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
+                    className={`appearance-none p-2 pr-6 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
                   >
                     {hours.map(h => (
                       <option key={h} value={h}>{h}</option>
@@ -435,7 +435,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
                     value={endTime.minute}
                     onChange={(e) => handleTimeChange('endTime', 'minute', e.target.value)}
                     disabled={!isEditMode}
-                    className={`appearance-none p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
+                    className={`appearance-none p-2 pr-7 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
                   >
                     {minutes.map(m => (
                       <option key={m} value={m}>{m}</option>
@@ -450,7 +450,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
                     value={endTime.period}
                     onChange={(e) => handleTimeChange('endTime', 'period', e.target.value)}
                     disabled={!isEditMode}
-                    className={`appearance-none p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
+                    className={`appearance-none p-2 pr-6 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
                   >
                     {ampm.map(p => (
                       <option key={p} value={p}>{p}</option>
