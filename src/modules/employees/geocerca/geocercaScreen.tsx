@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Search, Plus, Filter, ChevronDown, Trash } from "lucide-react"
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
@@ -22,6 +21,7 @@ import {
 import { Geocerca } from "./interfaces/Geocerca"
 import { GeocercaDetalle } from "./components/GeocercaDetalle"
 import { GeocercaEditar } from "./components/geocerca-editar"
+import { ConfirmModal } from "./components/ConfirmModal"
 
 // Importaciones para las columnas
 import { ArrowUpDown, MapPin, Edit, Eye } from "lucide-react"
@@ -30,211 +30,257 @@ import type { ColumnDef } from "@tanstack/react-table"
 // Tipo de vista
 type Vista = 'lista' | 'detalle' | 'editar' | 'crear';
 
-// Función para crear las columnas que usa handlers de clic en lugar de navegación
-const createGeocercaColumns = (
-  onView: (geocerca: Geocerca) => void,
-  onEdit: (geocerca: Geocerca) => void,
-  onDelete: (geocerca: Geocerca) => void
-): ColumnDef<Geocerca>[] => [
-  {
-    accessorKey: "nombre",
-    header: "Nombre",
-    cell: ({ row }) => {
-      return (
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => onView(row.original)}>
-          <MapPin className="h-4 w-4 text-blue-600" />
-          <div>
-            <div className="font-medium">{row.getValue("nombre")}</div>
-            <div className="text-xs text-gray-500 truncate max-w-[200px]">{row.original.direccion}</div>
-          </div>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "sede",
-    header: ({ column }) => {
-      return (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Sede
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-  },
-  {
-    accessorKey: "radio",
-    header: "Radio",
-    cell: ({ row }) => {
-      return <div>{row.getValue("radio")}m</div>
-    },
-  },
-  {
-    accessorKey: "empleadosAsignados",
-    header: "Empleados",
-    cell: ({ row }) => {
-      return <div className="text-center">{row.getValue("empleadosAsignados")}</div>
-    },
-  },
-  {
-    accessorKey: "estado",
-    header: "Estado",
-    cell: ({ row }) => {
-      const estado = row.getValue("estado") as string
-      return (
-        <Badge
-          variant={estado === "Activa" ? "default" : "secondary"}
-          className={estado === "Activa" ? "bg-green-100 text-green-800" : ""}
-        >
-          {estado}
-        </Badge>
-      )
-    },
-  },
-  {
-    accessorKey: "fechaCreacion",
-    header: "Fecha de creación",
-  },
-  {
-    id: "acciones",
-    cell: ({ row }) => {
-      const geocerca = row.original
-
-      return (
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              onView(geocerca);
-            }}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(geocerca);
-            }}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-red-600 hover:text-red-700"
-            onClick={() => {
-            }}
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        </div>
-      )
-    },
-  },
-]
-
 export default function GeocercasPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filtroEstado, setFiltroEstado] = useState<"todos" | "activas" | "inactivas">("activas")
   const [vistaActual, setVistaActual] = useState<Vista>('lista')
   const [geocercaSeleccionada, setGeocercaSeleccionada] = useState<Geocerca | null>(null)
-  const [listaGeocercas, setListaGeocercas] = useState<Geocerca[]>(geocercas)
+  const [listaGeocercas, setListaGeocercas] = useState<Geocerca[]>([])
   // Guarda la vista anterior para volver correctamente
   const [vistaAnterior, setVistaAnterior] = useState<Vista>('lista')
   
-  // Manejadores para las acciones de las geocercas
-  const handleViewGeocerca = (geocerca: Geocerca) => {
+  // Estado para el modal de confirmación
+  const [modalConfirmacion, setModalConfirmacion] = useState({
+    isOpen: false,
+    geocercaId: '',
+    geocercaNombre: ''
+  });
+  
+  // Carga inicial de datos - solo una vez
+  useEffect(() => {
+    setListaGeocercas(geocercas);
+    
+    // Limpieza al desmontar
+    return () => {
+      setListaGeocercas([]);
+      setGeocercaSeleccionada(null);
+      setSearchQuery("");
+      setFiltroEstado("activas");
+      setVistaActual('lista');
+      setVistaAnterior('lista');
+    };
+  }, []);
+  
+  // Memoizar manejadores para evitar recreaciones
+  const handleViewGeocerca = useCallback((geocerca: Geocerca) => {
     setGeocercaSeleccionada(geocerca);
     setVistaAnterior(vistaActual);
     setVistaActual('detalle');
-  };
+  }, [vistaActual]);
   
-  const handleEditGeocerca = (geocerca: Geocerca) => {
+  const handleEditGeocerca = useCallback((geocerca: Geocerca) => {
     setGeocercaSeleccionada(geocerca);
     setVistaAnterior(vistaActual);
     setVistaActual('editar');
-  };
+  }, [vistaActual]);
   
-  const handleDeleteGeocerca = (geocerca: Geocerca) => {
-    if (window.confirm(`¿Está seguro de eliminar la geocerca ${geocerca.nombre}?`)) {
-      // Eliminar la geocerca de la lista
-      const nuevasGeocercas = listaGeocercas.filter(g => g.id !== geocerca.id);
-      setListaGeocercas(nuevasGeocercas);
-      
-      // Si estamos en la vista de detalle de la geocerca eliminada, volver a la lista
-      if (vistaActual === 'detalle' && geocercaSeleccionada?.id === geocerca.id) {
-        setVistaActual('lista');
-      }
+  // Muestra el modal de confirmación para eliminar
+  const handleShowDeleteModal = useCallback((geocerca: Geocerca) => {
+    setModalConfirmacion({
+      isOpen: true,
+      geocercaId: geocerca.id,
+      geocercaNombre: geocerca.nombre
+    });
+  }, []);
+  
+  // Cerrar el modal de confirmación
+  const handleCancelDelete = useCallback(() => {
+    setModalConfirmacion({
+      isOpen: false,
+      geocercaId: '',
+      geocercaNombre: ''
+    });
+  }, []);
+  
+  // Confirmar eliminación desde el modal
+  const handleConfirmDelete = useCallback(() => {
+    const geocercaId = modalConfirmacion.geocercaId;
+    
+    // Eliminar la geocerca de la lista
+    setListaGeocercas(prev => prev.filter(g => g.id !== geocercaId));
+    
+    // Si estamos en la vista de detalle de la geocerca eliminada, volver a la lista
+    if (vistaActual === 'detalle' && geocercaSeleccionada?.id === geocercaId) {
+      setVistaActual('lista');
     }
-  };
+    
+    // Cerrar el modal
+    setModalConfirmacion({
+      isOpen: false,
+      geocercaId: '',
+      geocercaNombre: ''
+    });
+  }, [modalConfirmacion.geocercaId, vistaActual, geocercaSeleccionada]);
   
-  const handleCreateGeocerca = () => {
+  const handleCreateGeocerca = useCallback(() => {
     setGeocercaSeleccionada(null);
     setVistaAnterior(vistaActual);
     setVistaActual('crear');
-  };
+  }, [vistaActual]);
   
-  const handleSaveGeocerca = (geocerca: Geocerca) => {
+  const handleSaveGeocerca = useCallback((geocerca: Geocerca) => {
     if (vistaActual === 'crear') {
       // Agregar nueva geocerca
-      setListaGeocercas([...listaGeocercas, geocerca]);
+      setListaGeocercas(prev => [...prev, geocerca]);
     } else {
       // Actualizar geocerca existente
-      const nuevasGeocercas = listaGeocercas.map(g => 
-        g.id === geocerca.id ? geocerca : g
+      setListaGeocercas(prev => 
+        prev.map(g => g.id === geocerca.id ? geocerca : g)
       );
-      setListaGeocercas(nuevasGeocercas);
     }
     
     // Volver a la vista de detalle con la geocerca actualizada
     setGeocercaSeleccionada(geocerca);
     setVistaActual('detalle');
-  };
+  }, [vistaActual]);
   
-  const handleCancelEdicion = () => {
+  const handleCancelEdicion = useCallback(() => {
     // Siempre volver a la vista anterior
     setVistaActual(vistaAnterior);
-  };
+  }, [vistaAnterior]);
   
-  const handleVolverALista = () => {
+  const handleVolverALista = useCallback(() => {
     setVistaActual('lista');
-  };
+  }, []);
   
-  // Crear las columnas con manejadores de eventos
-  const columns = createGeocercaColumns(
-    handleViewGeocerca,
-    handleEditGeocerca,
-    handleDeleteGeocerca
-  );
+  // Función para crear las columnas que usa handlers de clic en lugar de navegación
+  const createGeocercaColumns = useCallback(() => [
+    {
+      accessorKey: "nombre",
+      header: "Nombre",
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleViewGeocerca(row.original)}>
+            <MapPin className="h-4 w-4 text-blue-600" />
+            <div>
+              <div className="font-medium">{row.getValue("nombre")}</div>
+              <div className="text-xs text-gray-500 truncate max-w-[200px]">{row.original.direccion}</div>
+            </div>
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: "sede",
+      header: ({ column }) => {
+        return (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Sede
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+    },
+    {
+      accessorKey: "radio",
+      header: "Radio",
+      cell: ({ row }) => {
+        return <div>{row.getValue("radio")}m</div>
+      },
+    },
+    {
+      accessorKey: "empleadosAsignados",
+      header: "Empleados",
+      cell: ({ row }) => {
+        return <div className="text-center">{row.getValue("empleadosAsignados")}</div>
+      },
+    },
+    {
+      accessorKey: "estado",
+      header: "Estado",
+      cell: ({ row }) => {
+        const estado = row.getValue("estado") as string
+        return (
+          <Badge
+            variant={estado === "Activa" ? "default" : "secondary"}
+            className={estado === "Activa" ? "bg-green-100 text-green-800" : ""}
+          >
+            {estado}
+          </Badge>
+        )
+      },
+    },
+    {
+      accessorKey: "fechaCreacion",
+      header: "Fecha de creación",
+    },
+    {
+      id: "acciones",
+      cell: ({ row }) => {
+        const geocerca = row.original
 
-  // Buscar primero, filtrar después
-  const geocercasBuscadas = listaGeocercas.filter(g => {
-    if (!searchQuery) return true;
-    
-    // Búsqueda insensible a mayúsculas/minúsculas
-    const query = searchQuery.toLowerCase();
-    return (
-      g.nombre.toLowerCase().includes(query) ||
-      g.sede.toLowerCase().includes(query) ||
-      g.direccion.toLowerCase().includes(query)
-    );
-  });
+        return (
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewGeocerca(geocerca);
+              }}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditGeocerca(geocerca);
+              }}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-red-600 hover:text-red-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleShowDeleteModal(geocerca);
+              }}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        )
+      },
+    },
+  ] as ColumnDef<Geocerca>[], [handleViewGeocerca, handleEditGeocerca, handleShowDeleteModal]);
 
-  // Filtrar geocercas según el estado seleccionado
-  const geocercasFiltradas = geocercasBuscadas.filter(g => {
-    if (filtroEstado === "todos") return true;
-    if (filtroEstado === "activas") return g.estado === "Activa";
-    if (filtroEstado === "inactivas") return g.estado === "Inactiva";
-    return true;
-  });
+  // Memoizar las columnas para evitar recreaciones constantes
+  const columns = useMemo(() => createGeocercaColumns(), [createGeocercaColumns]);
 
-  // Contador de estados para las pestañas
-  const totalActivas = listaGeocercas.filter(g => g.estado === "Activa").length;
-  const totalInactivas = listaGeocercas.filter(g => g.estado === "Inactiva").length;
+  // Memoizar las geocercas filtradas
+  const geocercasFiltradas = useMemo(() => {
+    // Buscar primero, filtrar después
+    const geocercasBuscadas = listaGeocercas.filter(g => {
+      if (!searchQuery) return true;
+      
+      // Búsqueda insensible a mayúsculas/minúsculas
+      const query = searchQuery.toLowerCase();
+      return (
+        g.nombre.toLowerCase().includes(query) ||
+        g.sede.toLowerCase().includes(query) ||
+        g.direccion.toLowerCase().includes(query)
+      );
+    });
+
+    // Filtrar geocercas según el estado seleccionado
+    return geocercasBuscadas.filter(g => {
+      if (filtroEstado === "todos") return true;
+      if (filtroEstado === "activas") return g.estado === "Activa";
+      if (filtroEstado === "inactivas") return g.estado === "Inactiva";
+      return true;
+    });
+  }, [listaGeocercas, searchQuery, filtroEstado]);
+
+  // Memoizar contadores para evitar cálculos innecesarios
+  const contadores = useMemo(() => {
+    const totalActivas = listaGeocercas.filter(g => g.estado === "Activa").length;
+    const totalInactivas = listaGeocercas.filter(g => g.estado === "Inactiva").length;
+    return { totalActivas, totalInactivas };
+  }, [listaGeocercas]);
 
   // Renderizado condicional según la vista actual
   if (vistaActual === 'detalle' && geocercaSeleccionada) {
@@ -244,7 +290,15 @@ export default function GeocercasPage() {
           geocerca={geocercaSeleccionada}
           onBack={handleVolverALista}
           onEdit={handleEditGeocerca}
-          onDelete={handleDeleteGeocerca}
+          onDelete={handleShowDeleteModal}
+        />
+        
+        {/* Modal de confirmación */}
+        <ConfirmModal 
+          deviceName={modalConfirmacion.geocercaNombre}
+          onDelete={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          isOpen={modalConfirmacion.isOpen}
         />
       </div>
     );
@@ -280,10 +334,10 @@ export default function GeocercasPage() {
         <div className="flex items-center justify-between mb-4">
           <TabsList>
             <TabsTrigger value="activas">
-              Activas <Badge className="ml-2 bg-green-100 text-green-800">{totalActivas}</Badge>
+              Activas <Badge className="ml-2 bg-green-100 text-green-800">{contadores.totalActivas}</Badge>
             </TabsTrigger>
             <TabsTrigger value="inactivas">
-              Inactivas <Badge className="ml-2 bg-gray-100 text-gray-800">{totalInactivas}</Badge>
+              Inactivas <Badge className="ml-2 bg-gray-100 text-gray-800">{contadores.totalInactivas}</Badge>
             </TabsTrigger>
             <TabsTrigger value="todos">
               Todas <Badge className="ml-2 bg-gray-100 text-gray-600">{listaGeocercas.length}</Badge>
@@ -320,31 +374,8 @@ export default function GeocercasPage() {
           </div>
         </div>
 
-        <TabsContent value="activas">
-          <Card>
-            <CardContent className="p-0">
-              <DataTable
-                columns={columns}
-                data={geocercasFiltradas}
-                searchQuery={searchQuery}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="inactivas">
-          <Card>
-            <CardContent className="p-0">
-              <DataTable
-                columns={columns}
-                data={geocercasFiltradas}
-                searchQuery={searchQuery}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="todos">
+        {/* Usar un solo componente DataTable con renderizado condicional para mejorar el rendimiento */}
+        <TabsContent value={filtroEstado}>
           <Card>
             <CardContent className="p-0">
               <DataTable
@@ -356,6 +387,14 @@ export default function GeocercasPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* Modal de confirmación */}
+      <ConfirmModal 
+        deviceName={modalConfirmacion.geocercaNombre}
+        onDelete={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        isOpen={modalConfirmacion.isOpen}
+      />
     </div>
   );
 }

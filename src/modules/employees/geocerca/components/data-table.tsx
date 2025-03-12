@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect, memo } from "react"
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -13,7 +13,6 @@ import {
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Button } from "./ui/button"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -22,7 +21,7 @@ interface DataTableProps<TData, TValue> {
   searchField?: string
 }
 
-export function DataTable<TData, TValue>({ 
+export const DataTable = memo(function DataTable<TData, TValue>({ 
   columns, 
   data, 
   searchQuery = "", 
@@ -30,26 +29,37 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [appliedFilters, setAppliedFilters] = useState<ColumnFiltersState>([])
 
-  // Aplicar la consulta de búsqueda al campo especificado
-  const appliedFilters = [...columnFilters];
-  if (searchQuery && searchField) {
-    // Añadir el filtro solo si no existe ya uno para ese campo
-    if (!appliedFilters.some(filter => filter.id === searchField)) {
-      appliedFilters.push({
-        id: searchField,
-        value: searchQuery,
-      });
+  // Manejar los filtros de manera separada para evitar ciclos
+  useEffect(() => {
+    const newFilters = [...columnFilters];
+    if (searchQuery && searchField) {
+      const existingFilterIndex = newFilters.findIndex(filter => filter.id === searchField);
+      
+      if (existingFilterIndex >= 0) {
+        newFilters[existingFilterIndex] = {
+          id: searchField,
+          value: searchQuery,
+        };
+      } else {
+        newFilters.push({
+          id: searchField,
+          value: searchQuery,
+        });
+      }
     } else {
-      // Actualizar el filtro existente
-      const index = appliedFilters.findIndex(filter => filter.id === searchField);
-      appliedFilters[index] = {
-        id: searchField,
-        value: searchQuery,
-      };
+      // Si no hay consulta, eliminar el filtro si existe
+      const existingFilterIndex = newFilters.findIndex(filter => filter.id === searchField);
+      if (existingFilterIndex >= 0) {
+        newFilters.splice(existingFilterIndex, 1);
+      }
     }
-  }
+    
+    setAppliedFilters(newFilters);
+  }, [searchQuery, searchField, columnFilters]);
 
+  // Memoizar la tabla para evitar recreaciones innecesarias
   const table = useReactTable({
     data,
     columns,
@@ -70,8 +80,15 @@ export function DataTable<TData, TValue>({
     },
   })
 
-  // Convertir pageSize a string para evitar errores de tipo
-  // const pageSizeString = String(table.getState().pagination.pageSize);
+  // Limpiar los recursos al desmontar el componente
+  useEffect(() => {
+    return () => {
+      // Limpieza explícita para evitar fugas de memoria
+      setSorting([]);
+      setColumnFilters([]);
+      setAppliedFilters([]);
+    };
+  }, []);
 
   return (
     <div>
@@ -133,7 +150,7 @@ export function DataTable<TData, TValue>({
           </p>
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
-        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <p className="text-sm font-medium">Filas por página</p>
             <div className="h-8 w-[70px] flex items-center justify-center border border-gray-300 rounded-md">
               <span className="text-sm">10</span>
@@ -181,4 +198,4 @@ export function DataTable<TData, TValue>({
       </div>
     </div>
   )
-}
+});
