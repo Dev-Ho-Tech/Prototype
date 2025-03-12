@@ -126,7 +126,7 @@ const createGeocercaColumns = (
             variant="ghost"
             size="icon"
             className="text-red-600 hover:text-red-700"
-            onClick={(e) => {
+            onClick={() => {
             }}
           >
             <Trash className="h-4 w-4" />
