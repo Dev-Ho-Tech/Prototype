@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react"
-import { Search, Plus, Filter, ChevronDown } from "lucide-react"
+import { Search, Plus, Filter, ChevronDown, Trash } from "lucide-react"
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
 import { Card, CardContent } from "./components/ui/card"
@@ -24,7 +24,7 @@ import { GeocercaDetalle } from "./components/GeocercaDetalle"
 import { GeocercaEditar } from "./components/geocerca-editar"
 
 // Importaciones para las columnas
-import { ArrowUpDown, MapPin, Edit, Trash, Eye } from "lucide-react"
+import { ArrowUpDown, MapPin, Edit, Eye } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
 
 // Tipo de vista
@@ -127,8 +127,6 @@ const createGeocercaColumns = (
             size="icon"
             className="text-red-600 hover:text-red-700"
             onClick={(e) => {
-              e.stopPropagation();
-              onDelete(geocerca);
             }}
           >
             <Trash className="h-4 w-4" />
