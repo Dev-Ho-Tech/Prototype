@@ -39,7 +39,7 @@ interface AdvancedFiltersDashboardProps {
 const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
   onFilterChange,
   onSearchTermChange,
-  searchTerm,
+  // searchTerm,
   onClearFilters,
   employees = [] // Valor por defecto vacío para evitar errores
 }) => {
@@ -68,7 +68,8 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     return Array.from(uniqueValues).map(value => ({
       id: value,
       nombre: value,
-      checked: false
+      // IMPORTANTE: Inicializar el estado 'checked' basado en si el valor ya está en filterState
+      checked: filterState[key as keyof FilterState]?.includes(value) || false
     }));
   };
 
@@ -124,17 +125,26 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
           if (section.id === 'sedes') {
             return {
               ...section,
-              options: getUniqueOptions('location')
+              options: getUniqueOptions('location').map(opt => ({
+                ...opt,
+                checked: filterState.sedes.includes(opt.id)
+              }))
             };
           } else if (section.id === 'departamentos') {
             return {
               ...section,
-              options: getUniqueOptions('department')
+              options: getUniqueOptions('department').map(opt => ({
+                ...opt,
+                checked: filterState.departamentos.includes(opt.id)
+              }))
             };
           } else if (section.id === 'secciones') {
             return {
               ...section,
-              options: getUniqueOptions('section')
+              options: getUniqueOptions('section').map(opt => ({
+                ...opt,
+                checked: filterState.secciones.includes(opt.id)
+              }))
             };
           }
           return section;
@@ -241,12 +251,15 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     setFilterState(prevState => {
       const newState = { ...prevState };
       
-      // Si el checkbox está marcado, añadir a la lista
+      // Si el checkbox está marcado, añadir a la lista (solo si no existe ya)
       if (checked) {
-        newState[sectionId as keyof FilterState] = [
-          ...newState[sectionId as keyof FilterState], 
-          optionId
-        ];
+        // Comprobar si el ID ya existe para evitar duplicados
+        if (!newState[sectionId as keyof FilterState].includes(optionId)) {
+          newState[sectionId as keyof FilterState] = [
+            ...newState[sectionId as keyof FilterState], 
+            optionId
+          ];
+        }
       } 
       // Si está desmarcado, quitar de la lista
       else {
@@ -299,6 +312,7 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
       }
       
       // Llamar al callback con el nuevo estado
+      // Importante: Ya no cerramos el panel aquí, dejamos que se mantenga abierto
       onFilterChange(newState);
       return newState;
     });
@@ -370,6 +384,11 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     onClearFilters();
   };
 
+  // Evitar la propagación en checkboxes para mantener el panel abierto
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="p-4">
       {/* Título de Filtros y botón Limpiar */}
@@ -437,10 +456,12 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
                           className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                           checked={!!option.checked}
                           onChange={(e) => handleOptionChange(section.id, option.id, e.target.checked)}
+                          onClick={handleCheckboxClick} // Evitar propagación de eventos
                         />
                         <label
                           htmlFor={`${section.id}-${option.id}`}
                           className="ml-2 block text-sm text-gray-700"
+                          onClick={handleCheckboxClick} // Evitar propagación de eventos
                         >
                           {option.nombre}
                         </label>

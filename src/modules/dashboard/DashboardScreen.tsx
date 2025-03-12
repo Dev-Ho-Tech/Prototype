@@ -25,7 +25,7 @@ const DashboardScreen: React.FC = () => {
   const [showOldDashboard, setShowOldDashboard] = useState<boolean>(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState<boolean>(false);
   
-  // Nuevo estado para mostrar/ocultar filtros avanzados
+  // Estado para mostrar/ocultar filtros avanzados
   const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
   
   // Estado para almacenar los filtros aplicados
@@ -54,6 +54,7 @@ const DashboardScreen: React.FC = () => {
   };
 
   // Función para manejar cambios en los filtros avanzados
+  // MODIFICADO: Ya no cerramos el panel automáticamente
   const handleFilterChange = (filters: any): void => {
     // Convertir los filtros al formato que espera el dashboard
     const convertedFilters = {
@@ -63,8 +64,8 @@ const DashboardScreen: React.FC = () => {
     };
     
     setAppliedFilters(convertedFilters);
-    // Cerrar el panel de filtros automáticamente al aplicar
-    setShowAdvancedFilters(false);
+    // Ya no cerramos el panel automáticamente
+    // setShowAdvancedFilters(false); <- ELIMINADO
   };
 
   // Función para limpiar todos los filtros
@@ -226,6 +227,24 @@ const DashboardScreen: React.FC = () => {
     };
   });
 
+  // Función para obtener texto de filtros avanzados sin duplicados
+  const getFilterDisplayText = () => {
+    // Combinar todos los filtros
+    const allFilters = [
+      ...appliedFilters.pais,
+      ...appliedFilters.estado,
+      ...appliedFilters.departamento
+    ];
+    
+    // Eliminar duplicados
+    const uniqueFilters = [...new Set(allFilters)];
+    
+    // Tomar solo los primeros 3 para mostrar
+    const displayFilters = uniqueFilters.slice(0, 3);
+    
+    return `${displayFilters.join(', ')}${uniqueFilters.length > 3 ? '...' : ''}`;
+  };
+
   return (
     <div className="flex-1 overflow-auto bg-gray-50">
       <div className="p-4">
@@ -319,14 +338,7 @@ const DashboardScreen: React.FC = () => {
               
               {hasAppliedAdvancedFilters && (
                 <span className="font-medium text-blue-700">
-                  Filtros avanzados: {
-                    [
-                      ...appliedFilters.pais,
-                      ...appliedFilters.estado,
-                      ...appliedFilters.departamento
-                    ].slice(0, 3).join(', ')
-                  }
-                  {[...appliedFilters.pais, ...appliedFilters.estado, ...appliedFilters.departamento].length > 3 ? '...' : ''}
+                  Filtros avanzados: {getFilterDisplayText()}
                 </span>
               )}
               
