@@ -13,7 +13,7 @@ import {
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Button } from "./ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -71,7 +71,7 @@ export function DataTable<TData, TValue>({
   })
 
   // Convertir pageSize a string para evitar errores de tipo
-  const pageSizeString = String(table.getState().pagination.pageSize);
+  // const pageSizeString = String(table.getState().pagination.pageSize);
 
   return (
     <div>
@@ -133,25 +133,11 @@ export function DataTable<TData, TValue>({
           </p>
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
-          <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2">
             <p className="text-sm font-medium">Filas por página</p>
-            <Select
-              value={pageSizeString}
-              onValueChange={(value) => {
-                table.setPageSize(Number(value))
-              }}
-            >
-              <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder="10" />
-              </SelectTrigger>
-              <SelectContent open={false} side="top">
-                {[10, 20, 30, 40, 50].map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="h-8 w-[70px] flex items-center justify-center border border-gray-300 rounded-md">
+              <span className="text-sm">10</span>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <Button
