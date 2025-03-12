@@ -178,6 +178,38 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
+    id: 'diner',
+    label: 'Comedor',
+    icon: Utensils,
+    path: '/system-config/diner',
+    // children: [
+    //   // {//11-03-25
+    //   //   id: 'doors',
+    //   //   label: 'Puertas',
+    //   //   icon: DoorClosed,
+    //   //   path: '/access/doors'
+    //   // },
+    //   {
+    //     id: 'visitors',
+    //     label: 'Visitantes',
+    //     icon: Users,
+    //     path: '/access/visitors'
+    //   },
+    //   {
+    //     id: 'access-permissions',
+    //     label: 'Permisos de Acceso',
+    //     icon: UserCheck,
+    //     path: '/access/permissions'
+    //   },
+    //   // { //11-03-25
+    //   //   id: 'monitoring',
+    //   //   label: 'Monitoreo',
+    //   //   icon: BarChart2,
+    //   //   path: '/access/monitoring'
+    //   // }
+    // ]
+  },
+  {
     id: 'reports',
     label: 'Reportes',
     icon: BarChart2,
@@ -249,12 +281,12 @@ export const menuItems: MenuItem[] = [
         path: '/system-config/positions'
       },
       
-      {
-        id: 'diner',
-        label: 'Comedor',
-        icon: Utensils,
-        path: '/system-config/diner'
-      },
+      // {
+      //   id: 'diner',
+      //   label: 'Comedor',
+      //   icon: Utensils,
+      //   path: '/system-config/diner'
+      // },
       {
         id: 'email',
         label: 'Correo electronico',

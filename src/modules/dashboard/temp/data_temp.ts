@@ -264,7 +264,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Recursos Humanos',
-    cargo: 'Gerente'
+    cargo: 'Gerente',
+    contrato: true, 
   },
   {
     id: 2,
@@ -279,7 +280,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'computadora',
     departamento: 'Operaciones',
     cargo: 'Director',
-    marcajes: marcajesData[2]
+    marcajes: marcajesData[2],
+    contrato: true, 
   },
   {
     id: 3,
@@ -291,7 +293,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Habitaciones',
-    cargo: 'Analista'
+    cargo: 'Analista',
+    contrato: true, 
   },
   {
     id: 4,
@@ -306,7 +309,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'smartphone',
     departamento: 'Alimentos y Bebidas',
     cargo: 'Gerente',
-    marcajes: marcajesData[4]
+    marcajes: marcajesData[4],
+    contrato: false, 
   },
   {
     id: 5,
@@ -318,7 +322,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Administración de Personal',
-    cargo: 'Coordinador'
+    cargo: 'Coordinador',
+    contrato: true, 
   },
   {
     id: 6,
@@ -330,7 +335,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Operaciones',
-    cargo: 'Diseñador'
+    cargo: 'Diseñador',
+    contrato: true, 
   },
   {
     id: 7,
@@ -342,7 +348,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Reclutamiento y Selección',
-    cargo: 'Analista'
+    cargo: 'Analista',
+    contrato: true, 
   },
   {
     id: 8,
@@ -357,7 +364,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'smartphone',
     departamento: 'Housekeeping',
     cargo: 'Diseñador',
-    marcajes: marcajesData[8]
+    marcajes: marcajesData[8],
+    contrato: true, 
   },
   {
     id: 9,
@@ -372,7 +380,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'smartphone',
     departamento: 'Cocina Principal',
     cargo: 'Desarrollador',
-    marcajes: marcajesData[9]
+    marcajes: marcajesData[9],
+    contrato: true, 
   },
   {
     id: 10,
@@ -385,7 +394,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: null,
     departamento: 'Supervisión de Sucursales',
     cargo: 'Desarrollador',
-    tieneContrato: false
+    tieneContrato: false,
+    contrato: true, 
   },
   {
     id: 11,
@@ -399,7 +409,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: 'computadora',
     dispositivo2: 'smartphone',
     departamento: 'Restaurantes',
-    cargo: 'Coordinador'
+    cargo: 'Coordinador',
+    contrato: true, 
   },
   {
     id: 12,
@@ -413,7 +424,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: 'computadora',
     dispositivo2: 'smartphone',
     departamento: 'Housekeeping',
-    cargo: 'Asistente'
+    cargo: 'Asistente',
+    contrato: true, 
   },
   {
     id: 13,
@@ -430,7 +442,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     tardanza: {
       tiene: true,
       tiempo: '00:30'
-    }
+    },
+    contrato: true, 
   },
   {
     id: 14,
@@ -442,7 +455,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Gestión de Tiendas',
-    cargo: 'Coordinador'
+    cargo: 'Coordinador',
+    contrato: true, 
   },
   {
     id: 15,
@@ -455,7 +469,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: 'computadora',
     departamento: 'Red de Sucursales',
     cargo: 'Director',
-    marcajes: marcajesData[15]
+    marcajes: marcajesData[15],
+    contrato: true, 
   },
   {
     id: 16,
@@ -467,7 +482,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Bares',
-    cargo: 'Asistente'
+    cargo: 'Asistente',
+    contrato: false, 
   },
   {
     id: 17,
@@ -484,7 +500,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     tardanza: {
       tiene: true,
       tiempo: '01:45'
-    }
+    },
+    contrato: true, 
   },
   {
     id: 18,
@@ -497,7 +514,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: null,
     departamento: 'Operaciones Retail',
     cargo: 'Analista',
-    tieneContrato: false
+    tieneContrato: false,
+    contrato: true, 
   },
   {
     id: 19,
@@ -512,7 +530,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'computadora',
     departamento: 'Recursos Humanos',
     cargo: 'Gerente',
-    marcajes: marcajesData[19]
+    marcajes: marcajesData[19],
+    contrato: true, 
   },
   {
     id: 20,
@@ -529,7 +548,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     tardanza: {
       tiene: true,
       tiempo: '02:30'
-    }
+    },
+    contrato: true, 
   },
   {
     id: 21,
@@ -541,7 +561,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Banca Personal',
-    cargo: 'Asistente'
+    cargo: 'Asistente',
+    contrato: true, 
   },
   {
     id: 22,
@@ -555,7 +576,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: 'computadora',
     dispositivo2: 'smartphone',
     departamento: 'Lavandería',
-    cargo: 'Coordinador'
+    cargo: 'Coordinador',
+    contrato: true, 
   },
   {
     id: 23,
@@ -567,7 +589,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: null,
     dispositivo: null,
     departamento: 'Selección de Personal',
-    cargo: 'Analista'
+    cargo: 'Analista',
+    contrato: true, 
   },
   {
     id: 24,
@@ -579,7 +602,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     ultimaAccion: '07:15',
     dispositivo: 'computadora',
     departamento: 'Evaluación y Desarrollo',
-    cargo: 'Director'
+    cargo: 'Director',
+    contrato: true, 
   },
   // Nuevos empleados con salidas intempestivas
   {
@@ -595,7 +619,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'smartphone',
     departamento: 'Ventas',
     cargo: 'Ejecutiva',
-    marcajes: marcajesData[25]
+    marcajes: marcajesData[25],
+    contrato: true, 
   },
   {
     id: 26,
@@ -610,7 +635,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'smartphone',
     departamento: 'Finanzas',
     cargo: 'Contador',
-    marcajes: marcajesData[26]
+    marcajes: marcajesData[26],
+    contrato: true, 
   },
   // Agregar más empleados sin horario
   {
@@ -626,7 +652,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'computadora',
     departamento: 'Sistemas',
     cargo: 'Analista IT',
-    marcajes: marcajesData[27]
+    marcajes: marcajesData[27],
+    contrato: true, 
   },
   {
     id: 28,
@@ -641,7 +668,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'computadora',
     departamento: 'Contabilidad',
     cargo: 'Contadora',
-    marcajes: marcajesData[28]
+    marcajes: marcajesData[28],
+    contrato: true, 
   },
   {
     id: 29,
@@ -656,7 +684,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'computadora',
     departamento: 'Seguridad',
     cargo: 'Supervisor',
-    marcajes: marcajesData[29]
+    marcajes: marcajesData[29],
+    contrato: false, 
   },
   {
     id: 30,
@@ -671,7 +700,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo2: 'computadora',
     departamento: 'Marketing',
     cargo: 'Diseñadora',
-    marcajes: marcajesData[30]
+    marcajes: marcajesData[30],
+    contrato: true, 
   },
   // Empleados sin horario
   {
@@ -685,7 +715,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: null,
     departamento: 'Mantenimiento',
     cargo: 'Técnico',
-    tieneContrato: false
+    tieneContrato: false,
+    contrato: false, 
   },
   {
     id: 32,
@@ -698,7 +729,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: null,
     departamento: 'Limpieza',
     cargo: 'Supervisora',
-    tieneContrato: false
+    tieneContrato: false,
+    contrato: true, 
   },
   {
     id: 33,
@@ -711,7 +743,8 @@ export const empleadosDataEnriquecida: Employee[] = [
     dispositivo: null,
     departamento: 'Cocina',
     cargo: 'Chef',
-    tieneContrato: false
+    tieneContrato: false,
+    contrato: true, 
   }
 ];
 

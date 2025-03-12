@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useEffect } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 
@@ -24,13 +25,18 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
   className = "relative flex-1"
 }) => {
   const searchRef = useRef<HTMLDivElement>(null);
+  const advancedFiltersRef = useRef<HTMLDivElement>(null);
 
   // Efecto para manejar clics fuera del componente
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showAdvancedFilters && 
-          searchRef.current && 
-          !searchRef.current.contains(event.target as Node)) {
+      // Verificar si el clic fue en algún elemento dentro del panel de filtros avanzados
+      const wasClickInside = 
+        searchRef.current?.contains(event.target as Node) || 
+        advancedFiltersRef.current?.contains(event.target as Node);
+      
+      // Sólo cerrar si el clic fue completamente fuera del componente de búsqueda y del panel de filtros
+      if (showAdvancedFilters && !wasClickInside) {
         toggleAdvancedFilters();
       }
     };
@@ -66,8 +72,27 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
       
       {/* Panel de filtros avanzados */}
       {showAdvancedFilters && advancedFiltersComponent && (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm absolute left-0 z-20 w-96">
-          {advancedFiltersComponent}
+        <div 
+          ref={advancedFiltersRef} 
+          className="bg-white rounded-lg border border-gray-200 shadow-sm absolute left-0 z-20 w-96"
+          onClick={(e) => {
+            // Evitar que los clics dentro del panel de filtros propaguen al documento
+            e.stopPropagation();
+          }}
+        >
+          {/* Clonar el componente y modificar sus props para evitar que se cierre el panel */}
+          {React.cloneElement(advancedFiltersComponent as React.ReactElement, {
+            // Aseguramos que el callback onFilterChange no cierre el panel
+            onFilterChange: (filters: any) => {
+              // Obtener la función original
+              const originalOnFilterChange = (advancedFiltersComponent as React.ReactElement).props.onFilterChange;
+              
+              // Llamar a la función original sin cerrar el panel
+              if (originalOnFilterChange) {
+                originalOnFilterChange(filters);
+              }
+            }
+          })}
         </div>
       )}
     </div>

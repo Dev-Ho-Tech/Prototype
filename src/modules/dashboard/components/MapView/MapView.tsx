@@ -1,8 +1,83 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Maximize, Minimize, Plus, Minus, Layers } from 'lucide-react';
+import { Maximize, Minimize, Plus, Minus, Layers, Search, X, MapPin, Users, Map as MapIcon, RefreshCw } from 'lucide-react';
 import { MapViewProps, Sede } from '../../interface/map';
 import { SEDES_MOCK } from '../../temp/sedes_temp';
-import SearchBox from './SearchBox';
+
+// Componente de búsqueda mejorado
+interface SearchBoxProps {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  onSelectSede: (sede: Sede) => void;
+  filteredSedes: Sede[];
+}
+
+const SearchBox: React.FC<SearchBoxProps> = ({ searchTerm, onSearchChange, onSelectSede, filteredSedes }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const searchRef = useRef(null);
+
+  // Manejar clics fuera del componente para cerrar resultados
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className="relative" ref={searchRef}>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <input
+          type="text"
+          placeholder="Buscar sede o ciudad..."
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          className="pl-9 pr-4 py-2 w-64 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm text-black"
+        />
+        {searchTerm && (
+          <button
+            onClick={() => onSearchChange('')}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Resultados de búsqueda */}
+      {isFocused && searchTerm && (
+        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+          {filteredSedes.length === 0 ? (
+            <div className="p-3 text-sm text-gray-500">No se encontraron resultados</div>
+          ) : (
+            <ul>
+              {filteredSedes.map((sede) => (
+                <li
+                  key={sede.id}
+                  className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 text-sm"
+                  onClick={() => {
+                    onSelectSede(sede);
+                    setIsFocused(false);
+                  }}
+                >
+                  <div className="font-medium">{sede.nombre}</div>
+                  <div className="text-xs text-gray-500">{sede.ciudad}, {sede.pais}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const MapView: React.FC<MapViewProps> = ({ 
   onClose, 
@@ -16,8 +91,9 @@ const MapView: React.FC<MapViewProps> = ({
   const [currentZoom, setCurrentZoom] = useState(8);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [mapCenter, setMapCenter] = useState({ lat: 18.9012, lng: -70.1626 }); // República Dominicana
+  const [showSidePanel, setShowSidePanel] = useState(true);
   
-  // Estado para controlar el arrastre del mapa - Versión simplificada
+  // Estado para controlar el arrastre del mapa - Versión mejorada
   const [isDragging, setIsDragging] = useState(false);
   const lastMousePositionRef = useRef({ x: 0, y: 0 });
   const mapCenterAtDragStartRef = useRef(mapCenter);
@@ -109,7 +185,18 @@ const MapView: React.FC<MapViewProps> = ({
     shouldRefreshRef.current = true;
   };
 
-  // Convertir píxeles a coordenadas geográficas
+  // Función para centrar el mapa en la ubicación actual (simulada)
+  const centerOnCurrentLocation = () => {
+    // En una implementación real, usaríamos la API de geolocalización
+    // Por ahora simplemente centramos en un punto predefinido
+    const currentLocation = { lat: 18.9012, lng: -70.1626 };
+    setMapCenter(currentLocation);
+    mapCenterAtDragStartRef.current = currentLocation;
+    setCurrentZoom(8);
+    shouldRefreshRef.current = true;
+  };
+
+  // Convertir píxeles a coordenadas geográficas - MEJORADO para movimiento en todas direcciones
   const pixelsToGeo = (deltaX: number, deltaY: number, zoom: number) => {
     // Calcular factor de escala basado en el zoom
     const scale = Math.pow(2, zoom);
@@ -119,17 +206,17 @@ const MapView: React.FC<MapViewProps> = ({
     const pixelsPerLatRadian = (256 * scale) / (2 * Math.PI);
     
     // Convertir cambio en píxeles a cambio en coordenadas
-    const lngChange = -deltaX / pixelsPerLngDegree;
+    const lngChange = deltaX / pixelsPerLngDegree;
     
     // Para latitud, necesitamos ajustar según la posición actual
     // porque la proyección de Mercator no es lineal con la latitud
     const latRad = mapCenter.lat * Math.PI / 180;
-    const latChange = deltaY / (pixelsPerLatRadian * Math.cos(latRad));
+    const latChange = -deltaY / (pixelsPerLatRadian * Math.cos(latRad));
     
     return { lngChange, latChange };
   };
 
-  // Manejadores para el arrastre del mapa - Versión simplificada
+  // Manejadores para el arrastre del mapa - MEJORADO para movimiento bidireccional
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevenir selección de texto durante el arrastre
     setIsDragging(true);
@@ -149,13 +236,13 @@ const MapView: React.FC<MapViewProps> = ({
       return;
     }
     
-    // Convertir el movimiento de píxeles a cambio en coordenadas
+    // Convertir el movimiento de píxeles a cambio en coordenadas (corregido)
     const { lngChange, latChange } = pixelsToGeo(deltaX, deltaY, currentZoom);
     
     // Actualizar el centro del mapa en tiempo real
     const newCenter = {
-      lng: mapCenter.lng + lngChange,
-      lat: mapCenter.lat + latChange
+      lng: mapCenterAtDragStartRef.current.lng - lngChange,
+      lat: mapCenterAtDragStartRef.current.lat - latChange
     };
     
     // Verificar que las nuevas coordenadas son válidas
@@ -264,14 +351,14 @@ const MapView: React.FC<MapViewProps> = ({
     return filteredSedes.map(sede => {
       // Determinar tamaño del marcador según la cantidad de empleados
       let size = 20;
-      let color = '#3388ff';
+      let color = '#3B82F6'; // Color base azul (Tailwind blue-500)
       
       if (sede.cantidadEmpleados > 150) {
         size = 30;
-        color = '#2c6fbb'; // Azul más oscuro para sedes grandes
+        color = '#2563EB'; // Azul más oscuro (Tailwind blue-600)
       } else if (sede.cantidadEmpleados > 100) {
         size = 25;
-        color = '#4e9af1'; // Azul medio para sedes medianas
+        color = '#3B82F6'; // Azul estándar (Tailwind blue-500)
       }
       
       // Calcular posición relativa al centro
@@ -307,7 +394,9 @@ const MapView: React.FC<MapViewProps> = ({
               fontWeight: 'bold',
               fontSize: `${size/2}px`,
               border: isSelected ? '3px solid white' : 'none',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+              boxShadow: '0 3px 10px rgba(0,0,0,0.25)',
+              transition: 'transform 0.2s ease-in-out',
+              transform: isSelected ? 'scale(1.1)' : 'scale(1)'
             }}
           >
             {sede.cantidadEmpleados}
@@ -316,25 +405,22 @@ const MapView: React.FC<MapViewProps> = ({
           {/* Información al seleccionar */}
           {isSelected && (
             <div 
+              className="bg-white rounded-lg shadow-lg p-3 absolute z-10"
               style={{
-                position: 'absolute',
                 top: `${size + 5}px`,
                 left: '50%',
                 transform: 'translateX(-50%)',
-                backgroundColor: 'white',
-                padding: '8px',
-                borderRadius: '4px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                zIndex: 1001,
-                width: '180px',
-                pointerEvents: 'none'
+                width: '200px',
+                pointerEvents: 'none',
+                borderLeft: '4px solid #3B82F6'
               }}
             >
-              <div style={{ fontWeight: 'bold', fontSize: '14px' }}>{sede.nombre}</div>
-              <div style={{ fontSize: '12px', color: '#666' }}>{sede.direccion}</div>
-              <div style={{ fontSize: '12px', color: '#666' }}>{sede.ciudad}</div>
-              <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#3366cc', marginTop: '4px' }}>
-                {sede.cantidadEmpleados} empleados
+              <div className="font-semibold text-gray-900">{sede.nombre}</div>
+              <div className="text-sm text-gray-600 mt-1">{sede.direccion}</div>
+              <div className="text-sm text-gray-600">{sede.ciudad}, {sede.pais}</div>
+              <div className="flex items-center mt-2 text-blue-600">
+                <Users className="w-4 h-4 mr-1" />
+                <span className="font-semibold">{sede.cantidadEmpleados} empleados</span>
               </div>
             </div>
           )}
@@ -350,81 +436,121 @@ const MapView: React.FC<MapViewProps> = ({
 
   return (
     <div className={containerClasses}>
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <h2 className="text-xl font-medium text-gray-800">Mapa de Sedes</h2>
+      {/* Header con controles principales */}
+      <div className="flex items-center justify-between py-3 px-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+        <h2 className="text-xl font-semibold flex items-center">
+          <MapIcon className="w-6 h-6 mr-2" />
+          Mapa de Distribución de Personal
+        </h2>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           {/* Componente de búsqueda */}
-          <SearchBox
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            onSelectSede={centerOnSede}
-            filteredSedes={filteredSedes}
-          />
+          <div className="bg-blue-700/30 rounded-lg p-1">
+            <SearchBox
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onSelectSede={centerOnSede}
+              filteredSedes={filteredSedes}
+            />
+          </div>
           
           {/* Botones de control */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             <button
-              onClick={toggleMapType}
-              className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
-              title={activeMapType === 'map' ? 'Cambiar a satélite' : 'Cambiar a mapa'}
+              onClick={() => setShowSidePanel(!showSidePanel)}
+              className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+              title={showSidePanel ? "Ocultar panel lateral" : "Mostrar panel lateral"}
             >
               <Layers className="w-5 h-5" />
             </button>
+            {/* <button
+              onClick={toggleMapType}
+              className={`p-2 rounded-lg ${activeMapType === 'satellite' ? 'bg-blue-400 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
+              title={activeMapType === 'map' ? 'Cambiar a satélite' : 'Cambiar a mapa'}
+            >
+              <MapIcon className="w-5 h-5" />
+            </button> */}
             <button
               onClick={toggleFullscreen}
-              className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
+              className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors"
               title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
             >
               {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200"
+              className="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors"
               title="Cerrar mapa"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Panel lateral de sedes */}
-        <div className="w-64 bg-gray-50 border-r border-gray-200 overflow-y-auto">
-          <div className="p-3">
-            <h3 className="font-medium text-gray-700 mb-2">Sedes</h3>
-            <div className="text-xs text-gray-500 mb-3">
-              Total: {filteredSedes.length} sedes / {filteredSedes.reduce((sum, sede) => sum + sede.cantidadEmpleados, 0)} empleados
-            </div>
-            {filteredSedes.length === 0 ? (
-              <p className="text-sm text-gray-500">No se encontraron sedes</p>
-            ) : (
-              <ul className="space-y-2">
-                {filteredSedes.map((sede) => (
-                  <li 
-                    key={sede.id}
-                    className={`p-2 bg-white rounded-lg border transition-colors cursor-pointer
-                      ${selectedSede?.id === sede.id 
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:bg-blue-50'
-                      }`}
-                    onClick={() => centerOnSede(sede)}
+        {/* Panel lateral de sedes - Colapsable */}
+        {showSidePanel && (
+          <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-800 text-lg">Sedes</h3>
+                <div className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+                  {filteredSedes.length} sedes
+                </div>
+              </div>
+              
+              {/* Lista de sedes */}
+              {filteredSedes.length === 0 ? (
+                <div className="text-center py-6 px-4">
+                  <Search className="w-10 h-10 mx-auto text-gray-300 mb-2" />
+                  <p className="text-gray-500">No se encontraron sedes con estos criterios</p>
+                  <button 
+                    onClick={() => setSearchTerm('')}
+                    className="mt-3 text-blue-500 text-sm hover:text-blue-700"
                   >
-                    <div className="font-medium text-gray-800">{sede.nombre}</div>
-                    <div className="text-xs text-gray-500">{sede.direccion}</div>
-                    <div className="text-xs text-gray-500">{sede.ciudad}, {sede.pais}</div>
-                    <div className="text-xs font-medium text-blue-600 mt-1">
-                      {sede.cantidadEmpleados} empleados
+                    Limpiar búsqueda
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredSedes.map((sede) => (
+                    <div 
+                      key={sede.id}
+                      className={`p-3 rounded-lg transition-all cursor-pointer flex ${
+                        selectedSede?.id === sede.id 
+                          ? 'bg-blue-100 border-l-4 border-blue-500'
+                          : 'bg-white hover:bg-blue-50 border-l-4 border-transparent'
+                      }`}
+                      onClick={() => centerOnSede(sede)}
+                    >
+                      <div 
+                        className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 ${
+                          selectedSede?.id === sede.id 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-blue-100 text-blue-700'
+                        }`}
+                      >
+                        <MapPin className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-900 truncate">{sede.nombre}</div>
+                        <div className="text-xs text-gray-500 truncate">{sede.direccion}</div>
+                        <div className="text-xs text-gray-500">{sede.ciudad}, {sede.pais}</div>
+                        <div className={`text-xs font-medium mt-1 flex items-center ${
+                          selectedSede?.id === sede.id ? 'text-blue-600' : 'text-blue-500'
+                        }`}>
+                          <Users className="w-3 h-3 mr-1" />
+                          {sede.cantidadEmpleados} empleados
+                        </div>
+                      </div>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Contenedor del mapa */}
         <div className="flex-1 relative">
@@ -443,16 +569,15 @@ const MapView: React.FC<MapViewProps> = ({
                 // Mapa estándar OpenStreetMap
                 generateTiles()
               ) : (
-                // Versión simplificada para satélite (en producción usarías tiles de satélite)
+                // Versión estilizada para satélite
                 <div 
                   style={{ 
                     position: 'absolute', 
                     inset: 0, 
-                    backgroundColor: '#264653',
-                    backgroundImage: 'linear-gradient(30deg, #1a535c 12%, transparent 12.5%, transparent 87%, #1a535c 87.5%, #1a535c), linear-gradient(150deg, #1a535c 12%, transparent 12.5%, transparent 87%, #1a535c 87.5%, #1a535c), linear-gradient(30deg, #1a535c 12%, transparent 12.5%, transparent 87%, #1a535c 87.5%, #1a535c), linear-gradient(150deg, #1a535c 12%, transparent 12.5%, transparent 87%, #1a535c 87.5%, #1a535c), linear-gradient(60deg, #1a535c77 25%, transparent 25.5%, transparent 75%, #1a535c77 75%, #1a535c77), linear-gradient(60deg, #1a535c77 25%, transparent 25.5%, transparent 75%, #1a535c77 75%, #1a535c77)',
-                    backgroundSize: '60px 105px',
-                    backgroundPosition: '0 0, 0 0, 30px 53px, 30px 53px, 0 0, 30px 53px',
-                    opacity: 0.8
+                    backgroundColor: '#1E293B', // Slate-800
+                    backgroundImage: 'radial-gradient(rgba(30, 41, 59, 0.7) 2px, transparent 0)',
+                    backgroundSize: '30px 30px',
+                    opacity: 0.95
                   }}
                 />
               )}
@@ -460,74 +585,55 @@ const MapView: React.FC<MapViewProps> = ({
             
             {/* Marcadores en el mapa */}
             {generateMarkers()}
-            
-            {/* Marcadores de posición */}
-            {selectedSede && (
-              <div 
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  width: '20px',
-                  height: '20px',
-                  backgroundColor: 'rgba(255,0,0,0.5)',
-                  borderRadius: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 1001,
-                  pointerEvents: 'none'
-                }}
-              />
-            )}
           </div>
           
-          {/* Controles de zoom */}
-          <div className="absolute top-4 right-4 bg-white rounded-lg shadow-md">
+          {/* Panel de controles flotante - Ubicado en la parte inferior izquierda */}
+          <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg overflow-hidden">
+            {/* Controles de zoom */}
+            <div className="border-b border-gray-200">
+              <button
+                onClick={handleZoomIn}
+                className="p-2 block w-full hover:bg-gray-50 text-gray-700 transition-colors"
+                title="Acercar"
+              >
+                <Plus className="w-5 h-5 mx-auto" />
+              </button>
+              <div className="px-2 py-1 font-medium text-sm text-center text-gray-700 border-t border-b border-gray-200">
+                {currentZoom}
+              </div>
+              <button
+                onClick={handleZoomOut}
+                className="p-2 block w-full hover:bg-gray-50 text-gray-700 transition-colors"
+                title="Alejar"
+              >
+                <Minus className="w-5 h-5 mx-auto" />
+              </button>
+            </div>
+            
+            {/* Centrar en ubicación actual */}
             <button
-              onClick={handleZoomIn}
-              className="p-2 block border-b border-gray-200 text-gray-700 hover:bg-gray-50"
-              title="Acercar"
+              onClick={centerOnCurrentLocation}
+              className="p-2 block w-full hover:bg-gray-50 text-gray-700 transition-colors"
+              title="Centrar en mi ubicación"
             >
-              <Plus className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleZoomOut}
-              className="p-2 block text-gray-700 hover:bg-gray-50"
-              title="Alejar"
-            >
-              <Minus className="w-5 h-5" />
+              <RefreshCw className="w-5 h-5 mx-auto" />
             </button>
           </div>
-
-          {/* Leyenda del mapa */}
-          <div className="absolute bottom-4 left-4 bg-white p-3 rounded-lg shadow-md max-w-xs">
-            <h4 className="font-medium text-gray-800 mb-2">Leyenda</h4>
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
-                <span className="text-sm">Menos de 100 empleados</span>
+          
+          {/* Información de ubicación - Abajo a la derecha */}
+          <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 text-xs text-gray-600">
+            {selectedSede ? (
+              <>
+                <div className="font-medium">{selectedSede.nombre}</div>
+                <div className="text-gray-500">
+                  {mapCenter.lat.toFixed(4)}, {mapCenter.lng.toFixed(4)}
+                </div>
+              </>
+            ) : (
+              <div>
+                {mapCenter.lat.toFixed(4)}, {mapCenter.lng.toFixed(4)}
               </div>
-              <div className="flex items-center">
-                <div className="w-5 h-5 bg-blue-600 rounded-full mr-2"></div>
-                <span className="text-sm">100-150 empleados</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-6 h-6 bg-blue-700 rounded-full mr-2"></div>
-                <span className="text-sm">Más de 150 empleados</span>
-              </div>
-              <div className="text-xs text-gray-500 mt-2">
-                El tamaño del punto indica la cantidad de empleados
-              </div>
-            </div>
-          </div>
-
-          {/* Controles para mapa */}
-          <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-md">
-            <div className="text-xs font-medium text-gray-700 p-2 border-b border-gray-200">
-              Zoom: {currentZoom}
-            </div>
-            <div className="text-xs text-gray-500 p-2">
-              Centro: {mapCenter.lat.toFixed(4)}, {mapCenter.lng.toFixed(4)}
-            </div>
+            )}
           </div>
         </div>
       </div>

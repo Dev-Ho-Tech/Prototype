@@ -32,7 +32,7 @@ const EmployeeDetailHeader: React.FC<EmployeeDetailHeaderProps> = ({ employee })
         </div>
         
         <div className="grid grid-cols-6 gap-x-4 gap-y-4 flex-1">
-          {/* Primera fila - 6 columnas exactamente como en la imagen */}
+          {/* Primera fila - 6 columnas  */}
           <div>
             <div className="text-xs text-gray-500 mb-1">Nombres:</div>
             <div className="text-sm font-medium">{completeEmployee.nombre}</div>
@@ -44,18 +44,29 @@ const EmployeeDetailHeader: React.FC<EmployeeDetailHeaderProps> = ({ employee })
           </div>
           
           <div>
-            <div className="text-xs text-gray-500 mb-1">Sede:</div>
-            <div className="text-sm font-medium">{completeEmployee.location}</div>
+            <div className="text-xs text-gray-500 mb-1">Compañia:</div>
+            <div className="text-sm font-medium">{completeEmployee.company}</div>
+          </div>
+          
+          <div>
+            <div className="text-xs text-gray-500 mb-1">Sucursal:</div>
+            <div className="text-sm font-medium">Hodelpa Gran Almirante</div>
+          </div>
+          
+          <div>
+            <div className="text-xs text-gray-500 mb-1">Departamento:</div>
+            <div className="text-sm font-medium">{completeEmployee.department}</div>
           </div>
           
           <div>
             <div className="text-xs text-gray-500 mb-1">Sección:</div>
-            <div className="text-sm font-medium">{completeEmployee.section}</div>
+            <div className="text-sm font-medium">Reclutamiento y Seleccíon</div>
           </div>
           
+          {/* Segunda fila -  */}
           <div>
-            <div className="text-xs text-gray-500 mb-1">Contenedor:</div>
-            <div className="text-sm font-medium">{completeEmployee.containerType || 'Departamentos'}</div>
+            <div className="text-xs text-gray-500 mb-1">Unidad:</div>
+            <div className="text-sm font-medium">Selección de Personal</div>
           </div>
           
           <div>
@@ -63,20 +74,9 @@ const EmployeeDetailHeader: React.FC<EmployeeDetailHeaderProps> = ({ employee })
             <div className="text-sm font-medium">{completeEmployee.position}</div>
           </div>
           
-          {/* Segunda fila - 3 columnas como en la imagen */}
           <div>
-            <div className="text-xs text-gray-500 mb-1">Departamento:</div>
-            <div className="text-sm font-medium">{completeEmployee.department}</div>
-          </div>
-          
-          <div>
-            <div className="text-xs text-gray-500 mb-1">Contenedor:</div>
-            <div className="text-sm font-medium">Puestos</div>
-          </div>
-          
-          <div>
-            <div className="text-xs text-gray-500 mb-1">Empresa:</div>
-            <div className="text-sm font-medium">{completeEmployee.company}</div>
+            <div className="text-xs text-gray-500 mb-1">Supervisor:</div>
+            <div className="text-sm font-medium">Marco Timaná</div>
           </div>
         </div>
       </div>

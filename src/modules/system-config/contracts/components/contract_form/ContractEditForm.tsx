@@ -8,7 +8,10 @@ import {
   Settings,
   ChevronDown,
   Plus,
-  X
+  X,
+  Calendar,
+  Users,
+  Tag
 } from 'lucide-react';
 import { Contract, ScheduleLimitGroup, ContractDetailProps } from '../../interfaces/types';
 
@@ -29,6 +32,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
   const [contract, setContract] = useState<Contract>({...initialContract});
   const [conceptSearch, setConceptSearch] = useState('');
   const [showConceptDropdown, setShowConceptDropdown] = useState(false);
+  const [showConceptSearchInput, setShowConceptSearchInput] = useState(false);
 
   const weekdays = [
     { id: 'mon', label: 'Lun' },
@@ -122,13 +126,24 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
     }
   };
 
-  const handleCheckMethodSelect = (methodId: string) => {
+  const handleCheckMethodToggle = (methodId: string) => {
     if (!isEditMode) return;
     
-    setContract({
-      ...contract,
-      allowedCheckMethods: [methodId]
-    });
+    const methods = contract.allowedCheckMethods || [];
+    if (methods.includes(methodId)) {
+      // Solo permitir quitar si hay al menos un método seleccionado
+      if (methods.length > 1) {
+        setContract({
+          ...contract,
+          allowedCheckMethods: methods.filter(m => m !== methodId)
+        });
+      }
+    } else {
+      setContract({
+        ...contract,
+        allowedCheckMethods: [...methods, methodId]
+      });
+    }
   };
 
   const handleConceptToggle = (conceptId: string) => {
@@ -209,6 +224,13 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
 
   const handleSaveChanges = () => {
     onSave(contract);
+  };
+
+  const handleAddConceptClick = () => {
+    setShowConceptSearchInput(!showConceptSearchInput);
+    if (showConceptSearchInput) {
+      setShowConceptDropdown(false);
+    }
   };
 
   const filteredConcepts = concepts.filter(
@@ -322,8 +344,11 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
           </div>
   
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Días de la semana</label>
-            <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
+            <div className="flex items-center mb-2 text-gray-700">
+              <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+              <label className="text-sm font-medium">Días de la semana</label>
+            </div>
+            <div className="flex flex-wrap p-2 bg-gray-50 rounded-md">
               {weekdays.map(day => (
                 <button
                   key={day.id}
@@ -331,10 +356,10 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
                   onClick={() => handleWorkDayToggle(day.id)}
                   disabled={!isEditMode}
                   className={`
-                    w-12 h-12 rounded-full flex items-center justify-center transition
+                    px-4 py-2 rounded-lg m-1 transition
                     ${contract.workDays?.includes(day.id)
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white border border-blue-500 text-blue-500'}
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-white text-gray-600'}
                     ${!isEditMode && !contract.workDays?.includes(day.id) ? 'opacity-50' : ''}
                   `}
                 >
@@ -355,7 +380,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
+                <Clock className="w-4 h-4 mr-2 text-blue-600" />
                 Inicio de jornada de trabajo
               </label>
               <div className="flex items-center space-x-2">
@@ -410,7 +435,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
   
             <div>
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
+                <Clock className="w-4 h-4 mr-2 text-blue-600" />
                 Fin de jornada de trabajo
               </label>
               <div className="flex items-center space-x-2">
@@ -514,11 +539,9 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
           </div>
   
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <span className="flex items-center">
-                <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
-                Adscripción de turno (selección múltiple)
-              </span>
+            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+              <Users className="w-4 h-4 mr-2 text-blue-600" />
+              Adscripción de turno (selección múltiple)
             </label>
             <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
               {shifts.map(shift => (
@@ -583,19 +606,29 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
           </div>
   
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <span className="flex items-center">
-                <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
+            <div className="flex items-center justify-between mb-2">
+              <label className="flex items-center text-sm font-medium text-gray-700">
+                <Tag className="w-4 h-4 mr-2 text-blue-600" />
                 Conceptos
-              </span>
-            </label>
+              </label>
+              {isEditMode && (
+                <button
+                  type="button"
+                  className="flex items-center text-blue-600 hover:text-blue-800"
+                  onClick={handleAddConceptClick}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  <span className="text-sm">Conceptos</span>
+                </button>
+              )}
+            </div>
             <div className="flex flex-wrap mb-2 p-2 bg-gray-50 rounded-md">
               {contract.concepts?.map(conceptId => {
                 const concept = concepts.find(c => c.id === conceptId);
                 if (!concept) return null;
                 
                 return (
-                  <div key={conceptId} className="bg-blue-100 text-blue-800 text-sm rounded-md py-1 px-2 mr-2 mb-2 flex items-center">
+                  <div key={conceptId} className="bg-blue-100 text-blue-800 text-sm rounded-full py-1 px-3 mr-2 mb-2 flex items-center">
                     {concept.label}
                     {isEditMode && (
                       <button 
@@ -610,7 +643,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
                 );
               })}
               
-              {isEditMode && (
+              {showConceptSearchInput && isEditMode && (
                 <div className="relative mt-2 w-full">
                   <div className="flex items-center">
                     <input
@@ -622,14 +655,8 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
                       }}
                       placeholder="Buscar conceptos..."
                       className="flex-1 p-2 border border-gray-300 rounded-md"
+                      autoFocus
                     />
-                    <button
-                      type="button"
-                      className="ml-2 px-3 py-2 bg-blue-500 text-white rounded-md flex items-center"
-                      onClick={() => setShowConceptDropdown(!showConceptDropdown)}
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
                   </div>
                   
                   {showConceptDropdown && (
@@ -655,7 +682,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
           </div>
         </div>
   
-{/* Métodos de Marcaje Permitidos */}
+      {/* Métodos de Marcaje Permitidos */}
       <div className="bg-white p-4 rounded-lg border border-gray-200">
         {renderSectionTitle(
           <Fingerprint className="w-5 h-5" />, 
@@ -665,7 +692,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <button
             type="button"
-            onClick={() => handleCheckMethodSelect('face')}
+            onClick={() => handleCheckMethodToggle('face')}
             disabled={!isEditMode}
             className={`
               p-4 border rounded-lg flex flex-col items-center justify-center transition h-35
@@ -686,7 +713,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
 
           <button
             type="button"
-            onClick={() => handleCheckMethodSelect('fingerprint')}
+            onClick={() => handleCheckMethodToggle('fingerprint')}
             disabled={!isEditMode}
             className={`
               p-4 border rounded-lg flex flex-col items-center justify-center transition h-35
@@ -706,7 +733,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
 
           <button
             type="button"
-            onClick={() => handleCheckMethodSelect('card')}
+            onClick={() => handleCheckMethodToggle('card')}
             disabled={!isEditMode}
             className={`
               p-4 border rounded-lg flex flex-col items-center justify-center transition h-35
@@ -727,7 +754,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
 
           <button
             type="button"
-            onClick={() => handleCheckMethodSelect('pin')}
+            onClick={() => handleCheckMethodToggle('pin')}
             disabled={!isEditMode}
             className={`
               p-4 border rounded-lg flex flex-col items-center justify-center transition h-35
@@ -760,7 +787,6 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
 
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <span className="text-sm font-medium text-gray-700 mr-2">Ignorar ausencias</span>
             <div 
               className={`relative inline-block w-12 h-6 ${isEditMode ? 'cursor-pointer' : ''}`}
               onClick={() => isEditMode && handleToggle('ignoreAbsences')}
@@ -768,10 +794,11 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
               <div className={`absolute w-12 h-6 rounded-full transition-colors ${contract.ignoreAbsences ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
               <div className={`absolute w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${contract.ignoreAbsences ? 'translate-x-6' : 'translate-x-1'} top-0.5 left-0`}></div>
             </div>
+            <span className="text-sm font-medium text-gray-700 ml-2">Ignorar ausencias</span>
+
           </div>
 
           <div className="flex items-center">
-            <span className="text-sm font-medium text-gray-700 mr-2">¿Primer y último marcaje?</span>
             <div 
               className={`relative inline-block w-12 h-6 ${isEditMode ? 'cursor-pointer' : ''}`}
               onClick={() => isEditMode && handleToggle('firstLastCheck')}
@@ -779,6 +806,8 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
               <div className={`absolute w-12 h-6 rounded-full transition-colors ${contract.firstLastCheck ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
               <div className={`absolute w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${contract.firstLastCheck ? 'translate-x-6' : 'translate-x-1'} top-0.5 left-0`}></div>
             </div>
+            <span className="text-sm font-medium text-gray-700 ml-2">¿Primer y último marcaje?</span>
+
           </div>
         </div>
       </div>

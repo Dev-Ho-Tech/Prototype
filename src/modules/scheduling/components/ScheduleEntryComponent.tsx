@@ -82,7 +82,7 @@ const ScheduleEntryComponent: React.FC<ScheduleEntryComponentProps> = ({
         )}
       </div>
       
-      {statusIndicator()}
+      {/* {statusIndicator()} */}
       
       {/* Manijas para redimensionar */}
       <div className="absolute inset-y-0 left-0 w-2 cursor-w-resize" />

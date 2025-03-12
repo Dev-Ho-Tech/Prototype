@@ -1,6 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MapPin, Users, Clock, Camera, Fingerprint, CreditCard, Key, Check, X, Briefcase, AlertCircle, Calendar } from 'lucide-react';
+import React, { useState, useRef, useEffect, SVGProps } from 'react';
+import { MapPin, Users, Clock, Fingerprint, CreditCard, Key, Check, X, Briefcase, AlertCircle, Calendar } from 'lucide-react';
 import type { Employee, Marcaje } from '../interface/types';
+// Elimina la importación del componente EmployeeTooltip que ya no vamos a usar
+// import EmployeeTooltip from './EmployeeTooltip';
 
 // Extender la interfaz Employee para incluir nuevos campos
 interface ExtendedEmployee extends Employee {
@@ -9,7 +11,7 @@ interface ExtendedEmployee extends Employee {
   horaEntrada?: string;
   horaSalida?: string;
   marcajes?: Marcaje[];
-  tieneContrato?: boolean; // Nuevo campo para determinar si tiene contrato asignado
+  tieneContrato?: boolean; 
   tardanza?: {
     tiene: boolean;
     tiempo: string;
@@ -19,21 +21,63 @@ interface ExtendedEmployee extends Employee {
 interface EmployeeCardProps {
   empleado: ExtendedEmployee;
   onSelect?: (empleado: ExtendedEmployee) => void;
-  activeFilter?: string | null; // Agregamos el filtro activo como prop
+  activeFilter?: string | null;
 }
 
 const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeFilter }) => {
   // Estado local para el tooltip
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const tooltipTimeout = useRef(null);
+  const tooltipTimeout = useRef<any>(null);
   
-  // Limpiar timeout cuando el componente se desmonte
+  // Funciones de tooltip con Vanilla JS
+  const showGlobalTooltip = (text: string, x: number, y: number) => {
+    // Para debug
+    console.log("Mostrando TOOLTIP GLOBAL:", { text, x, y });
+    
+    // Eliminar cualquier tooltip existente primero
+    const oldTooltip = document.getElementById('global-employee-tooltip');
+    if (oldTooltip) {
+      document.body.removeChild(oldTooltip);
+    }
+    
+    // Crear nuevo tooltip
+    const tooltip = document.createElement('div');
+    tooltip.id = 'global-employee-tooltip';
+    tooltip.textContent = text;
+    tooltip.style.position = 'fixed';
+    tooltip.style.top = `${y - 30}px`;
+    tooltip.style.left = `${x}px`;
+    tooltip.style.transform = 'translateX(-50%)';
+    tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    tooltip.style.color = 'white';
+    tooltip.style.padding = '4px 8px';
+    tooltip.style.borderRadius = '4px';
+    tooltip.style.fontSize = '12px';
+    tooltip.style.fontWeight = '500';
+    tooltip.style.zIndex = '99999';
+    tooltip.style.pointerEvents = 'none';
+    tooltip.style.whiteSpace = 'nowrap';
+    tooltip.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
+    
+    // Añadir al body
+    document.body.appendChild(tooltip);
+  };
+
+  const hideGlobalTooltip = () => {
+    const tooltip = document.getElementById('global-employee-tooltip');
+    if (tooltip) {
+      document.body.removeChild(tooltip);
+    }
+  };
+  
+  // Limpiar timeout y tooltips cuando el componente se desmonte
   useEffect(() => {
     return () => {
       if (tooltipTimeout.current) {
         clearTimeout(tooltipTimeout.current);
       }
+      hideGlobalTooltip();
     };
   }, []);
 
@@ -131,7 +175,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
   const getBiometricIcon = (metodo?: string) => {
     switch(metodo) {
       case 'camara':
-        return <Camera className="w-5 h-5 text-gray-500" />;
+        return <UserIcon className="w-5 h-5 text-gray-500" />;
       case 'huella':
         return <Fingerprint className="w-5 h-5 text-gray-500" />;
       case 'tarjeta':
@@ -143,50 +187,79 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
     }
   };
 
-  // Determinar si mostrar indicador de 'Sin horario' o 'Tardanza'
-  const getIndicadorEstado = () => {
-    // Si es un permiso, mostrar indicador de permiso
+
+  const UserIcon = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <circle cx="12" cy="8" r="4" fill="currentColor"/>
+      <path d="M4 20C4 17.2386 6.23858 15 9 15H15C17.7614 15 20 17.2386 20 20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V20Z" fill="currentColor"/>
+    </svg>
+  );
+
+  // Determinar si mostrar indicador y qué contenido debe tener
+  const shouldShowIndicator = () => {
+    // Log inicial para depuración
+    console.log(`Evaluando indicador para ${empleado.nombre}:`, {
+      estado: empleado.estado,
+      contrato: empleado.contrato,
+      tardanza: empleado.tardanza
+    });
+
+    // Solo mostrar en estos estados
+    const validStates = ['trabajando', 'trabajó', 'permiso'];
+    if (!validStates.includes(empleado.estado)) {
+      console.log(`${empleado.nombre}: No mostrar indicador - estado no válido`);
+      return { show: false };
+    }
+
+    // Caso 1: Permiso
     if (empleado.estado === 'permiso') {
+      console.log(`${empleado.nombre}: Mostrar indicador de PERMISO`);
       return {
         show: true,
         type: 'permiso',
-        text: 'Permiso',
-        color: 'bg-indigo-500',
+        text: 'PERMISO',
+        color: 'bg-blue-500',
         textColor: 'text-white',
         icon: <Calendar className="w-4 h-4 text-white" />,
-        tooltipText: 'Permiso'
+        tooltipText: 'PERMISO'
       };
     }
-    
-    // Si no tiene contrato, mostrar "Sin horario"
-    if (!empleado.tieneContrato) {
+
+    // Caso 2: Sin contrato (trabajando o trabajó)
+    if (empleado.contrato === false) {
+      console.log(`${empleado.nombre}: Mostrar indicador de Sin horario - contrato: ${empleado.contrato}`);
       return {
         show: true,
         type: 'sin-horario',
-        text: `Sin horario: ${empleado.horas}`,
-        color: 'bg-blue-400',
+        text: `Sin horario: ${empleado.horas || '0 hrs 0 min'}`,
+        color: 'bg-cyan-500', // Color celeste para diferenciar
         textColor: 'text-white',
         icon: <Clock className="w-4 h-4 text-white" />,
-        tooltipText: `Sin horario: ${empleado.horas}`
+        tooltipText: `Sin horario: ${empleado.horas || '0 hrs 0 min'}`
       };
     }
-    
-    // Si tiene tardanza, mostrar indicador
-    if (empleado.tardanza?.tiene) {
+
+    // Caso 3: Con contrato y tardanza (trabajando)
+    if (empleado.contrato === true && empleado.tardanza?.tiene) {
+      console.log(`${empleado.nombre}: Mostrar indicador de Tardanza - tiene: ${empleado.tardanza.tiene}, tiempo: ${empleado.tardanza.tiempo}`);
       return {
         show: true,
         type: 'tardanza',
         text: `Tardanza: ${empleado.tardanza.tiempo}`,
-        color: 'bg-gray-700',
+        color: 'bg-amber-500',
         textColor: 'text-white',
         icon: <AlertCircle className="w-4 h-4 text-white" />,
         tooltipText: `Tardanza: ${empleado.tardanza.tiempo}`
       };
     }
-    
+
+    console.log(`${empleado.nombre}: No mostrar indicador - no cumple ninguna condición`);
     return { show: false };
   };
 
+  // Obtener información del indicador con la nueva lógica
+  const indicadorInfo = shouldShowIndicator();
+  
   // Texto del estado
   const getEstadoTexto = (estado: string) => {
     // Si estamos filtrando por un tipo específico, mostrar ese texto en vez del estado actual
@@ -227,9 +300,6 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
   // Información del estado para este empleado
   const estadoInfo = getEstadoInfo(empleado.estado);
   
-  // Información de indicador (sin horario/tardanza/permiso)
-  const indicadorInfo = getIndicadorEstado();
-  
   // Handler para el clic en la tarjeta
   const handleCardClick = () => {
     if (onSelect) {
@@ -237,22 +307,32 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
     }
   };
 
-  // Handler para mostrar tooltip
-  const handleIndicadorMouseEnter = (e) => {
+  // Handler para mostrar tooltip usando Vanilla JS
+  const handleIndicadorMouseEnter = (e: React.MouseEvent) => {
+    console.log(`MouseEnter en indicador de ${empleado.nombre}`);
+    
     if (tooltipTimeout.current) {
       clearTimeout(tooltipTimeout.current);
     }
     
     const rect = e.currentTarget.getBoundingClientRect();
-    setTooltipPosition({
-      x: rect.left + (rect.width / 2),
-      y: rect.top + window.scrollY
-    });
+    const x = rect.left + rect.width / 2;
+    const y = rect.top;
+    
+    console.log("Posición calculada del tooltip:", { x, y });
+    showGlobalTooltip(indicadorInfo.tooltipText || "", x, y);
+    
+    // Actualizamos el estado local también (por si se necesita para otra cosa)
+    setTooltipPosition({ x, y });
     setShowTooltip(true);
   };
 
   // Handler para ocultar tooltip
   const handleIndicadorMouseLeave = () => {
+    console.log(`MouseLeave en indicador de ${empleado.nombre}`);
+    
+    hideGlobalTooltip();
+    
     tooltipTimeout.current = setTimeout(() => {
       setShowTooltip(false);
     }, 100);
@@ -307,33 +387,25 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
     }
     return empleado.metodoBiometricoEntrada || 'huella';
   };
-
-  const getMetodoBiometricoSalida = () => {
-    if (empleado.marcajes && empleado.marcajes.length > 0) {
-      const salidas = empleado.marcajes.filter(m => m.tipo === 'salida');
-      if (salidas.length > 0) {
-        const ultimaSalida = salidas[salidas.length - 1];
-        // Convertir método a tipo biométrico
-        if (ultimaSalida.metodo === 'facial') return 'camara';
-        if (ultimaSalida.metodo === 'smartphone') return 'tarjeta';
-        if (ultimaSalida.metodo === 'computadora') return 'huella';
-        return 'tarjeta';
-      }
-    }
-    return empleado.metodoBiometricoSalida || 'camara';
-  };
   
   const horaEntrada = getHoraEntrada();
   const horaSalida = getHoraSalida();
   const metodoBiometricoEntrada = getMetodoBiometricoEntrada();
-  const metodoBiometricoSalida = getMetodoBiometricoSalida();
+
+  // Log para verificar el estado del tooltip
+  console.log(`Estado del tooltip para ${empleado.nombre}:`, { 
+    showTooltip, 
+    tooltipPosition, 
+    indicadorVisible: indicadorInfo.show,
+    tooltipText: indicadorInfo.tooltipText || ""
+  });
 
   return (
     <div 
       className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105 h-[255px] flex flex-col relative"
       onClick={handleCardClick}
     >
-      {/* Indicador sin horario/tardanza si existe - solo icono */}
+      {/* Indicador según las condiciones - solo se muestra si indicadorInfo.show es true */}
       {indicadorInfo.show && (
         <div 
           className={`absolute right-2 top-2 ${indicadorInfo.color} ${indicadorInfo.textColor} p-1.5 rounded-full z-10 cursor-pointer shadow-sm`}
@@ -344,27 +416,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
         </div>
       )}
       
-      {/* Tooltip estilo material */}
-      {showTooltip && (
-        <div 
-          className="absolute z-30 bg-white shadow-lg rounded-md py-2 px-3 text-sm"
-          style={{
-            top: (tooltipPosition.y - 45) + 'px',
-            left: tooltipPosition.x + 'px',
-            transform: 'translateX(-80%)',
-            whiteSpace: 'nowrap',
-            filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.06))'
-          }}
-        >
-          <div className="text-gray-800 font-medium">
-            {indicadorInfo.tooltipText}
-          </div>
-          <div 
-            className="absolute h-3 w-3 bg-white transform rotate-45" 
-            style={{ bottom: '-6px', left: '85%', marginLeft: '-6px', boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.08)' }}
-          ></div>
-        </div>
-      )}
+      {/* Eliminamos ambos tooltips de React y dejamos solo la implementación en Vanilla JS */}
 
       {/* Encabezado con la información principal - altura fija */}
       <div className="p-4 bg-white flex-grow flex flex-col">
@@ -420,7 +472,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
               <span className="text-sm text-gray-600">{horaSalida}</span>
             </div>
             <div className="mt-1">
-              {getBiometricIcon(metodoBiometricoSalida)}
+              {getBiometricIcon(metodoBiometricoEntrada)}
             </div>
           </div>
         </div>

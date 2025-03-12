@@ -1,5 +1,7 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState } from 'react';
 import { PieChart, Info } from 'lucide-react';
+import HoverTooltip from './HoverTooltip';
 
 interface ChartDataItem {
   name: string;
@@ -25,7 +27,11 @@ const InteractivePieChart: React.FC<PieChartProps> = ({
   activeSegment, 
   onSegmentClick 
 }) => {
-  console.log('Renderizando InteractivePieChart con datos:', { data, centerLabel, sectionId, activeSegment });
+  // Estado para el tooltip en hover
+  const [hoverSegmentData, setHoverSegmentData] = useState<{
+    id: string;
+    data: ChartDataItem;
+  } | null>(null);
   
   // Calcular el total para los porcentajes
   const total = data.reduce((sum, item) => sum + item.value, 0);
@@ -75,7 +81,6 @@ const InteractivePieChart: React.FC<PieChartProps> = ({
     currentAngle = endAngle;
     
     const segmentId = `${sectionId}-${index}`;
-    console.log(`Generando segmento ${segmentId}:`, { startAngle, endAngle, color: item.color });
     
     return {
       id: segmentId,
@@ -84,37 +89,56 @@ const InteractivePieChart: React.FC<PieChartProps> = ({
       name: item.name,
       value: item.value,
       percentage,
+      details: item.details,
+      additionalInfo: item.additionalInfo,
       startAngle,
       endAngle
     };
   });
   
-  // Event handlers con logging
-  const handleMouseEnter = (e: React.MouseEvent, segmentId: string) => {
-    console.log(`MouseEnter en segmento ${segmentId}`);
+  // Event handlers para hover con tooltip
+  const handleMouseEnter = (e: React.MouseEvent, segment: any) => {
+    console.log("HOVER DETECTED:", segment.name);
+    
     // Aplicar estilo directamente al elemento
     const target = e.currentTarget as SVGPathElement;
     target.style.opacity = '0.8';
     target.style.filter = 'drop-shadow(0px 3px 3px rgba(0,0,0,0.2))';
+    
+    // Actualizar estado para mostrar tooltip
+    setHoverSegmentData({
+      id: segment.id,
+      data: {
+        name: segment.name,
+        value: segment.value,
+        percentage: segment.percentage,
+        color: segment.color,
+        details: segment.details,
+        additionalInfo: segment.additionalInfo
+      }
+    });
   };
   
   const handleMouseLeave = (e: React.MouseEvent, segmentId: string) => {
-    console.log(`MouseLeave en segmento ${segmentId}`);
+    console.log("HOVER LEFT:", segmentId);
+    
     // Solo restaurar estilo si no es el segmento activo
     if (segmentId !== activeSegment) {
       const target = e.currentTarget as SVGPathElement;
       target.style.opacity = '1';
       target.style.filter = 'none';
     }
+    
+    // Ocultar tooltip
+    setHoverSegmentData(null);
   };
   
   const handleClick = (e: React.MouseEvent, segmentId: string) => {
-    console.log(`Click en segmento ${segmentId}`);
     onSegmentClick(segmentId, e);
   };
   
   return (
-    <div className="relative tooltip-area" style={{ width: size, height: size }}>
+    <div className="relative inline-block" style={{ width: size, height: size }}>
       <svg 
         width={size} 
         height={size} 
@@ -124,13 +148,12 @@ const InteractivePieChart: React.FC<PieChartProps> = ({
         {segments.map(segment => (
           <path
             key={segment.id}
-            id={segment.id}
             d={segment.path}
             fill={segment.color}
             stroke="#fff"
             strokeWidth={1}
             onClick={(e) => handleClick(e, segment.id)}
-            onMouseEnter={(e) => handleMouseEnter(e, segment.id)}
+            onMouseEnter={(e) => handleMouseEnter(e, segment)}
             onMouseLeave={(e) => handleMouseLeave(e, segment.id)}
             style={{
               cursor: 'pointer',
@@ -154,31 +177,31 @@ const InteractivePieChart: React.FC<PieChartProps> = ({
       
       {/* Etiqueta central */}
       <div 
-        className="absolute inset-0 flex items-center justify-center text-gray-800 font-bold"
+        className="absolute inset-0 flex items-center justify-center text-gray-800 font-bold pointer-events-none"
         style={{ fontSize: `${size/7}px` }}
       >
         {centerLabel}
       </div>
+      
+      {/* Tooltip en hover - posición fija relativa al contenedor */}
+      {hoverSegmentData && (
+        <HoverTooltip 
+          data={hoverSegmentData.data} 
+          position={{ x: 0, y: 0 }} 
+          visible={true} 
+        />
+      )}
     </div>
   );
 };
 
-interface ChartTooltipProps {
-  data: ChartDataItem | null;
-  position: { x: number; y: number };
-  visible: boolean;
-  onClose: () => void;
-}
-
-// Componente para el tooltip
-export const ChartTooltip: React.FC<ChartTooltipProps> = ({ 
+// Componente para el tooltip de clic (existente)
+export const ChartTooltip: React.FC<any> = ({ 
   data, 
   position, 
   visible, 
   onClose 
 }) => {
-  console.log('Renderizando ChartTooltip:', { visible, data, position });
-  
   if (!visible || !data) return null;
   
   // Calcular el porcentaje
@@ -187,7 +210,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   
   return (
     <div 
-      className="fixed bg-white border border-gray-200 shadow-lg rounded-md p-3 z-50 tooltip-click"
+      className="fixed bg-white border border-gray-200 shadow-lg rounded-md p-3 z-[9999] tooltip-click"
       style={{ 
         top: position.y - 10,
         left: position.x,
@@ -204,7 +227,6 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
         <button 
           type="button"
           onClick={() => {
-            console.log('Click en botón cerrar tooltip');
             onClose();
           }}
           className="text-gray-400 hover:text-gray-600"

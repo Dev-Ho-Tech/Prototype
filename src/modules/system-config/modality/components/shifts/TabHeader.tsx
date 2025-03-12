@@ -22,7 +22,7 @@ export const TabHeader: React.FC<TabHeaderProps> = ({ activeTab, onTabChange }) 
           onClick={() => onTabChange(tab.id)}
           className={`flex items-center justify-center flex-1 p-3 ${
             activeTab === tab.id
-              ? 'bg-indigo-600 text-white'
+              ? 'bg-blue-500 text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           } rounded-md transition-colors`}
         >

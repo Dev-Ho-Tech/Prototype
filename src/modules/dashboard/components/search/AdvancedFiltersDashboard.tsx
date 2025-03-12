@@ -39,7 +39,7 @@ interface AdvancedFiltersDashboardProps {
 const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
   onFilterChange,
   onSearchTermChange,
-  searchTerm,
+  // searchTerm,
   onClearFilters,
   employees = [] // Valor por defecto vacío para evitar errores
 }) => {
@@ -49,6 +49,19 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     departamentos: [],
     secciones: [],
     unidades: []
+  });
+
+  // Estado para almacenar todos los datos disponibles
+  const [availableData, setAvailableData] = useState<{
+    sedes: string[];
+    departamentos: Record<string, string[]>;
+    secciones: Record<string, string[]>;
+    unidades: Record<string, string[]>;
+  }>({
+    sedes: [],
+    departamentos: {},
+    secciones: {},
+    unidades: {}
   });
 
   // Extraer opciones únicas de los datos de empleados
@@ -68,7 +81,8 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     return Array.from(uniqueValues).map(value => ({
       id: value,
       nombre: value,
-      checked: false
+      // Inicializar el estado 'checked' basado en si el valor ya está en filterState
+      checked: filterState[key as keyof FilterState]?.includes(value) || false
     }));
   };
 
@@ -116,103 +130,159 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     }
   ]);
 
-  // Inicializar las opciones cuando los empleados estén disponibles
+  // Procesar datos cuando los empleados están disponibles
   useEffect(() => {
     if (employees && employees.length > 0) {
-      setFilterSections(prevSections => 
-        prevSections.map(section => {
+      // Recopilar todas las opciones de filtro disponibles
+      const sedesSet = new Set<string>();
+      const departamentosBySede: Record<string, Set<string>> = {};
+      const seccionesByDepartamento: Record<string, Set<string>> = {};
+      const unidadesBySeccion: Record<string, Set<string>> = {};
+      
+      // Primera pasada: recolectar todas las sedes
+      employees.forEach(employee => {
+        if (employee.location) {
+          sedesSet.add(employee.location);
+        }
+      });
+      
+      // Segunda pasada: mapear departamentos por sede
+      employees.forEach(employee => {
+        if (employee.location && employee.department) {
+          if (!departamentosBySede[employee.location]) {
+            departamentosBySede[employee.location] = new Set<string>();
+          }
+          departamentosBySede[employee.location].add(employee.department);
+        }
+      });
+      
+      // Tercera pasada: mapear secciones por departamento
+      employees.forEach(employee => {
+        if (employee.department && employee.section) {
+          if (!seccionesByDepartamento[employee.department]) {
+            seccionesByDepartamento[employee.department] = new Set<string>();
+          }
+          seccionesByDepartamento[employee.department].add(employee.section);
+        }
+      });
+      
+      // Cuarta pasada: mapear unidades por sección
+      employees.forEach(employee => {
+        if (employee.section && employee.unit) {
+          if (!unidadesBySeccion[employee.section]) {
+            unidadesBySeccion[employee.section] = new Set<string>();
+          }
+          unidadesBySeccion[employee.section].add(employee.unit);
+        }
+      });
+      
+      // Convertir Sets a Arrays
+      const sedesArray = Array.from(sedesSet);
+      const departamentosMap: Record<string, string[]> = {};
+      const seccionesMap: Record<string, string[]> = {};
+      const unidadesMap: Record<string, string[]> = {};
+      
+      Object.keys(departamentosBySede).forEach(sede => {
+        departamentosMap[sede] = Array.from(departamentosBySede[sede]);
+      });
+      
+      Object.keys(seccionesByDepartamento).forEach(departamento => {
+        seccionesMap[departamento] = Array.from(seccionesByDepartamento[departamento]);
+      });
+      
+      Object.keys(unidadesBySeccion).forEach(seccion => {
+        unidadesMap[seccion] = Array.from(unidadesBySeccion[seccion]);
+      });
+      
+      // Guardar toda la información recopilada
+      setAvailableData({
+        sedes: sedesArray,
+        departamentos: departamentosMap,
+        secciones: seccionesMap,
+        unidades: unidadesMap
+      });
+      
+      // Inicializar las opciones de sedes
+      setFilterSections(prevSections => {
+        return prevSections.map(section => {
           if (section.id === 'sedes') {
             return {
               ...section,
-              options: getUniqueOptions('location')
-            };
-          } else if (section.id === 'departamentos') {
-            return {
-              ...section,
-              options: getUniqueOptions('department')
-            };
-          } else if (section.id === 'secciones') {
-            return {
-              ...section,
-              options: getUniqueOptions('section')
+              options: sedesArray.map(sede => ({
+                id: sede,
+                nombre: sede,
+                checked: filterState.sedes.includes(sede)
+              }))
             };
           }
           return section;
-        })
-      );
+        });
+      });
     }
   }, [employees]);
 
-  // Actualizar las opciones de secciones basado en la selección de departamentos
+  // Actualizar las opciones de secciones basado en la selección de sedes/departamentos
   useEffect(() => {
-    const updateFilterOptions = () => {
-      // Verificar si hay empleados disponibles
-      if (!employees || employees.length === 0) return;
-      
-      // Actualizamos las listas dependientes
-      if (filterState.sedes.length > 0) {
-        // Filtrar departamentos basados en las sedes seleccionadas
-        const filteredDepartments = new Set<string>();
-        
-        employees.forEach(employee => {
-          if (employee && employee.location && filterState.sedes.includes(employee.location) && employee.department) {
-            filteredDepartments.add(employee.department);
-          }
-        });
-        
-        // Actualizar opciones de departamentos
-        setFilterSections(prevSections => 
-          prevSections.map(section => {
-            if (section.id === 'departamentos') {
-              const currentDeptOptions = Array.from(filteredDepartments).map(dept => ({
-                id: dept,
-                nombre: dept,
-                checked: filterState.departamentos.includes(dept)
-              }));
-              
-              return {
-                ...section,
-                options: currentDeptOptions
-              };
-            }
-            return section;
-          })
-        );
+    // Función auxiliar para obtener todos los departamentos disponibles en las sedes seleccionadas
+    const getAvailableDepartamentos = () => {
+      if (filterState.sedes.length === 0) {
+        return getUniqueOptions('department');
       }
       
-      if (filterState.departamentos.length > 0) {
-        // Filtrar secciones basadas en los departamentos seleccionados
-        const filteredSections = new Set<string>();
-        
-        employees.forEach(employee => {
-          if (employee && employee.department && filterState.departamentos.includes(employee.department) && employee.section) {
-            filteredSections.add(employee.section);
-          }
-        });
-        
-        // Actualizar opciones de secciones
-        setFilterSections(prevSections => 
-          prevSections.map(section => {
-            if (section.id === 'secciones') {
-              const currentSectionOptions = Array.from(filteredSections).map(sec => ({
-                id: sec,
-                nombre: sec,
-                checked: filterState.secciones.includes(sec)
-              }));
-              
-              return {
-                ...section,
-                options: currentSectionOptions
-              };
-            }
-            return section;
-          })
-        );
-      }
+      const deptSet = new Set<string>();
+      
+      filterState.sedes.forEach(sede => {
+        const deptsForSede = availableData.departamentos[sede] || [];
+        deptsForSede.forEach(dept => deptSet.add(dept));
+      });
+      
+      return Array.from(deptSet).map(deptId => ({
+        id: deptId,
+        nombre: deptId,
+        checked: filterState.departamentos.includes(deptId)
+      }));
     };
     
-    updateFilterOptions();
-  }, [employees, filterState.sedes, filterState.departamentos, filterState.secciones]);
+    // Función auxiliar para obtener todas las secciones disponibles en los departamentos seleccionados
+    const getAvailableSecciones = () => {
+      if (filterState.departamentos.length === 0) {
+        return getUniqueOptions('section');
+      }
+      
+      const sectionSet = new Set<string>();
+      
+      filterState.departamentos.forEach(dept => {
+        const sectionsForDept = availableData.secciones[dept] || [];
+        sectionsForDept.forEach(section => sectionSet.add(section));
+      });
+      
+      return Array.from(sectionSet).map(sectionId => ({
+        id: sectionId,
+        nombre: sectionId,
+        checked: filterState.secciones.includes(sectionId)
+      }));
+    };
+    
+    // Actualizar departamentos cuando cambian las sedes seleccionadas
+    setFilterSections(prevSections => {
+      return prevSections.map(section => {
+        if (section.id === 'departamentos') {
+          return {
+            ...section,
+            options: getAvailableDepartamentos()
+          };
+        }
+        else if (section.id === 'secciones') {
+          return {
+            ...section,
+            options: getAvailableSecciones()
+          };
+        }
+        
+        return section;
+      });
+    });
+  }, [filterState.sedes, filterState.departamentos, availableData]);
 
   // Función para manejar el cambio de estado de una opción de filtro
   const handleOptionChange = (sectionId: string, optionId: string, checked: boolean) => {
@@ -241,12 +311,15 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     setFilterState(prevState => {
       const newState = { ...prevState };
       
-      // Si el checkbox está marcado, añadir a la lista
+      // Si el checkbox está marcado, añadir a la lista (solo si no existe ya)
       if (checked) {
-        newState[sectionId as keyof FilterState] = [
-          ...newState[sectionId as keyof FilterState], 
-          optionId
-        ];
+        // Comprobar si el ID ya existe para evitar duplicados
+        if (!newState[sectionId as keyof FilterState].includes(optionId)) {
+          newState[sectionId as keyof FilterState] = [
+            ...newState[sectionId as keyof FilterState], 
+            optionId
+          ];
+        }
       } 
       // Si está desmarcado, quitar de la lista
       else {
@@ -254,16 +327,15 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
           .filter(id => id !== optionId);
       }
       
-      // Si cambia la selección de una sección padre, limpiamos las selecciones hijas
+      // Lógica para manejar dependencias cuando se desmarca una opción
       if (sectionId === 'sedes' && !checked) {
-        // Si desmarcamos una sede, verificamos si debemos limpiar departamentos relacionados
-        const remainingSedes = newState.sedes;
+        // Si se desmarca una sede, revisar si algún departamento seleccionado ya no es válido
         const validDepartamentos = new Set<string>();
         
-        employees.forEach(employee => {
-          if (employee && employee.location && employee.department && remainingSedes.includes(employee.location)) {
-            validDepartamentos.add(employee.department);
-          }
+        // Para cada sede que queda seleccionada, agregar sus departamentos como válidos
+        newState.sedes.forEach(sede => {
+          const deptsForSede = availableData.departamentos[sede] || [];
+          deptsForSede.forEach(dept => validDepartamentos.add(dept));
         });
         
         // Filtrar los departamentos que ya no son válidos
@@ -271,34 +343,49 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
           validDepartamentos.has(dept)
         );
         
-        // Si se eliminaron todos los departamentos, limpiar secciones
+        // Si se eliminaron todos los departamentos, limpiar también las secciones y unidades
         if (newState.departamentos.length === 0) {
           newState.secciones = [];
           newState.unidades = [];
+        } else {
+          // Si aún quedan departamentos, verificar secciones válidas
+          const validSecciones = new Set<string>();
+          
+          newState.departamentos.forEach(dept => {
+            const sectionsForDept = availableData.secciones[dept] || [];
+            sectionsForDept.forEach(section => validSecciones.add(section));
+          });
+          
+          // Filtrar secciones que ya no son válidas
+          newState.secciones = newState.secciones.filter(seccion => 
+            validSecciones.has(seccion)
+          );
+          
+          // Si se eliminaron todas las secciones, limpiar unidades
+          if (newState.secciones.length === 0) {
+            newState.unidades = [];
+          }
         }
       } else if (sectionId === 'departamentos' && !checked) {
-        // Si desmarcamos un departamento, verificamos si debemos limpiar secciones relacionadas
-        const remainingDepartamentos = newState.departamentos;
+        // Lógica similar para cuando se desmarca un departamento
         const validSecciones = new Set<string>();
         
-        employees.forEach(employee => {
-          if (employee && employee.department && remainingDepartamentos.includes(employee.department)) {
-            validSecciones.add(employee.section);
-          }
+        newState.departamentos.forEach(dept => {
+          const sectionsForDept = availableData.secciones[dept] || [];
+          sectionsForDept.forEach(section => validSecciones.add(section));
         });
         
-        // Filtrar las secciones que ya no son válidas
-        newState.secciones = newState.secciones.filter(sec => 
-          validSecciones.has(sec)
+        newState.secciones = newState.secciones.filter(seccion => 
+          validSecciones.has(seccion)
         );
         
-        // Si se eliminaron todas las secciones, limpiar unidades
         if (newState.secciones.length === 0) {
           newState.unidades = [];
         }
       }
       
       // Llamar al callback con el nuevo estado
+      // Importante: Ya no cerramos el panel aquí, dejamos que se mantenga abierto
       onFilterChange(newState);
       return newState;
     });
@@ -340,19 +427,23 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
           if (section.id === 'sedes') {
             return {
               ...section,
-              options: getUniqueOptions('location').map(opt => ({ ...opt, checked: false })),
+              options: availableData.sedes.map(sede => ({ 
+                id: sede, 
+                nombre: sede, 
+                checked: false 
+              })),
               expanded: true
             };
           } else if (section.id === 'departamentos') {
             return {
               ...section,
-              options: getUniqueOptions('department').map(opt => ({ ...opt, checked: false })),
+              options: [],
               expanded: true
             };
           } else if (section.id === 'secciones') {
             return {
               ...section,
-              options: getUniqueOptions('section').map(opt => ({ ...opt, checked: false })),
+              options: [],
               expanded: true
             };
           } else {
@@ -370,6 +461,11 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     onClearFilters();
   };
 
+  // Evitar la propagación en checkboxes para mantener el panel abierto
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="p-4">
       {/* Título de Filtros y botón Limpiar */}
@@ -383,6 +479,13 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
           Limpiar
         </button>
       </div>
+
+      {/* Debug: Mostrar estado actual de filtros (puedes eliminar esto en producción) */}
+      {/* <div className="mb-3 text-xs bg-gray-100 p-2 rounded">
+        <div>Sedes: {filterState.sedes.join(', ')}</div>
+        <div>Departamentos: {filterState.departamentos.join(', ')}</div>
+        <div>Secciones: {filterState.secciones.join(', ')}</div>
+      </div> */}
 
       {/* Secciones de filtro */}
       <div className="space-y-3">
@@ -428,6 +531,10 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
                     <p className="text-sm text-gray-500 italic">
                       {section.dependsOn?.message}
                     </p>
+                  ) : section.options.length === 0 ? (
+                    <p className="text-sm text-gray-500 italic">
+                      No hay opciones disponibles
+                    </p>
                   ) : (
                     section.options.map((option) => (
                       <div key={option.id} className="flex items-center">
@@ -437,10 +544,12 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
                           className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                           checked={!!option.checked}
                           onChange={(e) => handleOptionChange(section.id, option.id, e.target.checked)}
+                          onClick={handleCheckboxClick} // Evitar propagación de eventos
                         />
                         <label
                           htmlFor={`${section.id}-${option.id}`}
                           className="ml-2 block text-sm text-gray-700"
+                          onClick={handleCheckboxClick} // Evitar propagación de eventos
                         >
                           {option.nombre}
                         </label>

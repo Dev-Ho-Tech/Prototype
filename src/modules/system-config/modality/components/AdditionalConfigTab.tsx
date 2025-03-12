@@ -38,7 +38,7 @@ export const AdditionalConfigTab: React.FC<AdditionalConfigTabProps> = ({ workSh
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg">
+    <div className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm mt-4">
       <div className="mb-8">
         <h2 className="text-lg font-medium flex items-center text-gray-800">
           <span className="flex items-center justify-center bg-indigo-100 w-8 h-8 rounded-full mr-2">

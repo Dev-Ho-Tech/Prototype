@@ -55,7 +55,8 @@ export const WorkShiftForm: React.FC<WorkShiftFormProps> = ({
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col px-20 py-10">
+      {/* Header con título y botones */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">
           {isEditMode ? 'Editar Turno de Trabajo' : 'Nuevo Turno de Trabajo'}
@@ -73,7 +74,7 @@ export const WorkShiftForm: React.FC<WorkShiftFormProps> = ({
             onClick={handleSubmit}
             disabled={!isFormValid()}
             className={`px-4 py-2 rounded-md text-white ${
-              isFormValid() ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-300 cursor-not-allowed'
+              isFormValid() ? 'bg-blue-500 hover:bg-blue-700' : 'bg-blue-700 cursor-not-allowed'
             }`}
           >
             Guardar
@@ -81,9 +82,13 @@ export const WorkShiftForm: React.FC<WorkShiftFormProps> = ({
         </div>
       </div>
 
+      {/* Pestañas */}
       <TabHeader activeTab={activeTab} onTabChange={setActiveTab} />
       
-      {renderTabContent()}
+      {/* Contenido de la pestaña activa */}
+      <div className="px-6">
+        {renderTabContent()}
+      </div>
     </div>
   );
 };
