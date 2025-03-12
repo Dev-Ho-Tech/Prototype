@@ -54,8 +54,10 @@ const DashboardScreen: React.FC = () => {
   };
 
   // Función para manejar cambios en los filtros avanzados
-  // MODIFICADO: Ya no cerramos el panel automáticamente
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFilterChange = (filters: any): void => {
+    console.log("Filtros recibidos:", filters); // Log para debugging
+    
     // Convertir los filtros al formato que espera el dashboard
     const convertedFilters = {
       pais: filters.sedes || [],
@@ -63,9 +65,8 @@ const DashboardScreen: React.FC = () => {
       departamento: filters.secciones || []
     };
     
+    console.log("Filtros convertidos:", convertedFilters); // Log para debugging
     setAppliedFilters(convertedFilters);
-    // Ya no cerramos el panel automáticamente
-    // setShowAdvancedFilters(false); <- ELIMINADO
   };
 
   // Función para limpiar todos los filtros
@@ -78,25 +79,48 @@ const DashboardScreen: React.FC = () => {
     setSearchTerm('');
   };
 
-  // Filtrar empleados según el término de búsqueda, filtros avanzados y el filtro KPI activo
+  // CORREGIDO: Lógica de filtrado mejorada para departamentos
   const filteredEmpleados = empleadosDataEnriquecida.filter(empleado => {
+    // Para debugging
+    if (appliedFilters.estado.length > 0 || appliedFilters.departamento.length > 0) {
+      console.log(`Evaluando empleado: ${empleado.nombre}, pais: ${empleado.pais}, departamento: ${empleado.departamento}, estado: ${empleado.estado}`);
+    }
+    
     // Primero aplicar filtro de búsqueda
     const matchesSearch = 
       empleado.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       empleado.pais.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Verificar si coincide con los filtros avanzados seleccionados
-    const matchesCountry = appliedFilters.pais.length === 0 || 
-      appliedFilters.pais.includes(empleado.pais);
+    // Lógica para filtros avanzados
+    let matchesAdvancedFilters = true;
     
-    const matchesStatus = appliedFilters.estado.length === 0 || 
-      appliedFilters.estado.includes(empleado.estado);
+    // Verificar filtro de país/sede si hay alguno seleccionado
+    if (appliedFilters.pais.length > 0) {
+      if (!empleado.pais || !appliedFilters.pais.includes(empleado.pais)) {
+        matchesAdvancedFilters = false;
+      }
+    }
     
-    const matchesDepartment = appliedFilters.departamento.length === 0 || 
-      (empleado.departamento && appliedFilters.departamento.includes(empleado.departamento));
+    // CORREGIDO: El campo "estado" en los filtros corresponde al campo "departamento" en el empleado
+    if (matchesAdvancedFilters && appliedFilters.estado.length > 0) {
+      // Aquí está el cambio crucial - usamos departamento en lugar de estado
+      if (!empleado.departamento || !appliedFilters.estado.includes(empleado.departamento)) {
+        matchesAdvancedFilters = false;
+      }
+    }
     
-    // Verificar coincidencia con filtros avanzados
-    const matchesAdvancedFilters = matchesCountry && matchesStatus && matchesDepartment;
+    // CORREGIDO: El campo "departamento" en los filtros corresponde a las secciones
+    if (matchesAdvancedFilters && appliedFilters.departamento.length > 0) {
+      // En este caso, usamos estado para match con secciones
+      if (!empleado.estado || !appliedFilters.departamento.includes(empleado.estado)) {
+        matchesAdvancedFilters = false;
+      }
+    }
+    
+    // Para debugging
+    if ((appliedFilters.estado.length > 0 || appliedFilters.departamento.length > 0) && matchesAdvancedFilters) {
+      console.log(`MATCH: ${empleado.nombre}`);
+    }
     
     // Si no hay filtro KPI activo, sólo aplicar la búsqueda y filtros avanzados
     if (!activeKpiFilter) {
@@ -215,14 +239,17 @@ const DashboardScreen: React.FC = () => {
     appliedFilters.departamento.length > 0;
 
   // Convertir los datos de empleados al formato que espera AdvancedFiltersDashboard
-  // Esto es necesario porque AdvancedFiltersDashboard espera objetos UnifiedEmployee
+  // CORREGIDO: Mapeando las propiedades correctamente según los nuevos conocimientos
   const formattedEmployees = empleadosDataEnriquecida.map(emp => {
     return {
-      id: emp.id || '',
+      id: emp.id.toString(),
       displayName: emp.nombre || '',
+      // Sede es pais
       location: emp.pais || '',
+      // Departamento es departamento
       department: emp.departamento || '',
-      section: emp.estado || '', // Usando 'estado' como sección para el ejemplo
+      // Estado es section (en el filtro)
+      section: emp.estado || '',
       unit: '' // No hay unidad en los datos del ejemplo
     };
   });
