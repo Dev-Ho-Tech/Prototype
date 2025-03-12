@@ -13,6 +13,7 @@ export interface Employee {
   cargo?: string;
   departamento?: string;
   marcajes?: Marcaje[];
+  contrato?: boolean;
 }
 
 export interface Marcaje {
