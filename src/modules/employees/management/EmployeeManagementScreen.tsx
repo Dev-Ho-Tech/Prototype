@@ -214,7 +214,7 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
                 />
                 <button
                   onClick={toggleAdvancedFilters}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-xs text-indigo-600 hover:bg-indigo-50 rounded-md flex items-center"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-xs text-blue-600 hover:bg-blue-50 rounded-md flex items-center"
                 >
                   {showAdvancedFilters ? 'Búsqueda simple' : 'Búsqueda avanzada'}
                   <ChevronDown className={`ml-1 w-3 h-3 ${showAdvancedFilters ? 'rotate-180' : ''}`} />
@@ -289,7 +289,7 @@ export function EmployeeManagementScreen({ setCurrentView }: EmployeeManagementS
                       return (
                         <tr 
                           key={employee.id} 
-                          className={`hover:bg-gray-50 cursor-pointer ${isSelected ? 'bg-indigo-50' : ''}`}
+                          className={`hover:bg-gray-50 cursor-pointer ${isSelected ? 'bg-blue-50' : ''}`}
                           onClick={() => handleEmployeeClick(employee)}
                         >
                           <td className="px-6 py-4">

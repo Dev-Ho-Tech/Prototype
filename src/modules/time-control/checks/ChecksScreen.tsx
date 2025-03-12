@@ -246,7 +246,7 @@ export function ChecksScreen() {
                 <input
                   type="text"
                   placeholder="Buscar turnos..."
-                  className="pl-10 pr-4 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="pl-10 pr-4 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -256,7 +256,7 @@ export function ChecksScreen() {
               <div className="border rounded-lg p-4 border-pink-500 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-medium text-lg text-pink-500">Turno A</h3>
-                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                     Mañana
                   </span>
                 </div>
@@ -268,7 +268,7 @@ export function ChecksScreen() {
               <div className="border rounded-lg p-4 border-orange-500 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-medium text-lg text-orange-500">Turno B</h3>
-                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                     Tarde
                   </span>
                 </div>
@@ -280,7 +280,7 @@ export function ChecksScreen() {
               <div className="border rounded-lg p-4 border-cyan-500 text-cyan-500 text-cyan-500 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-medium text-lg text-cyan-500">Turno D</h3>
-                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                     Noche
                   </span>
                 </div>
@@ -292,7 +292,7 @@ export function ChecksScreen() {
               <div className="border rounded-lg p-4 border-purple-500 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-medium text-lg text-purple-500">Turno A</h3>
-                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                     Mañana
                   </span>
                 </div>
@@ -304,7 +304,7 @@ export function ChecksScreen() {
               <div className="border rounded-lg p-4 border-rose-500 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-medium text-lg text-rose-500 text-rose-500">Turno B</h3>
-                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                     Tarde
                   </span>
                 </div>
@@ -316,7 +316,7 @@ export function ChecksScreen() {
               <div className="border rounded-lg p-4 border-blue-500 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-medium text-lg text-blue-500">Turno D</h3>
-                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                     Noche
                   </span>
                 </div>
@@ -340,7 +340,7 @@ export function ChecksScreen() {
                 <input
                   type="text"
                   placeholder="Buscar turnos..."
-                  className="pl-10 pr-4 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="pl-10 pr-4 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -403,9 +403,9 @@ export function ChecksScreen() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
-              <div className="border bg-indigo-200 border-indigo-500 rounded-lg p-2 hover:shadow-md transition-shadow">
+              <div className="border bg-blue-200 border-blue-500 rounded-lg p-2 hover:shadow-md transition-shadow">
                 <div className="flex justify-space-around items-start">
-                  <h3 className="font-medium text-lg ml-2 text-indigo-500">Licencia por Fallecimiento</h3>
+                  <h3 className="font-medium text-lg ml-2 text-blue-500">Licencia por Fallecimiento</h3>
                 </div>
               </div>
             </div>

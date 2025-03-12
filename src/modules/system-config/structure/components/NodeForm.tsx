@@ -73,7 +73,7 @@ export function NodeForm({ node, parentType, onClose, onSubmit }: NodeFormProps)
       case 'section':
         return <FolderTree className="w-5 h-5 text-amber-500" />;
       case 'unit':
-        return <Briefcase className="w-5 h-5 text-indigo-500" />;
+        return <Briefcase className="w-5 h-5 text-blue-500" />;
       default:
         return <Building2 className="w-5 h-5 text-gray-500" />;
     }

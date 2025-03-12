@@ -52,7 +52,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         case 'green': bgColor = 'bg-green-100'; break;
         case 'purple': bgColor = 'bg-purple-100'; break;
         case 'amber': bgColor = 'bg-amber-100'; break;
-        case 'indigo': bgColor = 'bg-indigo-100'; break;
+        case 'blue': bgColor = 'bg-blue-100'; break;
         default: bgColor = 'bg-gray-100';
       }
     } else {
@@ -82,7 +82,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           icon = <Users className="w-5 h-5 text-amber-500" />; 
           break;
         case 'unit': 
-          icon = <LayoutGrid className="w-5 h-5 text-indigo-500" />; 
+          icon = <LayoutGrid className="w-5 h-5 text-blue-500" />; 
           break;
         default: 
           icon = <Building2 className="w-5 h-5 text-gray-500" />;

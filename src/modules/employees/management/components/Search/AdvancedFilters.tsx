@@ -440,10 +440,10 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
     <div className="p-4">
       {/* Título de Filtros y botón Limpiar */}
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-sm font-medium text-indigo-900">Filtros</h2>
+        <h2 className="text-sm font-medium text-blue-900">Filtros</h2>
         <button
           onClick={handleClearFilters}
-          className="text-xs text-indigo-600 hover:text-indigo-800"
+          className="text-xs text-blue-600 hover:text-blue-800"
           type="button"
         >
           Limpiar
@@ -464,26 +464,26 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
                 disabled={isDisabled}
                 type="button"
               >
-                <div className="flex items-center text-sm font-medium text-indigo-900">
+                <div className="flex items-center text-sm font-medium text-blue-900">
                   {/* Icono según el tipo de sección */}
                   {section.icon === 'building' && (
-                    <span className="text-indigo-300 mr-2">□</span>
+                    <span className="text-blue-300 mr-2">□</span>
                   )}
                   {section.icon === 'briefcase' && (
-                    <span className="text-indigo-300 mr-2">□</span>
+                    <span className="text-blue-300 mr-2">□</span>
                   )}
                   {section.icon === 'layers' && (
-                    <span className="text-indigo-300 mr-2">◉</span>
+                    <span className="text-blue-300 mr-2">◉</span>
                   )}
                   {section.icon === 'users' && (
-                    <span className="text-indigo-300 mr-2">◉</span>
+                    <span className="text-blue-300 mr-2">◉</span>
                   )}
                   {section.title}
                 </div>
                 {section.expanded ? (
-                  <ChevronUp className="h-4 w-4 text-indigo-500" />
+                  <ChevronUp className="h-4 w-4 text-blue-500" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-indigo-500" />
+                  <ChevronDown className="h-4 w-4 text-blue-500" />
                 )}
               </button>
               
@@ -500,7 +500,7 @@ const AdvancedFiltersDashboard: React.FC<AdvancedFiltersDashboardProps> = ({
                         <input
                           id={`${section.id}-${option.id}`}
                           type="checkbox"
-                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           checked={!!option.checked}
                           onChange={(e) => handleOptionChange(section.id, option.id, e.target.checked)}
                         />

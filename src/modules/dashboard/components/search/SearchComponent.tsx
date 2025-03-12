@@ -63,7 +63,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
       />
       <button
         onClick={toggleAdvancedFilters}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-xs text-indigo-600 hover:bg-indigo-50 rounded-md flex items-center"
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-xs text-blue-600 hover:bg-blue-50 rounded-md flex items-center"
         type="button"
       >
         {showAdvancedFilters ? 'Búsqueda simple' : 'Búsqueda avanzada'}

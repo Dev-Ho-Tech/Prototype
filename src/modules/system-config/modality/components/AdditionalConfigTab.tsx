@@ -41,8 +41,8 @@ export const AdditionalConfigTab: React.FC<AdditionalConfigTabProps> = ({ workSh
     <div className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm mt-4">
       <div className="mb-8">
         <h2 className="text-lg font-medium flex items-center text-gray-800">
-          <span className="flex items-center justify-center bg-indigo-100 w-8 h-8 rounded-full mr-2">
-            <span className="text-indigo-600">4</span>
+          <span className="flex items-center justify-center bg-blue-100 w-8 h-8 rounded-full mr-2">
+            <span className="text-blue-600">4</span>
           </span>
           Configuración Adicional
         </h2>
@@ -56,7 +56,7 @@ export const AdditionalConfigTab: React.FC<AdditionalConfigTabProps> = ({ workSh
           <button
             type="button"
             onClick={handleAddBreak}
-            className="inline-flex items-center py-1 px-3 border border-indigo-600 text-sm text-indigo-600 rounded hover:bg-indigo-50"
+            className="inline-flex items-center py-1 px-3 border border-blue-600 text-sm text-blue-600 rounded hover:bg-blue-50"
           >
             <Plus className="w-4 h-4 mr-1" /> Añadir descanso
           </button>
@@ -137,7 +137,7 @@ export const AdditionalConfigTab: React.FC<AdditionalConfigTabProps> = ({ workSh
         <textarea
           value={workShift.notes}
           onChange={(e) => onChange({ notes: e.target.value })}
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
           rows={4}
           placeholder="Información adicional sobre este turno..."
         />

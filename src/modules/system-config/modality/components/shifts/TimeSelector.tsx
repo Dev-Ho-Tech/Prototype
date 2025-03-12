@@ -30,7 +30,7 @@ export const TimeSelector: React.FC<TimeSelectorProps> = ({
         <select
           value={selectedHour}
           onChange={(e) => onHourChange(e.target.value)}
-          className="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          className="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
           {hours.map((hour) => (
             <option key={hour} value={hour}>
@@ -47,7 +47,7 @@ export const TimeSelector: React.FC<TimeSelectorProps> = ({
         <select
           value={selectedMinute}
           onChange={(e) => onMinuteChange(e.target.value)}
-          className="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          className="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
           {minutes.map((minute) => (
             <option key={minute} value={minute}>
@@ -62,7 +62,7 @@ export const TimeSelector: React.FC<TimeSelectorProps> = ({
         <select
           value={selectedAmPm}
           onChange={(e) => onAmPmChange(e.target.value)}
-          className="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          className="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
           {ampm.map((period) => (
             <option key={period} value={period}>

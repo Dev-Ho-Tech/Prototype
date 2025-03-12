@@ -14,8 +14,8 @@ export const DaySelector: React.FC<DaySelectorProps> = ({ day, label, isActive, 
       onClick={() => onChange(day, !isActive)}
       className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
         isActive 
-          ? 'bg-indigo-600 text-white' 
-          : 'bg-white border border-indigo-600 text-indigo-600'
+          ? 'bg-blue-500 text-white' 
+          : 'bg-white border border-blue-600 text-blue-600'
       }`}
     >
       {label}

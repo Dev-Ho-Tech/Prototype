@@ -46,8 +46,8 @@ export const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ workShift, onChange 
     <div className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm mt-4">
       <div className="mb-6">
         <h2 className="text-base font-semibold flex items-center text-gray-800">
-          <span className="flex items-center justify-center bg-indigo-100 w-6 h-6 rounded-full mr-2">
-            <span className="text-indigo-600 text-sm">1</span>
+          <span className="flex items-center justify-center bg-blue-100 w-6 h-6 rounded-full mr-2">
+            <span className="text-blue-600 text-sm">1</span>
           </span>
           Información Básica del Turno
         </h2>
@@ -63,7 +63,7 @@ export const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ workShift, onChange 
             type="text"
             value={workShift.code}
             onChange={(e) => onChange({ code: e.target.value })}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             placeholder="001"
             required
           />
@@ -78,7 +78,7 @@ export const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ workShift, onChange 
             type="text"
             value={workShift.name}
             onChange={(e) => onChange({ name: e.target.value })}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             placeholder="Mañana"
             required
           />
@@ -103,7 +103,7 @@ export const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ workShift, onChange 
             <button
               type="button"
               onClick={() => setShowDepartmentSearch(true)}
-              className="inline-flex items-center py-1 px-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50"
+              className="inline-flex items-center py-1 px-2 text-sm border border-blue-600 text-blue-600 rounded hover:bg-blue-50"
             >
               <Plus className="w-3.5 h-3.5 mr-1" /> Añadir
             </button>
@@ -123,7 +123,7 @@ export const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ workShift, onChange 
                 autoFocus
                 onFocus={() => setShowDepartmentDropdown(true)}
                 placeholder="Buscar departamento..."
-                className="flex-1 p-2 pr-10 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                className="flex-1 p-2 pr-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
               <button
                 type="button"
