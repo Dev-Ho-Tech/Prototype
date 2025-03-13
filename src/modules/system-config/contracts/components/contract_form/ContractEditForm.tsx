@@ -7,13 +7,15 @@ import {
   Fingerprint, 
   Settings,
   ChevronDown,
-  Plus,
   X,
   Calendar,
   Users,
-  Tag
+  Tag,
+  KeyRound,
+  CreditCard
 } from 'lucide-react';
 import { Contract, ScheduleLimitGroup, ContractDetailProps } from '../../interfaces/types';
+import { Toggle } from '../Toggle';
 
 interface ContractEditFormProps extends ContractDetailProps {
   onSave: (contract: Contract) => void;
@@ -30,9 +32,8 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
   isEditMode
 }) => {
   const [contract, setContract] = useState<Contract>({...initialContract});
-  const [conceptSearch, setConceptSearch] = useState('');
-  const [showConceptDropdown, setShowConceptDropdown] = useState(false);
-  const [showConceptSearchInput, setShowConceptSearchInput] = useState(false);
+  const [, setConceptSearch] = useState('');
+  const [, setShowConceptDropdown] = useState(false);
 
   const weekdays = [
     { id: 'mon', label: 'Lun' },
@@ -55,9 +56,6 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
     { id: 'night-overtime', label: 'Horas fuera de horario nocturnas' },
     { id: 'holiday', label: 'Horas en día feriado' },
     { id: 'special', label: 'Horas especiales' },
-    { id: 'weekend', label: 'Horas en fin de semana' },
-    { id: 'early', label: 'Horas anticipadas' },
-    { id: 'late', label: 'Horas tardías' }
   ];
 
   const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
@@ -225,19 +223,6 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
   const handleSaveChanges = () => {
     onSave(contract);
   };
-
-  const handleAddConceptClick = () => {
-    setShowConceptSearchInput(!showConceptSearchInput);
-    if (showConceptSearchInput) {
-      setShowConceptDropdown(false);
-    }
-  };
-
-  const filteredConcepts = concepts.filter(
-    concept => 
-      !contract.concepts?.includes(concept.id) &&
-      concept.label.toLowerCase().includes(conceptSearch.toLowerCase())
-  );
 
   const startTime = parseTime(contract.startTime || '7:00 AM');
   const endTime = parseTime(contract.endTime || '3:00 PM');
@@ -527,159 +512,111 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
             </div>
           </div>
   
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-sm font-medium text-gray-700">¿Cruzar días?</span>
-            <div 
-              className={`relative inline-block w-12 h-6 ${isEditMode ? 'cursor-pointer' : ''}`}
-              onClick={() => isEditMode && handleToggle('crossDays')}
-            >
-              <div className={`absolute w-12 h-6 rounded-full transition-colors ${contract.crossDays ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
-              <div className={`absolute w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${contract.crossDays ? 'translate-x-6' : 'translate-x-1'} top-0.5 left-0`}></div>
-            </div>
-          </div>
-  
           <div className="mb-6">
+            
             <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
               <Users className="w-4 h-4 mr-2 text-blue-600" />
               Adscripción de turno (selección múltiple)
             </label>
-            <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
-              {shifts.map(shift => (
-                <button
-                  key={shift.id}
-                  type="button"
-                  onClick={() => handleShiftToggle(shift.id)}
-                  disabled={!isEditMode}
-                  className={`
-                    px-4 py-2 rounded-md transition
-                    ${contract.shifts?.includes(shift.id)
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white border border-blue-500 text-blue-500'}
-                    ${!isEditMode && !contract.shifts?.includes(shift.id) ? 'opacity-50' : ''}
-                  `}
-                >
-                  {shift.label}
-                </button>
-              ))}
+            <div className="flex justify-between items-center p-2 rounded-md">
+              {/* Botones de turnos */}
+              <div className="flex flex-wrap gap-2">
+                {shifts.map((shift) => (
+                  <button
+                    key={shift.id}
+                    type="button"
+                    onClick={() => handleShiftToggle(shift.id)}
+                    disabled={!isEditMode}
+                    className={`
+                      px-4 py-2 rounded-md transition
+                      ${
+                        contract.shifts?.includes(shift.id)
+                          ? "bg-blue-500 text-white"
+                          : "bg-white border border-blue-500 text-blue-500"
+                      }
+                      ${!isEditMode && !contract.shifts?.includes(shift.id) ? "opacity-50" : ""}
+                    `}
+                  >
+                    {shift.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Switch "¿Cruzar días?" */}
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-medium text-gray-700 mb-[5px] mr-[15px]">¿Cruzar días?</span>
+                <Toggle  />
+              </div>
             </div>
           </div>
   
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mín. horas extras
-              </label>
-              <input
-                type="number"
-                value={contract.workingHours.minOvertimeHours || 0}
-                onChange={(e) => handleWorkingHoursChange('minOvertimeHours', parseInt(e.target.value))}
-                disabled={!isEditMode}
-                min="0"
-                className={`w-full p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
-              />
-            </div>
-  
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Máx. horas extras
-              </label>
-              <input
-                type="number"
-                value={contract.workingHours.maxOvertimeHours || 0}
-                onChange={(e) => handleWorkingHoursChange('maxOvertimeHours', parseInt(e.target.value))}
-                disabled={!isEditMode}
-                min="0"
-                className={`w-full p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
-              />
-            </div>
+          <div className="flex items-end gap-4 mb-6">
+          {/* Mín. horas extras */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Mín. horas extras
+            </label>
+            <input
+              type="number"
+              value={contract.workingHours.minOvertimeHours || 0}
+              onChange={(e) => handleWorkingHoursChange('minOvertimeHours', parseInt(e.target.value))}
+              disabled={!isEditMode}
+              min="0"
+              className={`w-full p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
+            />
           </div>
-  
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-sm font-medium text-gray-700">¿Auto aprobar?</span>
-            <div 
-              className={`relative inline-block w-12 h-6 ${isEditMode ? 'cursor-pointer' : ''}`}
-              onClick={() => isEditMode && handleToggle('autoApprove')}
-            >
-              <div className={`absolute w-12 h-6 rounded-full transition-colors ${contract.autoApprove ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
-              <div className={`absolute w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${contract.autoApprove ? 'translate-x-6' : 'translate-x-1'} top-0.5 left-0`}></div>
-            </div>
+
+          {/* Máx. horas extras */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Máx. horas extras
+            </label>
+            <input
+              type="number"
+              value={contract.workingHours.maxOvertimeHours || 0}
+              onChange={(e) => handleWorkingHoursChange('maxOvertimeHours', parseInt(e.target.value))}
+              disabled={!isEditMode}
+              min="0"
+              className={`w-full p-2 border border-gray-300 rounded-md ${!isEditMode ? 'bg-gray-100' : ''}`}
+            />
           </div>
-  
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="flex items-center text-sm font-medium text-gray-700">
-                <Tag className="w-4 h-4 mr-2 text-blue-600" />
-                Conceptos
-              </label>
-              {isEditMode && (
-                <button
-                  type="button"
-                  className="flex items-center text-blue-600 hover:text-blue-800"
-                  onClick={handleAddConceptClick}
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  <span className="text-sm">Conceptos</span>
-                </button>
-              )}
-            </div>
-            <div className="flex flex-wrap mb-2 p-2 bg-gray-50 rounded-md">
-              {contract.concepts?.map(conceptId => {
-                const concept = concepts.find(c => c.id === conceptId);
-                if (!concept) return null;
-                
-                return (
-                  <div key={conceptId} className="bg-blue-100 text-blue-800 text-sm rounded-full py-1 px-3 mr-2 mb-2 flex items-center">
-                    {concept.label}
-                    {isEditMode && (
-                      <button 
-                        type="button" 
-                        className="ml-1 text-blue-500 hover:text-blue-700"
-                        onClick={() => handleConceptToggle(conceptId)}
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-              
-              {showConceptSearchInput && isEditMode && (
-                <div className="relative mt-2 w-full">
-                  <div className="flex items-center">
-                    <input
-                      type="text"
-                      value={conceptSearch}
-                      onChange={(e) => {
-                        setConceptSearch(e.target.value);
-                        setShowConceptDropdown(true);
-                      }}
-                      placeholder="Buscar conceptos..."
-                      className="flex-1 p-2 border border-gray-300 rounded-md"
-                      autoFocus
-                    />
-                  </div>
-                  
-                  {showConceptDropdown && (
-                    <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-40 overflow-y-auto">
-                      {filteredConcepts.length > 0 ? (
-                        filteredConcepts.map(concept => (
-                          <div 
-                            key={concept.id} 
-                            className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => handleConceptToggle(concept.id)}
-                          >
-                            {concept.label}
-                          </div>
-                        ))
-                      ) : (
-                        <div className="px-3 py-2 text-gray-500">No se encontraron conceptos</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+
+          {/* Auto aprobar */}
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-medium text-gray-700 mb-[5px] mr-[15px] ml-[15px]">¿Auto aprobar?</span>
+            <Toggle />
           </div>
+        </div>
+      
+        {/* conceptos */}
+        <div className="mb-6">
+          <div className="flex items-center mb-2">
+            <Tag className="w-4 h-4 mr-2 text-blue-600" />
+            <span className="text-sm font-medium text-gray-700">Conceptos</span>
+
+          </div>
+          
+          <div className="flex flex-wrap p-2 rounded-md">
+            {concepts.map(concept => (
+              <div 
+                key={concept.id} 
+                onClick={() => isEditMode && handleConceptToggle(concept.id)}
+                className={`
+                  flex items-center text-sm rounded-full py-2 px-4 mr-2 mb-2 cursor-pointer
+                  ${contract.concepts?.includes(concept.id) 
+                    ? 'bg-blue-100 text-blue-800' 
+                    : 'bg-white text-gray-700 border border-gray-300'}
+                  ${!isEditMode && 'pointer-events-none'}
+                `}
+              >
+                {concept.label}
+                {contract.concepts?.includes(concept.id) && isEditMode && (
+                  <X className="w-3 h-3 ml-2 text-blue-500" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
         </div>
   
       {/* Métodos de Marcaje Permitidos */}
@@ -725,7 +662,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
           >
             <div className="mb-2 rounded-full bg-white p-2 shadow-sm flex items-center justify-center w-12 h-12">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-blue-600">
-                <path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04.054-.09A13.916 13.916 0 0 0 8 11a4 4 0 1 1 8 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0 0 15.171 17m3.839-1.132c.449-1.029.81-2.118 1.05-3.262A13.918 13.918 0 0 0 20 8.416a7.963 7.963 0 0 0-1.293-2.716M17 5.393A7.969 7.969 0 0 0 12 4c-2.5 0-4.727 1.164-6.183 2.766M9.998 15h.003"></path>
+                <Fingerprint className="mr-2 h-5 w-5 text-[#0066CC]" />
               </svg>
             </div>
             <span>Huella</span>
@@ -745,8 +682,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
           >
             <div className="mb-2 rounded-full bg-white p-2 shadow-sm flex items-center justify-center w-12 h-12">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-gray-600">
-                <rect width="20" height="14" x="2" y="5" rx="2" />
-                <line x1="2" x2="22" y1="10" y2="10" />
+                <CreditCard className="mr-2 h-5 w-5 text-[#0066CC]" />
               </svg>
             </div>
             <span>Tarjeta</span>
@@ -766,11 +702,7 @@ export const ContractEditForm: React.FC<ContractEditFormProps> = ({
           >
             <div className="mb-2 rounded-full bg-white p-2 shadow-sm flex items-center justify-center w-12 h-12">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-gray-600">
-                <path d="M9 10h6V7c0-1.7-1.4-3-3-3S9 5.3 9 7z" />
-                <rect width="18" height="12" x="3" y="10" rx="2" />
-                <path d="M8 15h.01" />
-                <path d="M12 15h.01" />
-                <path d="M16 15h.01" />
+                <KeyRound className="mr-2 h-5 w-5 text-[#0066CC]" />
               </svg>
             </div>
             <span>PIN</span>
