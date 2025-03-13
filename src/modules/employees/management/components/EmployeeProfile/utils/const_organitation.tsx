@@ -46,8 +46,8 @@ export const organizationalData: TreeNodeData = {
                   manager: 'Ana Martínez',
                   employeeCount: 20,
                   id: 'grandes-clientes',
-                  icon: <LayoutGrid className="w-5 h-5 text-indigo-500" />,
-                  color: 'indigo',
+                  icon: <LayoutGrid className="w-5 h-5 text-blue-500" />,
+                  color: 'blue',
                   type: 'unit',
                   children: []
                 },
@@ -56,8 +56,8 @@ export const organizationalData: TreeNodeData = {
                   manager: 'Pedro Jiménez',
                   employeeCount: 25,
                   id: 'pymes',
-                  icon: <LayoutGrid className="w-5 h-5 text-indigo-500" />,
-                  color: 'indigo',
+                  icon: <LayoutGrid className="w-5 h-5 text-blue-500" />,
+                  color: 'blue',
                   type: 'unit',
                   children: []
                 }

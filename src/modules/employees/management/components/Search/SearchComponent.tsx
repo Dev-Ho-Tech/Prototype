@@ -50,7 +50,7 @@ export function SearchComponent({
         <h2 className="text-sm font-medium text-gray-700">Empleados</h2>
         <button
           onClick={toggleAdvancedFilters}
-          className="p-1.5 text-xs text-indigo-600 hover:bg-indigo-50 rounded-md flex items-center"
+          className="p-1.5 text-xs text-blue-600 hover:bg-blue-50 rounded-md flex items-center"
         >
           {showAdvancedFilters ? 'Búsqueda simple' : 'Búsqueda avanzada'}
           <ChevronDown className={`ml-1 w-3 h-3 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />

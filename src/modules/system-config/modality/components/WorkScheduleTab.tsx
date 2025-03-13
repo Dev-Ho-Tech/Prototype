@@ -63,8 +63,8 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({ workShift, onC
     <div className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm mt-4">
       <div className="mb-8">
         <h2 className="text-lg font-medium flex items-center text-gray-800">
-          <span className="flex items-center justify-center bg-indigo-100 w-8 h-8 rounded-full mr-2">
-            <span className="text-indigo-600">2</span>
+          <span className="flex items-center justify-center bg-blue-100 w-8 h-8 rounded-full mr-2">
+            <span className="text-blue-600">2</span>
           </span>
           Configuración Horaria
         </h2>

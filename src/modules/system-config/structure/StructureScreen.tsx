@@ -191,7 +191,7 @@ export function StructureScreen() {
                   {selectedNode.type === 'branch' && <Building className="w-8 h-8 text-green-500" />}
                   {selectedNode.type === 'department' && <Users className="w-8 h-8 text-purple-500" />}
                   {selectedNode.type === 'section' && <FolderTree className="w-8 h-8 text-amber-500" />}
-                  {selectedNode.type === 'unit' && <Briefcase className="w-8 h-8 text-indigo-500" />}
+                  {selectedNode.type === 'unit' && <Briefcase className="w-8 h-8 text-blue-500" />}
                 </div>
                 <div>
                   <h1 className="text-2xl font-semibold text-gray-900">
@@ -325,7 +325,7 @@ export function StructureScreen() {
                           {child.type === 'branch' && <Building className="w-5 h-5 text-green-500" />}
                           {child.type === 'department' && <Users className="w-5 h-5 text-purple-500" />}
                           {child.type === 'section' && <FolderTree className="w-5 h-5 text-amber-500" />}
-                          {child.type === 'unit' && <Briefcase className="w-5 h-5 text-indigo-500" />}
+                          {child.type === 'unit' && <Briefcase className="w-5 h-5 text-blue-500" />}
                           <div>
                             <h4 className="text-sm font-medium text-gray-900">
                               {child.name}

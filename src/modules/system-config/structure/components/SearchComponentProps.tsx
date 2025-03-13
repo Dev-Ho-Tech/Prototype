@@ -36,7 +36,7 @@ export function SearchComponent({
       case 'section':
         return <FolderTree className="w-5 h-5 text-amber-500 flex-shrink-0" />;
       case 'unit':
-        return <Briefcase className="w-5 h-5 text-indigo-500 flex-shrink-0" />;
+        return <Briefcase className="w-5 h-5 text-blue-500 flex-shrink-0" />;
       default:
         return <Building2 className="w-5 h-5 text-gray-400 flex-shrink-0" />;
     }

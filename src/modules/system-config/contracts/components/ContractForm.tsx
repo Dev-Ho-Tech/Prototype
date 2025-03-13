@@ -79,12 +79,12 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
         {value.length > 0 ? (
           <>
             {value.map(val => (
-              <div key={val} className="flex items-center bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-sm">
+              <div key={val} className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded text-sm">
                 {getOptionLabel(val)}
                 <button 
                   type="button" 
                   onClick={(e) => handleRemove(val, e)}
-                  className="ml-1 text-indigo-600 hover:text-indigo-800"
+                  className="ml-1 text-blue-600 hover:text-blue-800"
                 >
                   <XIcon size={14} />
                 </button>

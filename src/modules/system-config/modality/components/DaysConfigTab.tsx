@@ -27,8 +27,8 @@ export const DaysConfigTab: React.FC<DaysConfigTabProps> = ({ workShift, onChang
     <div className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm mt-4">
       <div className="mb-8">
         <h2 className="text-lg font-medium flex items-center text-gray-800">
-          <span className="flex items-center justify-center bg-indigo-100 w-8 h-8 rounded-full mr-2">
-            <span className="text-indigo-600">3</span>
+          <span className="flex items-center justify-center bg-blue-100 w-8 h-8 rounded-full mr-2">
+            <span className="text-blue-600">3</span>
           </span>
           Configuración de Días
         </h2>
@@ -60,7 +60,7 @@ export const DaysConfigTab: React.FC<DaysConfigTabProps> = ({ workShift, onChang
             <select
               value={workShift.startDayOfWeek}
               onChange={(e) => handleStartDayChange(e.target.value as DayOfWeek)}
-              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
               {daysOfWeek.map((day) => (
                 <option key={day.value} value={day.value}>

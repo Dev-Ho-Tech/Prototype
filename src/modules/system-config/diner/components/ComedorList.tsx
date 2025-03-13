@@ -79,7 +79,7 @@ const ComedorList: React.FC<ComedorListProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => onEdit(comedor)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-3"
+                      className="text-blue-600 hover:text-blue-900 mr-3"
                     >
                       <Edit className="h-5 w-5" />
                     </button>

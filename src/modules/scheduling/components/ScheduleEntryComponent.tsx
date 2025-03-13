@@ -29,39 +29,39 @@ const ScheduleEntryComponent: React.FC<ScheduleEntryComponentProps> = ({
     ? parseInt(schedule.endTime.split(':')[0]) 
     : 19;
 
-  const statusIndicator = () => {
-    if (!schedule.status) return null;
+  // const statusIndicator = () => {
+  //   if (!schedule.status) return null;
     
-    let statusClass = '';
-    let statusIcon = '';
+  //   let statusClass = '';
+  //   let statusIcon = '';
     
-    switch(schedule.status) {
-      case 'onTime':
-        statusClass = 'bg-green-600';
-        statusIcon = '✓';
-        break;
-      case 'late':
-        statusClass = 'bg-orange-600';
-        statusIcon = '!';
-        break;
-      case 'early':
-        statusClass = 'bg-yellow-600';
-        statusIcon = '↑';
-        break;
-      case 'absent':
-        statusClass = 'bg-red-600';
-        statusIcon = '✗';
-        break;
-      default:
-        return null;
-    }
+  //   switch(schedule.status) {
+  //     case 'onTime':
+  //       statusClass = 'bg-green-600';
+  //       statusIcon = '✓';
+  //       break;
+  //     case 'late':
+  //       statusClass = 'bg-orange-600';
+  //       statusIcon = '!';
+  //       break;
+  //     case 'early':
+  //       statusClass = 'bg-yellow-600';
+  //       statusIcon = '↑';
+  //       break;
+  //     case 'absent':
+  //       statusClass = 'bg-red-600';
+  //       statusIcon = '✗';
+  //       break;
+  //     default:
+  //       return null;
+  //   }
     
-    return (
-      <div className={`absolute -top-2 -right-2 w-5 h-5 ${statusClass} rounded-full flex items-center justify-center text-white text-xs`}>
-        {statusIcon}
-      </div>
-    );
-  };
+  //   return (
+  //     <div className={`absolute -top-2 -right-2 w-5 h-5 ${statusClass} rounded-full flex items-center justify-center text-white text-xs`}>
+  //       {statusIcon}
+  //     </div>
+  //   );
+  // };
 
   return (
     <div
