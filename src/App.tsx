@@ -5,7 +5,6 @@ import { LogoutModal } from './modules/auth/components/LogoutModal';
 import { authService } from './modules/auth/services/authService';
 import { Sidebar } from './components/layout/Sidebar';
 import { EmployeeManagementScreen } from './modules/employees/management/EmployeeManagementScreen';
-import { ReportsScreen } from './modules/reports/ReportsScreen';
 import { SchedulingScreen } from './modules/scheduling/SchedulingScreen';
 import { LicensesScreen } from './modules/administration/licenses/LicensesScreen';
 import { UsersScreen } from './modules/administration/users/UsersScreen';
@@ -40,6 +39,7 @@ import GeofenceModule from './modules/employees/geocerca/geocercaScreen';
 import EmailTemplatesPage from './modules/system-config/emial/emailScreen';
 import { ProfileManagementScreen } from './modules/administration/profiles/ProfileManagementScreen';
 import { WorkShiftsScreen } from './modules/system-config/modality/WorkShiftsScreen';
+import ReportsScreen from './modules/reports/ReportsScreen';
 
 // Variable para almacenar el estado global (podemos mantenerla por compatibilidad)
 // eslint-disable-next-line react-refresh/only-export-components
@@ -156,7 +156,7 @@ function AppContent() {
           <Route path="/access/visitors" element={<VisitorsScreen />} />
           <Route path="/access/permissions" element={<PermissionsScreen />} />
           <Route path="/access/monitoring" element={<MonitoringScreen />} />
-          <Route path="/reports/attendance" element={<ReportsScreen />} />
+          <Route path="/reports/attendance/*" element={<ReportsScreen />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>

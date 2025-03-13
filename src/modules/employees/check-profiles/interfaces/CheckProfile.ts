@@ -1,49 +1,38 @@
+export type CheckProfileType = 'attendance' | 'access' | 'dining';
+export type CheckProfileStatus = 'active' | 'inactive';
+export type CheckMethodType = 'fingerprint' | 'face' | 'card' | 'pin' | 'mobile';
+
+export interface CheckProfileSchedule {
+  startTime: string;
+  endTime: string;
+  daysOfWeek?: number[]; // 0-6, donde 0 es domingo
+  tolerance?: number; // minutos de tolerancia
+}
+
+export interface CheckProfileValidations {
+  requirePhoto: boolean;
+  requireLocation: boolean;
+  requireSupervisorApproval?: boolean;
+  allowOvertime?: boolean;
+  maxDistanceMeters?: number;
+}
+
 export interface CheckProfile {
   id: string;
   name: string;
   description: string;
-  status: 'active' | 'inactive';
-  type: 'attendance' | 'access' | 'dining';
-  methods: ('fingerprint' | 'face' | 'card' | 'pin')[];
-  devices: string[];
-  schedule: {
-    startTime: string;
-    endTime: string;
-    days: number[];
-  };
-  validations: {
-    requirePhoto: boolean;
-    requireLocation: boolean;
-    requireSupervisor: boolean;
-    allowOvertime: boolean;
-  };
+  type: CheckProfileType;
+  status: CheckProfileStatus;
   employeeCount: number;
-  lastModified: string;
+  schedule: CheckProfileSchedule;
+  methods: CheckMethodType[];
+  validations: CheckProfileValidations;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy?: string;
+  updatedBy?: string;
+  locations?: string[];
+  departments?: string[];
 }
 
-export interface CheckProfileCardProps {
-  profile: CheckProfile;
-  onEdit: (id: string) => void;
-  onView: (id: string) => void;
-  onDelete: (id: string) => void;
-}
-
-export interface CheckProfileDetailProps {
-  profile: CheckProfile;
-  onEdit: () => void;
-  onBack: () => void;
-}
-
-export interface CheckProfileFormProps {
-  profile?: CheckProfile;
-  isEditMode: boolean;
-  onSave: (profile: CheckProfile) => void;
-  onCancel: () => void;
-}
-
-export interface DeleteConfirmationModalProps {
-  isOpen: boolean;
-  profileName: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
+export type CheckProfileFormData = Omit<CheckProfile, 'id' | 'employeeCount' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>;
