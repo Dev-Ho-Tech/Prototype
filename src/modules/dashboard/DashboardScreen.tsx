@@ -306,14 +306,14 @@ const DashboardScreen: React.FC = () => {
           )}
 
           <div className="flex items-center space-x-2">
-            <button
+            {/* <button
               onClick={() => setShowOldDashboard(true)}
               className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
               title="Panel anterior"
               type="button"
             >
               <ArrowLeft className="w-5 h-5" />
-            </button>
+            </button> */}
             <button
               onClick={() => setViewModeAndResetMapFullscreen('grid')}
               className={`p-2 rounded-lg ${

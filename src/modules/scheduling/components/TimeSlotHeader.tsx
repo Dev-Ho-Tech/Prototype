@@ -6,19 +6,42 @@ interface TimeSlotHeaderProps {
 }
 
 const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({ startHour, endHour }) => {
-  const timeSlots = Array.from({ length: endHour - startHour }, (_, i) => {
-    const hour = (i + startHour).toString().padStart(2, '0');
-    return `${hour}:00 am`;
-  });
+  // Crear todas las horas en una sola fila horizontal
+  const timeSlots = [];
+  
+  // Generamos todas las horas desde startHour hasta endHour
+  for (let hour = startHour; hour <= endHour; hour++) {
+    const hour12 = hour % 12 === 0 ? 12 : hour % 12; // Convertir a formato 12h
+    const period = hour >= 12 ? 'pm' : 'am';
+    const formattedHour = hour12.toString().padStart(2, '0');
+    
+    // Determinar si es hora nocturna (después de 7 PM)
+    const isEveningHour = hour >= 19;
+    
+    timeSlots.push({
+      time: `${formattedHour}:00 ${period}`,
+      isEveningHour
+    });
+  }
 
+  // Calcular la cantidad de columnas para el grid
+  const totalColumns = endHour - startHour + 1;
+  
   return (
-    <div className="grid grid-cols-[repeat(13,minmax(80px,1fr))]">
-      {timeSlots.map(time => (
+    <div 
+      className="grid divide-x divide-gray-200" 
+      style={{ 
+        gridTemplateColumns: `repeat(${totalColumns}, minmax(80px, 1fr))` 
+      }}
+    >
+      {timeSlots.map((slot, index) => (
         <div 
-          key={time} 
-          className="px-2 py-1 text-xs text-gray-500 border-r border-gray-200 last:border-r-0 text-center"
+          key={index} 
+          className={`px-2 py-1 text-xs text-gray-500 text-center border-r last:border-r-0 ${
+            slot.isEveningHour ? 'bg-white' : ''
+          }`}
         >
-          {time}
+          {slot.time}
         </div>
       ))}
     </div>

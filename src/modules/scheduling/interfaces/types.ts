@@ -22,6 +22,10 @@ export interface ScheduleEntry {
   actualEntryTime?: string;
   actualExitTime?: string;
   status?: 'onTime' | 'late' | 'early' | 'absent' | 'pending';
+  isResizingStart?: boolean;
+  isResizingEnd?: boolean;
+  isMoving?: boolean;
+
 }
 
 export type Period = 'Diario' | 'Semanal' | 'Mensual' | 'Seleccionar fechas';
