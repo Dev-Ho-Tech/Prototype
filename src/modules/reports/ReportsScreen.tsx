@@ -1,32 +1,22 @@
-import React, { useState } from 'react';
-import { AttendanceReport } from './components/AttendanceReport';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import ReportsModule from './ReportsModule';
+import HotelHoursReport from './views/HotelHoursReport';
+import AttendanceReport from './views/AttendanceReport'; 
+import BiometricReport from './views/BiometricReport';
 
-export function ReportsScreen() {
-  const [period, setPeriod] = useState('weekly');
-
-  const handleExport = (format: string) => {
-    // Handle export logic
-    console.log(`Exporting in ${format} format`);
-  };
-
+const ReportsScreen: React.FC = () => {
   return (
-    <div className="flex-1 overflow-auto bg-gray-50">
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Reportes de Asistencia</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Análisis detallado de asistencia y marcajes
-            </p>
-          </div>
-        </div>
-
-        <AttendanceReport
-          period={period}
-          onPeriodChange={setPeriod}
-          onExport={handleExport}
-        />
-      </div>
-    </div>
+    <Routes>
+      <Route path="/" element={<ReportsModule />}>
+        <Route index element={<Navigate to="/reports/attendance" replace />} />
+        <Route path="hotel-hours" element={<HotelHoursReport />} />
+        <Route path="attendance-marks" element={<AttendanceReport />} />
+        <Route path="biometric-persons" element={<BiometricReport />} />
+        {/* Aquí puedes agregar más rutas para los otros tipos de reportes */}
+      </Route>
+    </Routes>
   );
-}
+};
+
+export default ReportsScreen;

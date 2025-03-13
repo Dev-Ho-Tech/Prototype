@@ -209,20 +209,20 @@ export const menuItems: MenuItem[] = [
     //   // }
     // ]
   },
-  // {
-  //   id: 'reports',
-  //   label: 'Reportes',
-  //   icon: BarChart2,
-  //   path: '/reports',
-  //   children: [
-  //     {
-  //       id: 'attendance-reports',
-  //       label: 'Asistencia',
-  //       icon: Clock,
-  //       path: '/reports/attendance'
-  //     }
-  //   ]
-  // },
+  {
+    id: 'reports',
+    label: 'Reportes',
+    icon: BarChart2,
+    path: '/reports',
+    children: [
+      {
+        id: 'attendance-reports',
+        label: 'Asistencia',
+        icon: Clock,
+        path: '/reports/attendance'
+      }
+    ]
+  },
   {
     id: 'administration',
     label: 'Administración',
