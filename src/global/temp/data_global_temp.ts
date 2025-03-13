@@ -117,8 +117,8 @@ export const globalEmployees: UnifiedEmployee[] = [
       { 
         date: '2025-02-12', 
         shift: 'D', 
-        startTime: '', 
-        endTime: '' 
+        startTime: '06:00', 
+        endTime: '16:00',
       },
       { 
         date: '2025-02-13', 

@@ -72,8 +72,8 @@ const HorarioComidaList: React.FC<HorarioComidaListProps> = ({
                 <tr key={horario.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-indigo-100 rounded-full">
-                        <Clock className="h-5 w-5 text-indigo-600" />
+                      <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-blue-100 rounded-full">
+                        <Clock className="h-5 w-5 text-blue-600" />
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{horario.nombre}</div>
@@ -103,7 +103,7 @@ const HorarioComidaList: React.FC<HorarioComidaListProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => onEdit(horario)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-3"
+                      className="text-blue-600 hover:text-blue-900 mr-3"
                     >
                       <Edit className="h-5 w-5" />
                     </button>
