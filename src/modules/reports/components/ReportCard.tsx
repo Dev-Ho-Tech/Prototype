@@ -1,7 +1,17 @@
-// src/modules/reports/components/ReportCard.tsx
 import React from 'react';
 import { ReportCategory } from '../interfaces/Report';
 import { useNavigate } from 'react-router-dom';
+import {
+  Clock,
+  Calendar,
+  ClipboardCheck,
+  Users,
+  BarChart2,
+  FileText,
+  ClipboardList,
+  TrendingUp,
+  AlertTriangle,
+} from "lucide-react";
 
 interface ReportCardProps {
   category: ReportCategory;
@@ -11,22 +21,72 @@ const ReportCard: React.FC<ReportCardProps> = ({ category }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    // Usamos la ruta completa proporcionada
     navigate(category.path);
+  };
+
+  // Función para seleccionar el icono correcto según el id o nombre de la categoría
+  const getIcon = () => {
+    // Mapping de nombres o ids a iconos
+    switch (category.name.toLowerCase()) {
+      case 'hotelería - horas trabajadas':
+        return <Clock className="h-8 w-8 text-white" />;
+      case 'planilla sin horario':
+        return <Calendar className="h-8 w-8 text-white" />;
+      case 'personas con biometría':
+        return <ClipboardCheck className="h-8 w-8 text-white" />;
+      case 'carga masiva de personas':
+        return <Users className="h-8 w-8 text-white" />;
+      case 'hotelería - sumatorio':
+        return <BarChart2 className="h-8 w-8 text-white" />;
+      case 'listado de personas':
+        return <FileText className="h-8 w-8 text-white" />;
+      case 'marcajes de asistencia':
+        return <ClipboardList className="h-8 w-8 text-white" />;
+      case 'tiempo trabajado':
+        return <TrendingUp className="h-8 w-8 text-white" />;
+      case 'tiempo sin aprobar':
+        return <AlertTriangle className="h-8 w-8 text-white" />;
+      default:
+        return <FileText className="h-8 w-8 text-white" />; // Icono por defecto
+    }
+  };
+
+  // Función para obtener el color de fondo del círculo del icono
+  const getIconBgColor = () => {
+    switch (category.name.toLowerCase()) {
+      case 'hotelería - horas trabajadas':
+        return 'bg-yellow-400'; // Amarillo
+      case 'planilla sin horario':
+        return 'bg-pink-400'; // Rosa
+      case 'personas con biometría':
+        return 'bg-green-400'; // Verde
+      case 'carga masiva de personas':
+        return 'bg-green-400'; // Verde
+      case 'hotelería - sumatorio':
+        return 'bg-blue-400'; // Azul
+      case 'listado de personas':
+        return 'bg-purple-400'; // Morado
+      case 'marcajes de asistencia':
+        return 'bg-purple-400'; // Morado
+      case 'tiempo trabajado':
+        return 'bg-lime-400'; // Verde lima
+      case 'tiempo sin aprobar':
+        return 'bg-cyan-400'; // Cian
+      default:
+        return 'bg-gray-400'; // Gris por defecto
+    }
   };
 
   return (
     <div 
-      className={`rounded-lg shadow-md p-6 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:shadow-lg ${category.color} text-white h-48`}
+      className="bg-white rounded-lg shadow-sm border border-gray-100 p-9 flex flex-col items-center text-center transition-all duration-200 hover:shadow-md hover:translate-y-[-2px] cursor-pointer"
       onClick={handleClick}
     >
-      <div className="text-4xl mb-4">
-        {/* Este sería reemplazado con un componente de icono real */}
-        <svg className="h-12 w-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
+      <div className={`${getIconBgColor()} rounded-full p-3 mb-4 flex items-center justify-center`}>
+        {getIcon()}
       </div>
-      <h3 className="text-lg font-medium text-center">{category.name}</h3>
+      <h3 className="text-lg font-semibold text-gray-800 mb-1">{category.name}</h3>
+      <p className="text-sm text-gray-500">{category.description || 'Reporte detallado'}</p>
     </div>
   );
 };
