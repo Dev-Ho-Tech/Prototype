@@ -4,73 +4,73 @@ export const mockReportCategories: ReportCategoryList = [
   {
     id: 'hotel-hours',
     name: 'Hotelería - horas trabajadas',
-    description: 'Reporte de horas trabajadas en el hotel',
-    icon: 'document-text', // Asumiendo que usaremos alguna biblioteca de iconos
-    color: 'bg-amber-500',
-    path: '/hotel-hours' // Ruta relativa que será combinada con la base
+    description: 'Reporte detallado del sector hotelero',
+    path: '/hotel-hours',
+    color: 'bg-yellow-400',
+    icon: 'clock'
   },
   {
-    id: 'schedule-without-hours',
+    id: 'no-schedule',
     name: 'Planilla sin horario',
-    description: 'Reporte de empleados sin horario asignado',
-    icon: 'document-text',
-    color: 'bg-red-300',
-    path: '/schedule-without-hours'
+    description: 'Empleados sin horario asignado',
+    path: '/no-schedule',
+    color: 'bg-pink-400',
+    icon: 'calendar'
   },
   {
-    id: 'biometric-persons',
+    id: 'biometric',
     name: 'Personas con biometría',
-    description: 'Reporte de personas con registro biométrico',
-    icon: 'document-text',
+    description: 'Datos biométricos registrados',
+    path: '/biometric',
     color: 'bg-green-400',
-    path: '/biometric-persons'
+    icon: 'clipboard-check'
   },
   {
-    id: 'bulk-person-upload',
+    id: 'bulk-upload',
     name: 'Carga masiva de personas',
-    description: 'Herramienta para carga masiva de personas',
-    icon: 'document-text',
-    color: 'bg-emerald-400',
-    path: '/bulk-person-upload'
+    description: 'Importar múltiples empleados',
+    path: '/bulk-upload',
+    color: 'bg-green-400',
+    icon: 'users'
   },
   {
     id: 'hotel-summary',
     name: 'Hotelería - sumatorio',
-    description: 'Reporte sumatorio de hotelería',
-    icon: 'document-text',
+    description: 'Resumen métricas hoteleras',
+    path: '/hotel-summary',
     color: 'bg-blue-400',
-    path: '/hotel-summary'
+    icon: 'bar-chart-2'
   },
   {
-    id: 'person-list',
+    id: 'people-list',
     name: 'Listado de personas',
-    description: 'Reporte con listado de personas',
-    icon: 'document-text',
-    color: 'bg-pink-400',
-    path: '/person-list'
-  },
-  {
-    id: 'attendance-marks',
-    name: 'Marcajes de asistencia',
-    description: 'Reporte de marcajes de asistencia',
-    icon: 'flag',
+    description: 'Directorio completo de personal',
+    path: '/people-list',
     color: 'bg-purple-400',
-    path: '/attendance-marks'
+    icon: 'file-text'
   },
   {
-    id: 'time-worked',
+    id: 'attendance',
+    name: 'Marcajes de asistencia',
+    description: 'Registro entradas y salidas',
+    path: '/attendance',
+    color: 'bg-purple-400',
+    icon: 'clipboard-list'
+  },
+  {
+    id: 'worked-time',
     name: 'Tiempo trabajado',
-    description: 'Reporte de tiempo trabajado',
-    icon: 'calendar',
+    description: 'Análisis de horas por persona',
+    path: '/worked-time',
     color: 'bg-lime-400',
-    path: '/time-worked'
+    icon: 'trending-up'
   },
   {
-    id: 'unapproved-time',
+    id: 'pending-approval',
     name: 'Tiempo sin aprobar',
-    description: 'Reporte de tiempo sin aprobar',
-    icon: 'document-text',
+    description: 'Horas pendientes de aprobación',
+    path: '/pending-approval',
     color: 'bg-cyan-400',
-    path: '/unapproved-time'
+    icon: 'alert-triangle'
   }
 ];
