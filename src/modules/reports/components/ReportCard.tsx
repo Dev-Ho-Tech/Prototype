@@ -29,25 +29,25 @@ const ReportCard: React.FC<ReportCardProps> = ({ category }) => {
     // Mapping de nombres o ids a iconos
     switch (category.name.toLowerCase()) {
       case 'hotelería - horas trabajadas':
-        return <Clock className="h-7 w-7 text-white" />;
+        return <Clock className="h-8 w-8 text-white" />;
       case 'planilla sin horario':
-        return <Calendar className="h-7 w-7 text-white" />;
+        return <Calendar className="h-8 w-8 text-white" />;
       case 'personas con biometría':
-        return <ClipboardCheck className="h-7 w-7 text-white" />;
+        return <ClipboardCheck className="h-8 w-8 text-white" />;
       case 'carga masiva de personas':
-        return <Users className="h-7 w-7 text-white" />;
+        return <Users className="h-8 w-8 text-white" />;
       case 'hotelería - sumatorio':
-        return <BarChart2 className="h-7 w-7 text-white" />;
+        return <BarChart2 className="h-8 w-8 text-white" />;
       case 'listado de personas':
-        return <FileText className="h-7 w-7 text-white" />;
+        return <FileText className="h-8 w-8 text-white" />;
       case 'marcajes de asistencia':
-        return <ClipboardList className="h-7 w-7 text-white" />;
+        return <ClipboardList className="h-8 w-8 text-white" />;
       case 'tiempo trabajado':
-        return <TrendingUp className="h-7 w-7 text-white" />;
+        return <TrendingUp className="h-8 w-8 text-white" />;
       case 'tiempo sin aprobar':
-        return <AlertTriangle className="h-7 w-7 text-white" />;
+        return <AlertTriangle className="h-8 w-8 text-white" />;
       default:
-        return <FileText className="h-7 w-7 text-white" />; // Icono por defecto
+        return <FileText className="h-8 w-8 text-white" />; // Icono por defecto
     }
   };
 
@@ -79,7 +79,7 @@ const ReportCard: React.FC<ReportCardProps> = ({ category }) => {
 
   return (
     <div 
-      className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 flex flex-col items-center text-center transition-all duration-200 hover:shadow-md hover:translate-y-[-2px] cursor-pointer"
+      className="bg-white rounded-lg shadow-sm border border-gray-100 p-9 flex flex-col items-center text-center transition-all duration-200 hover:shadow-md hover:translate-y-[-2px] cursor-pointer"
       onClick={handleClick}
     >
       <div className={`${getIconBgColor()} rounded-full p-3 mb-4 flex items-center justify-center`}>
