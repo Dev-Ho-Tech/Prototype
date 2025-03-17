@@ -1,6 +1,12 @@
 import { Building2, Factory, Users, Briefcase, Home, LayoutGrid } from "lucide-react";
 import { TreeNodeData } from "../../../interface/types";
 
+
+// IDs para preselección de estructura
+export const COMPANY_ID = 'caldelpa-empresas';
+export const OPERATIONS_ID = 'caldelpa-operaciones';
+
+
 export const organizationalData: TreeNodeData = {
   name: 'Caldelpa S.a.(Empresas)',
   manager: 'Roberto Henríquez Martínez',

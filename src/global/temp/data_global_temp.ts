@@ -5,6 +5,31 @@ import {
   Dispositivo,
 } from '../interfaces/unifiedTypes';
 
+// Funciones auxiliares para fechas
+const currentDate = new Date();
+const formatDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Fechas para ingresos y egresos recientes
+const fifteenDaysAgo = new Date(currentDate);
+fifteenDaysAgo.setDate(currentDate.getDate() - 15);
+
+const sevenDaysAgo = new Date(currentDate);
+sevenDaysAgo.setDate(currentDate.getDate() - 7);
+
+const fiveDaysAgo = new Date(currentDate);
+fiveDaysAgo.setDate(currentDate.getDate() - 5);
+
+const twentyDaysAgo = new Date(currentDate);
+twentyDaysAgo.setDate(currentDate.getDate() - 20);
+
+const twentyFiveDaysAgo = new Date(currentDate);
+twentyFiveDaysAgo.setDate(currentDate.getDate() - 25);
+
 // Definición de turnos de trabajo
 export const workShifts: WorkShift[] = [
   { id: 'A', label: 'A', startTime: '08:00', endTime: '16:00', color: 'bg-indigo-600 text-white' },
@@ -69,6 +94,258 @@ export const departments = [
 ];
 
 // Datos combinados de empleados para el modelo unificado
+const inactiveEmployees = [
+  {
+    id: '2001',
+    codigo: '2001',
+    primerNombre: 'Javier',
+    segundoNombre: '',
+    primerApellido: 'Castillo',
+    segundoApellido: '',
+    nombre: 'Javier',
+    apellidos: 'Castillo',
+    name: 'Javier Castillo',
+    initial: 'J',
+    telefono: '+1809-555-1001',
+    correo: 'javier.castillo@hodelpa.com',
+    position: 'Asistente de Cocina',
+    department: 'Alimentos y Bebidas',
+    section: 'Cocina',
+    unit: 'Cocina Fría',
+    location: 'Hodelpa Gran Almirante',
+    company: 'Caridelpa, S.A.',
+    method: 'Huella',
+    status: 'inactive', // Estado inactivo
+    contractType: 'Indefinido',
+    fechaInicialContrato: '2022-05-15',
+    fechaFinalContrato: '2024-08-30', // Contrato finalizado hace unos meses
+    displayName: 'Javier Castillo',
+    fullName: 'Javier Castillo'
+  },
+  {
+    id: '2002',
+    codigo: '2002',
+    primerNombre: 'Patricia',
+    segundoNombre: 'Elena',
+    primerApellido: 'Vásquez',
+    segundoApellido: '',
+    nombre: 'Patricia Elena',
+    apellidos: 'Vásquez',
+    name: 'Patricia Elena Vásquez',
+    initial: 'P',
+    telefono: '+1809-555-1002',
+    correo: 'patricia.vasquez@hodelpa.com',
+    position: 'Recepcionista',
+    department: 'Habitaciones',
+    section: 'Recepción',
+    unit: 'Recepción Tarde',
+    location: 'Hodelpa Garden',
+    company: 'Caridelpa, S.A.',
+    method: 'Rostro',
+    status: 'inactive', // Estado inactivo
+    contractType: 'Temporal',
+    fechaInicialContrato: '2023-11-01',
+    fechaFinalContrato: '2024-05-01', // Contrato finalizado hace varios meses
+    displayName: 'Patricia Elena Vásquez',
+    fullName: 'Patricia Elena Vásquez'
+  },
+  {
+    id: '2003',
+    codigo: '2003',
+    primerNombre: 'Manuel',
+    segundoNombre: '',
+    primerApellido: 'Ortiz',
+    segundoApellido: '',
+    nombre: 'Manuel',
+    apellidos: 'Ortiz',
+    name: 'Manuel Ortiz',
+    initial: 'M',
+    telefono: '+1809-555-1003',
+    correo: 'manuel.ortiz@hodelpa.com',
+    position: 'Mantenimiento',
+    department: 'Mantenimiento',
+    section: 'Mantenimiento',
+    unit: 'Mantenimiento General',
+    location: 'Centro Plaza Hodelpa',
+    company: 'Caridelpa, S.A.',
+    method: 'Huella',
+    status: 'inactive', // Estado inactivo
+    contractType: 'Indefinido',
+    fechaInicialContrato: '2021-07-10',
+    fechaFinalContrato: '2024-09-15', // Contrato finalizado recientemente
+    displayName: 'Manuel Ortiz',
+    fullName: 'Manuel Ortiz'
+  }
+];
+
+const recentAdditions = [
+  {
+    id: '3001',
+    codigo: '3001',
+    primerNombre: 'Carolina',
+    segundoNombre: '',
+    primerApellido: 'Martínez',
+    segundoApellido: '',
+    nombre: 'Carolina',
+    apellidos: 'Martínez',
+    name: 'Carolina Martínez',
+    initial: 'C',
+    telefono: '+1809-555-2001',
+    correo: 'carolina.martinez@hodelpa.com',
+    position: 'Asistente de Eventos',
+    department: 'Eventos',
+    section: 'Eventos',
+    unit: 'Eventos Corporativos',
+    location: 'Hodelpa Gran Almirante',
+    company: 'Caridelpa, S.A.',
+    method: 'Rostro',
+    status: 'active',
+    contractType: 'Temporal',
+    fechaInicialContrato: formatDate(fifteenDaysAgo), // Contratada hace 15 días
+    fechaFinalContrato: '2025-06-30',
+    displayName: 'Carolina Martínez',
+    fullName: 'Carolina Martínez'
+  },
+  {
+    id: '3002',
+    codigo: '3002',
+    primerNombre: 'Fernando',
+    segundoNombre: '',
+    primerApellido: 'Ruiz',
+    segundoApellido: 'Medina',
+    nombre: 'Fernando',
+    apellidos: 'Ruiz Medina',
+    name: 'Fernando Ruiz Medina',
+    initial: 'F',
+    telefono: '+1809-555-2002',
+    correo: 'fernando.ruiz@hodelpa.com',
+    position: 'Bartender',
+    department: 'Alimentos y Bebidas',
+    section: 'Bar',
+    unit: 'Bar Lounge',
+    location: 'Hodelpa Garden',
+    company: 'Caridelpa, S.A.',
+    method: 'Huella',
+    status: 'active',
+    contractType: 'Indefinido',
+    fechaInicialContrato: formatDate(sevenDaysAgo), // Contratado hace 7 días
+    displayName: 'Fernando Ruiz Medina',
+    fullName: 'Fernando Ruiz Medina'
+  },
+  {
+    id: '3003',
+    codigo: '3003',
+    primerNombre: 'Gabriela',
+    segundoNombre: 'María',
+    primerApellido: 'Pérez',
+    segundoApellido: 'Sánchez',
+    nombre: 'Gabriela María',
+    apellidos: 'Pérez Sánchez',
+    name: 'Gabriela María Pérez Sánchez',
+    initial: 'G',
+    telefono: '+1809-555-2003',
+    correo: 'gabriela.perez@hodelpa.com',
+    position: 'Recepcionista',
+    department: 'Habitaciones',
+    section: 'Recepción',
+    unit: 'Recepción Mañana',
+    location: 'Centro Plaza Hodelpa',
+    company: 'Caridelpa, S.A.',
+    method: 'Rostro',
+    status: 'active',
+    contractType: 'Temporal',
+    fechaInicialContrato: formatDate(currentDate), // Contratada hoy
+    fechaFinalContrato: '2025-03-31',
+    displayName: 'Gabriela María Pérez Sánchez',
+    fullName: 'Gabriela María Pérez Sánchez'
+  }
+];
+
+const recentExits = [
+  {
+    id: '4001',
+    codigo: '4001',
+    primerNombre: 'Héctor',
+    segundoNombre: '',
+    primerApellido: 'Durán',
+    segundoApellido: '',
+    nombre: 'Héctor',
+    apellidos: 'Durán',
+    name: 'Héctor Durán',
+    initial: 'H',
+    telefono: '+1809-555-3001',
+    correo: 'hector.duran@hodelpa.com',
+    position: 'Chef de Partida',
+    department: 'Alimentos y Bebidas',
+    section: 'Cocina',
+    unit: 'Cocina Fría',
+    location: 'Hodelpa Garden',
+    company: 'Caridelpa, S.A.',
+    method: 'Huella',
+    status: 'inactive',
+    contractType: 'Temporal',
+    fechaInicialContrato: '2023-09-01',
+    fechaFinalContrato: formatDate(fiveDaysAgo), // Salió hace 5 días
+    displayName: 'Héctor Durán',
+    fullName: 'Héctor Durán'
+  },
+  {
+    id: '4002',
+    codigo: '4002',
+    primerNombre: 'Leticia',
+    segundoNombre: '',
+    primerApellido: 'Núñez',
+    segundoApellido: '',
+    nombre: 'Leticia',
+    apellidos: 'Núñez',
+    name: 'Leticia Núñez',
+    initial: 'L',
+    telefono: '+1809-555-3002',
+    correo: 'leticia.nunez@hodelpa.com',
+    position: 'Camarera',
+    department: 'Habitaciones',
+    section: 'Habitaciones',
+    unit: 'Limpieza VIP',
+    location: 'Hodelpa Gran Almirante',
+    company: 'Caridelpa, S.A.',
+    method: 'Rostro',
+    status: 'inactive',
+    contractType: 'Indefinido',
+    fechaInicialContrato: '2022-03-15',
+    fechaFinalContrato: formatDate(twentyDaysAgo), // Salió hace 20 días
+    displayName: 'Leticia Núñez',
+    fullName: 'Leticia Núñez'
+  },
+  {
+    id: '4003',
+    codigo: '4003',
+    primerNombre: 'Oscar',
+    segundoNombre: 'Roberto',
+    primerApellido: 'Mejía',
+    segundoApellido: '',
+    nombre: 'Oscar Roberto',
+    apellidos: 'Mejía',
+    name: 'Oscar Roberto Mejía',
+    initial: 'O',
+    telefono: '+1809-555-3003',
+    correo: 'oscar.mejia@hodelpa.com',
+    position: 'Seguridad',
+    department: 'Otros',
+    section: 'Seguridad',
+    unit: 'Seguridad Externa',
+    location: 'Centro Plaza Hodelpa',
+    company: 'Caridelpa, S.A.',
+    method: 'Huella',
+    status: 'inactive',
+    contractType: 'Temporal',
+    fechaInicialContrato: '2023-12-01',
+    fechaFinalContrato: formatDate(twentyFiveDaysAgo), // Salió hace 25 días
+    displayName: 'Oscar Roberto Mejía',
+    fullName: 'Oscar Roberto Mejía'
+  }
+];
+
+
 export const globalEmployees: UnifiedEmployee[] = [
   {
     id: '1001',
@@ -460,9 +737,7 @@ export const globalEmployees: UnifiedEmployee[] = [
     nombre: 'Laura',
     apellidos: 'Guzmán',
     name: 'Laura Guzmán',
-    initial: 'L',
-    telefono: '+1809-555-0009',
-    correo: 'laura.guzman@hodelpa.com',
+// Already moved above
     position: 'Camarera',
     department: 'Habitaciones',
     section: 'Habitaciones',
@@ -540,4 +815,11 @@ export const globalEmployees: UnifiedEmployee[] = [
       }
     ]
   },
+ ...inactiveEmployees.map(emp => ({ ...emp, status: 'inactive' as const })),
+ ...recentAdditions.map(emp => ({ ...emp, status: 'active' as const })),
+ ...recentExits.map(emp => ({ ...emp, status: 'inactive' as const }))
+
 ];
+
+
+

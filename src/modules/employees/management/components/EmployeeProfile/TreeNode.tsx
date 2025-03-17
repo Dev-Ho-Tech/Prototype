@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, X, Building2, Check, Users, Home, LayoutGrid, Briefcase, Search } from 'lucide-react';
 import { LocationSelection, StructureModalProps, TreeNodeData, TreeNodeProps } from '../../interface/types';
-import { organizationalData } from './utils/const_organitation';
+import {  organizationalData } from './utils/const_organitation';
 
 // Componente para cada nodo del árbol
 const TreeNode: React.FC<TreeNodeProps> = ({ 
@@ -52,7 +52,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         case 'green': bgColor = 'bg-green-100'; break;
         case 'purple': bgColor = 'bg-purple-100'; break;
         case 'amber': bgColor = 'bg-amber-100'; break;
-        case 'blue': bgColor = 'bg-blue-100'; break;
         default: bgColor = 'bg-gray-100';
       }
     } else {
@@ -366,10 +365,21 @@ export const StructureModal: React.FC<StructureModalProps> = ({
   onSelectLocations,
   initialSelectedLocations = []
 }) => {
-  const [selectedLocations, setSelectedLocations] = useState<string[]>(initialSelectedLocations);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Usar useEffect para inicializar selectedLocations cuando initialSelectedLocations cambia
+  useEffect(() => {
+    if (isOpen && initialSelectedLocations.length > 0) {
+      setSelectedLocations(initialSelectedLocations);
+    }
+  }, [isOpen, initialSelectedLocations]);
 
+  // Retornar null temprano si el modal no está abierto
   if (!isOpen) return null;
+  
+  // Calcular selectedNodes DESPUÉS del guard clause
+  const selectedNodes = getSelectedNodesInfo(organizationalData, selectedLocations);
 
   const handleToggleSelect = (nodeId: string) => {
     setSelectedLocations(prev => {
@@ -396,8 +406,6 @@ export const StructureModal: React.FC<StructureModalProps> = ({
   const handleRemoveSelection = (id: string) => {
     setSelectedLocations(prev => prev.filter(itemId => itemId !== id));
   };
-
-  const selectedNodes = getSelectedNodesInfo(organizationalData, selectedLocations);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
