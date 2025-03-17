@@ -1,4 +1,5 @@
-import { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from 'react';
 import { ActionButtons } from './EmployeeProfile/ActionButtons';
 import { EmployeeHeader } from './EmployeeProfile/EmployeeHeader';
 import { StructureModal } from './EmployeeProfile/TreeNode';
@@ -8,6 +9,7 @@ import { useAppState } from '../../../../global/context/AppStateContext';
 import { UnifiedEmployee } from '../../../../global/interfaces/unifiedTypes';
 import PerfilesMarcajeSelector from './EmployeeProfile/PerfilesMarcajeSelector';
 import DocumentTypeSelector from './EmployeeProfile/DocumentTypeSelector';
+import { COMPANY_ID, OPERATIONS_ID } from './EmployeeProfile/utils/const_organitation';
 
 export const EmployeeProfileForm = ({ 
   employee, 
@@ -18,11 +20,35 @@ export const EmployeeProfileForm = ({
 }) => {
   const { setCurrentEmployee } = useAppState();
   const [showStructureModal, setShowStructureModal] = useState(false);
+  const [initialStructureSelections, setInitialStructureSelections] = useState<string[]>([]);
+  // Removemos la inicialización con initialSelectedLocations que no está definida
+  const [, setSelectedLocations] = useState<string[]>([]);
   
   // Estado para controlar los métodos de marcaje seleccionados
   const [selectedBiometrics, setSelectedBiometrics] = useState<string[]>(
     employee?.biometricMethods || ['rostro']
   );
+
+  const handleOpenStructureModal = () => {
+    // Preseleccionamos empresa y operaciones
+    setInitialStructureSelections([COMPANY_ID, OPERATIONS_ID]);
+    setShowStructureModal(true);
+  };
+
+  // Eliminamos este useEffect que usa isOpen que no está definido
+  // O lo reemplazamos con uno que use showStructureModal
+  useEffect(() => {
+    if (showStructureModal && initialStructureSelections.length > 0) {
+      setSelectedLocations(initialStructureSelections);
+    }
+  }, [showStructureModal, initialStructureSelections]);
+
+  // Función para manejar la selección de ubicaciones desde el modal
+  const handleSelectStructures = (structures: any[]) => {
+    // Actualiza el estado con las ubicaciones seleccionadas
+    console.log('Estructuras seleccionadas:', structures);
+    // Implementar la actualización de departamento/sección si es necesario
+  };
 
   const [personalData, setPersonalData] = useState({
     primerNombre: employee?.primerNombre || '',
@@ -48,6 +74,8 @@ export const EmployeeProfileForm = ({
     tipoPlanificacion: employee?.tipoPlanificacion || '',
     cargo: employee?.position || employee?.cargo || '',
     perfilesMarcaje: employee?.perfilesMarcaje || ['Principal'],
+    department: employee?.department || '',
+    section: employee?.section || ''
   });
 
   // Función para manejar la selección de métodos biométricos
@@ -114,13 +142,14 @@ export const EmployeeProfileForm = ({
       position: laborData.cargo,
       cargo: laborData.cargo,
       perfilesMarcaje: laborData.perfilesMarcaje,
+      department: laborData.department,
+      section: laborData.section,
       
       // Agregar los métodos biométricos seleccionados
       biometricMethods: selectedBiometrics,
       
       // Calcular campos derivados
       fullName: `${personalData.primerNombre} ${personalData.segundoNombre ? personalData.segundoNombre + ' ' : ''}${personalData.primerApellido} ${personalData.segundoApellido || ''}`.trim(),
-      section: employee?.section || '', // Mantener la sección actual si existe
       method: employee?.method || 'Biométrico', // Valor por defecto
       status: employee?.status || 'active', // Valor por defecto
     };
@@ -493,7 +522,7 @@ export const EmployeeProfileForm = ({
                   <button 
                     type="button" 
                     className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                    onClick={() => setShowStructureModal(true)}
+                    onClick={handleOpenStructureModal}
                   >
                     <Eye className="w-4 h-4 mr-1" />
                     Ver estructura
@@ -558,7 +587,16 @@ export const EmployeeProfileForm = ({
         {/* Modal de Estructura Organizacional */}
         <StructureModal 
           isOpen={showStructureModal}
-          onClose={() => setShowStructureModal(false)}
+          onClose={() => {
+            setShowStructureModal(false);
+            // Limpiar las selecciones iniciales al cerrar
+            setInitialStructureSelections([]);
+          }}
+          onSelectLocations={handleSelectStructures}
+          initialSelectedLocations={initialStructureSelections}
+          employeeLocation={laborData.sede}
+          employeeDepartment={laborData.department}
+          employeeSection={laborData.section}
         />
       </div>
     </div>
