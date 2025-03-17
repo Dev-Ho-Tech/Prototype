@@ -288,7 +288,7 @@ const DashboardScreen: React.FC = () => {
               setSearchTerm={setSearchTerm}
               showAdvancedFilters={showAdvancedFilters}
               toggleAdvancedFilters={toggleAdvancedFilters}
-              placeholder="Buscar por nombre o país"
+              placeholder="Buscar por ID, Cédula, Nombre, Sede, Departamento..."
               className="relative flex-1 max-w-2xl mx-8"
               advancedFiltersComponent={
                 <AdvancedFiltersDashboard
