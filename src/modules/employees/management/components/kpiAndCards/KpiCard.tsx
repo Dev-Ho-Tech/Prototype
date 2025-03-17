@@ -11,11 +11,35 @@ interface KpiCardProps {
   };
   suffix?: string;
   iconColor?: string;
+  filterKey?: string; // Nueva prop para identificar el tipo de filtro
+  isActive?: boolean; // Para mostrar si está seleccionado
+  onClick?: (filterKey: string) => void; // Función para manejar el clic
 }
 
-export function KpiCard({ title, value, icon, trend, suffix, iconColor = 'text-blue-400' }: KpiCardProps) {
+export function KpiCard({ 
+  title, 
+  value, 
+  icon, 
+  trend, 
+  suffix, 
+  iconColor = 'text-blue-400', 
+  filterKey, 
+  isActive = false,
+  onClick 
+}: KpiCardProps) {
+  const handleClick = () => {
+    if (onClick && filterKey) {
+      onClick(filterKey);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 transition-all duration-200 hover:shadow-md hover:translate-y-[-2px] cursor-pointer">
+    <div 
+      className={`bg-white rounded-xl shadow-sm p-6 transition-all duration-200 
+        hover:shadow-md hover:translate-y-[-2px] cursor-pointer
+        ${isActive ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
+      onClick={handleClick}
+    >
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-500">{title}</p>
@@ -36,7 +60,7 @@ export function KpiCard({ title, value, icon, trend, suffix, iconColor = 'text-b
             {suffix && <span className="ml-2 text-sm text-gray-500">{suffix}</span>}
           </div>
         </div>
-        <div className={iconColor}>
+        <div className={`${iconColor} ${isActive ? 'text-blue-600' : ''}`}>
           {icon}
         </div>
       </div>

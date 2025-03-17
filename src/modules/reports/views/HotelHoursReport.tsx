@@ -367,7 +367,7 @@ const HotelHoursReport: React.FC = () => {
                   <tr>
                     <td className="px-4 py-2 text-center text-sm border border-gray-200 bg-gray-50">1</td>
                     <td colSpan={7} className="px-4 py-2 text-center text-sm font-semibold border border-gray-200">
-                      MyIntelli
+                      Ho-Tech
                     </td>
                   </tr>
                   
