@@ -14,6 +14,8 @@ interface ScheduleGridProps {
   setDragInfo: React.Dispatch<React.SetStateAction<DragInfo | null>>;
   startDate?: string;
   endDate?: string;
+  timeStep?: number;
+  onScheduleUpdate?: (updatedEntry: ScheduleEntry) => void;
 }
 
 const ScheduleGrid: React.FC<ScheduleGridProps> = ({
@@ -25,75 +27,240 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   dragInfo,
   setDragInfo,
   startDate,
-  endDate
+  endDate,
+  timeStep = 15,
+  onScheduleUpdate
 }) => {
-  // Rango de horas visible (5:00 AM hasta 11:00 PM)
   const startHour = 5;
   const endHour = 23;
   
-  // Referencia al contenedor de la cuadrícula para calcular posiciones
   const gridRef = useRef<HTMLDivElement>(null);
-  
-  // Estado para almacenar el ancho de cada celda de hora (para cálculos precisos)
-  const [cellWidth, setCellWidth] = useState(0);
-  
-  // Agregar un estado para manejar el arrastre global del documento
   const [isDragging, setIsDragging] = useState(false);
   
-  // Efecto para calcular el ancho de celda cuando el componente se monta o redimensiona
+  // Estado para el tooltip
+  const [tooltip, setTooltip] = useState({
+    show: false,
+    content: '',
+    x: 0,
+    y: 0
+  });
+  
+  // Efecto para manejar eventos globales durante redimensionado
   useEffect(() => {
-    const updateCellWidth = () => {
-      if (gridRef.current) {
-        const gridWidth = gridRef.current.getBoundingClientRect().width - 80; // Restar el ancho de la columna de días
-        const totalColumns = endHour - startHour + 1;
-        setCellWidth(gridWidth / totalColumns);
+    if (!isDragging || !dragInfo) return;
+    
+    console.log('[GRID] Configurando manejadores globales');
+    
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      
+      if (!gridRef.current) return;
+      
+      // Actualizar tooltip
+      setTooltip(prev => ({
+        ...prev,
+        x: e.clientX,
+        y: e.clientY - 30
+      }));
+      
+      // Obtener elemento que se está redimensionando
+      const dayDate = dragInfo.scheduleEntry.date;
+      const shiftId = dragInfo.scheduleEntry.shift;
+      const entryId = `schedule-entry-${dayDate}-${shiftId}`;
+      const entryElement = document.getElementById(entryId);
+      
+      if (!entryElement) {
+        console.log('[GRID] No se encontró el elemento:', entryId);
+        return;
+      }
+      
+      // Obtener dimensiones
+      const gridRect = gridRef.current.getBoundingClientRect();
+      const totalWidth = gridRect.width - 80; // Restar ancho de columna de días
+      const totalHours = endHour - startHour;
+      
+      // Parsear horarios actuales
+      const startTimeParts = dragInfo.scheduleEntry.startTime.split(':');
+      const endTimeParts = dragInfo.scheduleEntry.endTime.split(':');
+      
+      let startTimeHour = parseInt(startTimeParts[0]);
+      let startTimeMinutes = parseInt(startTimeParts[1] || '0');
+      let endTimeHour = parseInt(endTimeParts[0]);
+      let endTimeMinutes = parseInt(endTimeParts[1] || '0');
+      
+      // Obtener posición del mouse relativa a la cuadrícula
+      const offsetX = e.clientX - gridRect.left - 80;
+      const hourDecimal = startHour + (offsetX / totalWidth) * totalHours;
+      
+      // Calcular hora y minutos con snap a incrementos
+      const hour = Math.floor(hourDecimal);
+      let minutes = Math.floor((hourDecimal - hour) * 60);
+      minutes = Math.round(minutes / timeStep) * timeStep;
+      
+      const newHour = Math.max(startHour, Math.min(endHour, minutes === 60 ? hour + 1 : hour));
+      const newMinutes = minutes === 60 ? 0 : minutes;
+      
+      // Calcular duración actual en minutos
+      const durationMinutes = 
+        (endTimeHour * 60 + endTimeMinutes) - 
+        (startTimeHour * 60 + startTimeMinutes);
+      
+      // Aplicar cambios según el tipo de operación
+      if (dragInfo.isResizing) {
+        if (dragInfo.isStartHandle) {
+          // Redimensionar desde la izquierda
+          const newStartTimeMinutesTotal = newHour * 60 + newMinutes;
+          const endTimeMinutesTotal = endTimeHour * 60 + endTimeMinutes;
+          
+          // Asegurar duración mínima (30 min)
+          if (newStartTimeMinutesTotal < endTimeMinutesTotal - 30) {
+            // Calcular nueva posición y ancho
+            const newStartHourDecimal = newHour + (newMinutes / 60);
+            const newLeftPercent = ((newStartHourDecimal - startHour) / totalHours) * 100;
+            const newEndHourDecimal = endTimeHour + (endTimeMinutes / 60);
+            const newWidth = ((newEndHourDecimal - newStartHourDecimal) / totalHours) * 100;
+            
+            // Aplicar cambios
+            console.log('[GRID] Redimensionando izquierda:', { 
+              left: newLeftPercent, 
+              width: newWidth,
+              newTime: `${newHour}:${newMinutes}`
+            });
+            
+            entryElement.style.left = `${newLeftPercent}%`;
+            entryElement.style.width = `${newWidth}%`;
+            
+            // Actualizar horario
+            const formattedNewTime = `${newHour.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
+            dragInfo.scheduleEntry.startTime = formattedNewTime;
+            
+            // Actualizar tooltip
+            setTooltip(prev => ({
+              ...prev,
+              content: `${formattedNewTime} - ${dragInfo.scheduleEntry.endTime}`
+            }));
+          }
+        } else {
+          // Redimensionar desde la derecha
+          const startTimeMinutesTotal = startTimeHour * 60 + startTimeMinutes;
+          const newEndTimeMinutesTotal = newHour * 60 + newMinutes;
+          
+          // Asegurar duración mínima (30 min)
+          if (newEndTimeMinutesTotal > startTimeMinutesTotal + 30 && newHour <= endHour) {
+            // Calcular nuevo ancho
+            const startHourDecimal = startTimeHour + (startTimeMinutes / 60);
+            const newEndHourDecimal = newHour + (newMinutes / 60);
+            const newWidth = ((newEndHourDecimal - startHourDecimal) / totalHours) * 100;
+            
+            // Aplicar cambios
+            console.log('[GRID] Redimensionando derecha:', { 
+              width: newWidth,
+              newTime: `${newHour}:${newMinutes}`
+            });
+            
+            entryElement.style.width = `${newWidth}%`;
+            
+            // Actualizar horario
+            const formattedNewTime = `${newHour.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
+            dragInfo.scheduleEntry.endTime = formattedNewTime;
+            
+            // Actualizar tooltip
+            setTooltip(prev => ({
+              ...prev,
+              content: `${dragInfo.scheduleEntry.startTime} - ${formattedNewTime}`
+            }));
+          }
+        }
+      } else {
+        // Mover evento completo
+        // Ajustar posición para centrar en el mouse
+        const eventMouseOffset = dragInfo.initialWidth / 2;
+        const adjustedOffsetX = offsetX - eventMouseOffset;
+        const adjustedHourDecimal = startHour + (adjustedOffsetX / totalWidth) * totalHours;
+        
+        // Calcular nueva hora de inicio con snap a incrementos
+        const adjustedHour = Math.floor(adjustedHourDecimal);
+        let adjustedMinutes = Math.floor((adjustedHourDecimal - adjustedHour) * 60);
+        adjustedMinutes = Math.round(adjustedMinutes / timeStep) * timeStep;
+        
+        const newStartHour = Math.max(startHour, adjustedHour);
+        const newStartMinutes = adjustedMinutes === 60 ? 0 : adjustedMinutes;
+        
+        // Calcular nueva hora de fin basada en la duración original
+        let newEndHour = newStartHour + Math.floor(durationMinutes / 60);
+        let newEndMinutes = newStartMinutes + (durationMinutes % 60);
+        
+        if (newEndMinutes >= 60) {
+          newEndHour += 1;
+          newEndMinutes -= 60;
+        }
+        
+        // Verificar límites
+        if (newStartHour >= startHour && newEndHour <= endHour) {
+          // Calcular nueva posición
+          const newStartHourDecimal = newStartHour + (newStartMinutes / 60);
+          const newLeftPercent = ((newStartHourDecimal - startHour) / totalHours) * 100;
+          
+          // Aplicar cambios
+          console.log('[GRID] Moviendo:', { 
+            left: newLeftPercent,
+            newStart: `${newStartHour}:${newStartMinutes}`,
+            newEnd: `${newEndHour}:${newEndMinutes}`
+          });
+          
+          entryElement.style.left = `${newLeftPercent}%`;
+          
+          // Actualizar horario
+          const formattedStartTime = `${newStartHour.toString().padStart(2, '0')}:${newStartMinutes.toString().padStart(2, '0')}`;
+          const formattedEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinutes.toString().padStart(2, '0')}`;
+          
+          dragInfo.scheduleEntry.startTime = formattedStartTime;
+          dragInfo.scheduleEntry.endTime = formattedEndTime;
+          
+          // Actualizar tooltip
+          setTooltip(prev => ({
+            ...prev,
+            content: `${formattedStartTime} - ${formattedEndTime}`
+          }));
+        }
       }
     };
     
-    // Actualizar inicialmente
-    updateCellWidth();
+    const handleGlobalMouseUp = (e: MouseEvent) => {
+      console.log('[GRID] Finalizando operación');
+      
+      if (dragInfo?.scheduleEntry && onScheduleUpdate) {
+        console.log('[GRID] Notificando actualización:', dragInfo.scheduleEntry);
+        onScheduleUpdate(dragInfo.scheduleEntry);
+      }
+      
+      // Limpiar
+      setIsDragging(false);
+      setDragInfo(null);
+      setTooltip(prev => ({ ...prev, show: false }));
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = '';
+    };
     
-    // Actualizar en caso de redimensionamiento
-    window.addEventListener('resize', updateCellWidth);
-    return () => window.removeEventListener('resize', updateCellWidth);
-  }, [endHour, startHour]);
-  
-  // Efecto para manejar el arrastre global
-  useEffect(() => {
-    if (isDragging) {
-      const handleGlobalMouseMove = (e: MouseEvent) => {
-        if (dragInfo && isDragging) {
-          handleMouseMoveEvent(e);
-        }
-      };
-      
-      const handleGlobalMouseUp = () => {
-        setIsDragging(false);
-        handleMouseUpEvent();
-      };
-      
-      // Agregar eventos globales durante el arrastre
-      document.addEventListener('mousemove', handleGlobalMouseMove);
-      document.addEventListener('mouseup', handleGlobalMouseUp);
-      
-      return () => {
-        document.removeEventListener('mousemove', handleGlobalMouseMove);
-        document.removeEventListener('mouseup', handleGlobalMouseUp);
-      };
-    }
-  }, [isDragging, dragInfo]);
+    // Agregar listeners globales
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging, dragInfo, timeStep, startHour, endHour, onScheduleUpdate]);
 
   // Calcular los días de la semana para la fecha seleccionada
-  const getWeekDays = () => {
-    // Si estamos en modo "Seleccionar fechas", calcular los días basados en el rango
+  const weekDays = React.useMemo(() => {
     if (selectedPeriod === 'Seleccionar fechas' && startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
       const days = [];
       const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
       
-      // Limitar el número de días mostrados (para evitar problemas de rendimiento)
-      const maxDays = 30; // Mostrar máximo 30 días
+      const maxDays = 30;
       let count = 0;
       
       for (let d = new Date(start); d <= end && count < maxDays; d.setDate(d.getDate() + 1), count++) {
@@ -105,7 +272,6 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       
       return days;
     } else if (selectedPeriod === 'Diario') {
-      // Para vista diaria, solo mostrar el día seleccionado
       const date = new Date(selectedDate);
       const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
       
@@ -114,7 +280,6 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         date: date.toISOString().split('T')[0]
       }];
     } else if (selectedPeriod === 'Mensual') {
-      // Para vista mensual, mostrar todos los días del mes
       const date = new Date(selectedDate);
       const year = date.getFullYear();
       const month = date.getMonth();
@@ -132,10 +297,9 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       
       return days;
     } else {
-      // Vista semanal (por defecto)
       const date = new Date(selectedDate);
       const day = date.getDay();
-      const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Ajuste para que la semana comience el lunes
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
       
       const monday = new Date(date.setDate(diff));
       
@@ -149,7 +313,6 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         { name: 'Domingo', date: new Date(monday) }
       ];
       
-      // Corregir el problema de las fechas
       days[0].date = new Date(monday);
       for (let i = 1; i < days.length; i++) {
         const newDate = new Date(days[i-1].date);
@@ -162,167 +325,89 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         date: day.date.toISOString().split('T')[0]
       }));
     }
-  };
+  }, [selectedPeriod, selectedDate, startDate, endDate]);
 
-  const weekDays = getWeekDays();
-
-  // Función auxiliar para convertir posición del mouse a hora
-  const getHourFromMousePosition = (clientX: number): number => {
-    if (!gridRef.current) return startHour;
-    
-    const gridRect = gridRef.current.getBoundingClientRect();
-    const offsetX = clientX - gridRect.left - 80; // Ajustar por el ancho de la columna de días
-    const hourPosition = startHour + (offsetX / (gridRect.width - 80)) * (endHour - startHour + 1);
-    
-    // Redondear a la hora más cercana
-    return Math.max(startHour, Math.min(endHour, Math.round(hourPosition)));
-  };
-
-  // Manejadores para arrastrar y soltar
+  // Iniciar operación de redimensionado
   const handleMouseDown = (e: React.MouseEvent, scheduleEntry: ScheduleEntry) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('[GRID] Iniciando operación:', scheduleEntry);
+    
     if (!gridRef.current) return;
     
-    // Marcar que estamos arrastrando
-    setIsDragging(true);
-    
+    // Obtener dimensiones
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const gridRect = gridRef.current.getBoundingClientRect();
     
-    // Detectar el tipo de acción basado en las marcas del horario
-    const isResizingStart = scheduleEntry.isResizingStart;
-    const isResizingEnd = scheduleEntry.isResizingEnd;
-    const isMoving = scheduleEntry.isMoving || (!isResizingStart && !isResizingEnd);
-    
+    // Configurar estado de arrastre
     setDragInfo({
-      isResizing: isResizingStart || isResizingEnd,
-      isStartHandle: isResizingStart,
+      isResizing: scheduleEntry.isResizingStart || scheduleEntry.isResizingEnd,
+      isStartHandle: scheduleEntry.isResizingStart,
       startX: e.clientX,
       initialLeft: rect.left - gridRect.left,
       initialWidth: rect.width,
       scheduleEntry: {
-        ...scheduleEntry,
-        // Limpiar los indicadores para el siguiente evento
-        isResizingStart: false,
-        isResizingEnd: false,
-        isMoving: false
+        ...scheduleEntry
       }
     });
     
-    // Agregar clase para el elemento que se está arrastrando
-    const element = e.currentTarget as HTMLElement;
-    element.classList.add('dragging');
+    // Configurar tooltip
+    const startParts = scheduleEntry.startTime.split(':');
+    const endParts = scheduleEntry.endTime.split(':');
     
-    // Cambiar cursor según la acción
-    if (isResizingStart) {
+    const startTimeFormatted = `${startParts[0].padStart(2, '0')}:${(startParts[1] || '00').padStart(2, '0')}`;
+    const endTimeFormatted = `${endParts[0].padStart(2, '0')}:${(endParts[1] || '00').padStart(2, '0')}`;
+    
+    setTooltip({
+      show: true,
+      content: `${startTimeFormatted} - ${endTimeFormatted}`,
+      x: e.clientX,
+      y: e.clientY - 30
+    });
+    
+    // Ajustar cursor según tipo de operación
+    if (scheduleEntry.isResizingStart) {
       document.body.style.cursor = 'w-resize';
-    } else if (isResizingEnd) {
+    } else if (scheduleEntry.isResizingEnd) {
       document.body.style.cursor = 'e-resize';
     } else {
       document.body.style.cursor = 'move';
     }
     
-    // Evitar selección de texto durante el arrastre
     document.body.style.userSelect = 'none';
+    setIsDragging(true);
   };
 
-  // Función para manejar el movimiento del mouse (puede ser llamada desde el efecto global)
-  const handleMouseMoveEvent = (e: MouseEvent) => {
-    if (!dragInfo || !dragInfo.scheduleEntry || !gridRef.current) return;
-
-    const gridRect = gridRef.current.getBoundingClientRect();
-    const totalColumns = endHour - startHour + 1;
-    
-    // Encontrar el elemento que se está arrastrando
-    const element = document.querySelector('.dragging') as HTMLElement;
-    if (!element) return;
-    
-    // Obtener los horarios actuales
-    const startTimeHour = parseInt(dragInfo.scheduleEntry.startTime.split(':')[0]);
-    const endTimeHour = parseInt(dragInfo.scheduleEntry.endTime.split(':')[0]);
-    const duration = endTimeHour - startTimeHour;
-    
-    if (dragInfo.isResizing) {
-      if (dragInfo.isStartHandle) {
-        // Redimensionar desde el inicio (izquierda)
-        // Convertir posición del mouse a hora
-        const newStartHour = getHourFromMousePosition(e.clientX);
-        
-        // Asegurarse de que la hora de inicio no supere la hora de fin menos 1
-        if (newStartHour < endTimeHour) {
-          // Actualizar el elemento visualmente
-          const newLeftPercent = ((newStartHour - startHour) / totalColumns) * 100;
-          const newWidth = ((endTimeHour - newStartHour) / totalColumns) * 100;
-          
-          element.style.left = `${newLeftPercent}%`;
-          element.style.width = `${newWidth}%`;
-          
-          // Actualizar el horario
-          dragInfo.scheduleEntry.startTime = `${newStartHour.toString().padStart(2, '0')}:00`;
-        }
-      } else {
-        // Redimensionar desde el fin (derecha)
-        // Convertir posición del mouse a hora
-        const newEndHour = getHourFromMousePosition(e.clientX);
-        
-        // Asegurarse de que la hora de fin no sea menor que la hora de inicio más 1
-        // y que no exceda el límite de la cuadrícula
-        if (newEndHour > startTimeHour && newEndHour <= endHour) {
-          // Actualizar el elemento visualmente
-          const newWidth = ((newEndHour - startTimeHour) / totalColumns) * 100;
-          element.style.width = `${newWidth}%`;
-          
-          // Actualizar el horario
-          dragInfo.scheduleEntry.endTime = `${newEndHour.toString().padStart(2, '0')}:00`;
-        }
-      }
-    } else {
-      // Mover el elemento completo
-      // Convertir posición del mouse a hora
-      const newStartHour = getHourFromMousePosition(e.clientX) - Math.floor(duration / 2);
-      
-      // Asegurarse de que el evento permanezca dentro del rango visible
-      const adjustedStartHour = Math.max(startHour, Math.min(endHour - duration, newStartHour));
-      const adjustedEndHour = adjustedStartHour + duration;
-      
-      // Actualizar posición visual
-      const newLeftPercent = ((adjustedStartHour - startHour) / totalColumns) * 100;
-      element.style.left = `${newLeftPercent}%`;
-      
-      // Actualizar horario
-      dragInfo.scheduleEntry.startTime = `${adjustedStartHour.toString().padStart(2, '0')}:00`;
-      dragInfo.scheduleEntry.endTime = `${adjustedEndHour.toString().padStart(2, '0')}:00`;
-    }
-  };
-  
-  // Sobrecarga para el evento de React (llama a la función principal)
+  // Actualizar posición del tooltip durante el movimiento
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && dragInfo) {
-      handleMouseMoveEvent(e.nativeEvent);
+    if (isDragging && tooltip.show) {
+      setTooltip(prev => ({
+        ...prev,
+        x: e.clientX,
+        y: e.clientY - 30
+      }));
     }
   };
 
-  // Función para manejar cuando se suelta el mouse
-  const handleMouseUpEvent = () => {
-    // Remover clase de arrastre
-    const draggingElement = document.querySelector('.dragging');
-    if (draggingElement) {
-      draggingElement.classList.remove('dragging');
+  // Finalizar operación
+  const handleMouseUp = () => {
+    if (!isDragging) return;
+    
+    console.log('[GRID] Finalizando operación (evento de React)');
+    
+    if (dragInfo?.scheduleEntry && onScheduleUpdate) {
+      console.log('[GRID] Notificando actualización:', dragInfo.scheduleEntry);
+      onScheduleUpdate(dragInfo.scheduleEntry);
     }
     
-    // Restaurar estilos del cursor y selección
+    setIsDragging(false);
+    setDragInfo(null);
+    setTooltip(prev => ({ ...prev, show: false }));
     document.body.style.cursor = 'default';
     document.body.style.userSelect = '';
-    
-    setDragInfo(null);
-    setIsDragging(false);
-  };
-  
-  // Sobrecarga para el evento de React
-  const handleMouseUp = () => {
-    handleMouseUpEvent();
   };
 
-  // Si no hay empleado seleccionado, mostrar mensaje
   if (!employee) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
@@ -332,7 +417,20 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   }
 
   return (
-    <div className="overflow-auto rounded-lg mr-4 flex-1">
+    <div className="overflow-auto rounded-lg mr-4 flex-1 relative">
+      {tooltip.show && (
+        <div 
+          className="fixed bg-gray-800 text-white px-2 py-1 text-xs rounded z-50 pointer-events-none"
+          style={{
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: 'translateX(-50%)'
+          }}
+        >
+          {tooltip.content}
+        </div>
+      )}
+    
       <div className="bg-white rounded-lg shadow-sm border border-gray-200" ref={gridRef}>
         <div className="grid grid-cols-[auto,1fr]">
           <div className="w-20 rounded-tl-lg bg-gray-50 border-r border-gray-200"></div>
@@ -351,6 +449,7 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
               onMouseUp={handleMouseUp}
               startHour={startHour}
               endHour={endHour}
+              timeStep={timeStep}
             />
           ))}
         </div>

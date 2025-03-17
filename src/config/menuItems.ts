@@ -51,68 +51,49 @@ export const menuItems: MenuItem[] = [
         label: 'Gestión de Incidencias',
         icon: Fingerprint,
         path: '/employees/incidencias'
+      },
+      {
+        id: 'time-control',
+        label: 'Control de Tiempo',
+        icon: Clock,
+        path: '/time-control',
       }
     ],
     
   },
-  {
-    id: 'time-control',
-    label: 'Control de Tiempo',
-    icon: Clock,
-    path: '/time-control',
-    children: [
-      {
-        id: 'check-profiles',
-        label: 'Perfiles de Marcaje',
-        icon: Clock,
-        path: '/employees/check-profiles'
-      },
-      // {
-      //   id: 'calendar',
-      //   label: 'Asignacion de Horarios',
-      //   icon: Clock,
-      //   path: '/time-control/calendar'
-      // },
-      {
-        id: 'geocerca',
-        label: 'Geocerca',
-        icon: Clock,
-        path: '/employees/geocerca'
-      },
-      {
-        id: 'contracts',
-        label: 'Modalidad De Tiempo',
-        icon: FileText,
-        path: '/system-config/contracts'
-      },
-      {
-        id: 'modality',
-        label: 'Turnos de Trabajo',
-        icon: FileText,
-        path: '/system-config/modality'
-      },
-      
-
-      // {
-      //   id: 'checks',
-      //   label: 'Marcajes',
-      //   icon: Clock,
-      //   path: '/time-control/checks'
-      // },
-      // {
-      //   id: 'hours-approval',
-      //   label: 'Aprobación de Horas',
-      //   icon: Clock,
-      //   path: '/time-control/hours-approval'
-      // },
-      // {
-      //   id: 'absence',
-      //   label: 'Gestión de Ausencias',
-      //   icon: Clock,
-      //   path: '/time-control/absence'
-      // }
-    ]
-  },
+  // {
+  //   id: 'time-control',
+  //   label: 'Control de Tiempo',
+  //   icon: Clock,
+  //   path: '/time-control',
+  //   children: [
+     
+  //     // {
+  //     //   id: 'calendar',
+  //     //   label: 'Asignacion de Horarios',
+  //     //   icon: Clock,
+  //     //   path: '/time-control/calendar'
+  //     // },
+  //     // {
+  //     //   id: 'checks',
+  //     //   label: 'Marcajes',
+  //     //   icon: Clock,
+  //     //   path: '/time-control/checks'
+  //     // },
+  //     // {
+  //     //   id: 'hours-approval',
+  //     //   label: 'Aprobación de Horas',
+  //     //   icon: Clock,
+  //     //   path: '/time-control/hours-approval'
+  //     // },
+  //     // {
+  //     //   id: 'absence',
+  //     //   label: 'Gestión de Ausencias',
+  //     //   icon: Clock,
+  //     //   path: '/time-control/absence'
+  //     // }
+  //   ]
+  // },
   // {
   //   id: 'dining',
   //   label: 'Control de Comedor',
@@ -298,7 +279,33 @@ export const menuItems: MenuItem[] = [
         label: 'Configuración General',
         icon: Settings,
         path: '/administration/config'
-      }
+      },
+      {
+        id: 'check-profiles',
+        label: 'Perfiles de Marcaje',
+        icon: Clock,
+        path: '/employees/check-profiles'
+      },
+
+      {
+        id: 'geocerca',
+        label: 'Geocerca',
+        icon: Clock,
+        path: '/employees/geocerca'
+      },
+      {
+        id: 'contracts',
+        label: 'Modalidad De Tiempo',
+        icon: FileText,
+        path: '/system-config/contracts'
+      },
+      {
+        id: 'modality',
+        label: 'Turnos de Trabajo',
+        icon: FileText,
+        path: '/system-config/modality'
+      },
+      
     ]
   }
 ];
