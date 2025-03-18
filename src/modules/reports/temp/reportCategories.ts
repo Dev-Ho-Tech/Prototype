@@ -69,7 +69,7 @@ export const mockReportCategories: ReportCategoryList = [
     id: 'pending-approval',
     name: 'Tiempo sin aprobar',
     description: 'Horas pendientes de aprobación',
-    path: '/pending-approval', // Mantener (no hay ruta definida aún)
+    path: '/pending-approval',
     color: 'bg-cyan-400',
     icon: 'alert-triangle'
   }
