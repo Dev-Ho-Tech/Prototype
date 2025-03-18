@@ -108,7 +108,7 @@ const PendingApprovalReport: React.FC = () => {
       
       return inDateRange && employeeIncluded && typeIncluded && entry.status === 'pending';
     });
-  }, [mockPendingTimeData, filter, typeFilter]);
+  }, [filter, typeFilter]);
 
   // Ordenar datos
   const sortedData = useMemo(() => {

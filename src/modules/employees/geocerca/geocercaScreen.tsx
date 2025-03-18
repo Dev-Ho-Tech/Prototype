@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { Search, Plus, Filter, ChevronDown, Trash } from "lucide-react"
+import { Search, Plus, Filter, ChevronDown, Trash, List, Grid } from "lucide-react"
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
 import { Card, CardContent } from "./components/ui/card"
@@ -10,7 +11,7 @@ import {
   DropdownMenu,
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
 } from "./components/ui/dropdown"
 import {
   Tabs,
@@ -22,10 +23,14 @@ import { Geocerca } from "./interfaces/Geocerca"
 import { GeocercaDetalle } from "./components/GeocercaDetalle"
 import { GeocercaEditar } from "./components/geocerca-editar"
 import { ConfirmModal } from "./components/ConfirmModal"
+import GeocercaGridView from "./components/GeocercaGridView"
+import { ViewMode } from "./components/ViewToggleButton"
 
 // Importaciones para las columnas
 import { ArrowUpDown, MapPin, Edit, Eye } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
+import { CardFooter } from "./components/CardFooter"
+import { DropdownMenuSeparator } from "./components/DropdownMenuSeparator"
 
 // Tipo de vista
 type Vista = 'lista' | 'detalle' | 'editar' | 'crear';
@@ -34,6 +39,7 @@ export default function GeocercasPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filtroEstado, setFiltroEstado] = useState<"todos" | "activas" | "inactivas">("activas")
   const [vistaActual, setVistaActual] = useState<Vista>('lista')
+  const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [geocercaSeleccionada, setGeocercaSeleccionada] = useState<Geocerca | null>(null)
   const [listaGeocercas, setListaGeocercas] = useState<Geocerca[]>([])
   // Guarda la vista anterior para volver correctamente
@@ -50,6 +56,12 @@ export default function GeocercasPage() {
   useEffect(() => {
     setListaGeocercas(geocercas);
     
+    // Intentar recuperar la preferencia de visualización del localStorage
+    const savedViewMode = localStorage.getItem('geocercas-view-mode');
+    if (savedViewMode && (savedViewMode === 'table' || savedViewMode === 'grid')) {
+      setViewMode(savedViewMode as ViewMode);
+    }
+    
     // Limpieza al desmontar
     return () => {
       setListaGeocercas([]);
@@ -60,6 +72,11 @@ export default function GeocercasPage() {
       setVistaAnterior('lista');
     };
   }, []);
+  
+  // Persistir el tipo de visualización en localStorage cuando cambie
+  useEffect(() => {
+    localStorage.setItem('geocercas-view-mode', viewMode);
+  }, [viewMode]);
   
   // Memoizar manejadores para evitar recreaciones
   const handleViewGeocerca = useCallback((geocerca: Geocerca) => {
@@ -143,6 +160,11 @@ export default function GeocercasPage() {
     setVistaActual('lista');
   }, []);
   
+  // Cambiar modo de visualización
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
+  
   // Función para crear las columnas que usa handlers de clic en lugar de navegación
   const createGeocercaColumns = useCallback(() => [
     {
@@ -205,6 +227,7 @@ export default function GeocercasPage() {
       header: "Fecha de creación",
     },
     {
+      header: "Acciones",
       id: "acciones",
       cell: ({ row }) => {
         const geocerca = row.original
@@ -355,34 +378,53 @@ export default function GeocercasPage() {
                 className="w-[250px] md:w-[300px]"
               />
             </div>
-
+            
+            {/* Botón de alternancia de vistas y filtros */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">
                   <Filter className="mr-2 h-4 w-4" />
-                  Filtrar
+                  {viewMode === 'table' ? 'Modo Lista' : 'Modo Tarjetas'}
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[200px]">
-                <DropdownMenuItem onClick={() => console.log("Filtro por sede")}>Por sede</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Filtro por radio")}>Por radio</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Filtro por empleados")}>Por empleados</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Filtro por fecha")}>Por fecha</DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => handleViewModeChange('table')}
+                  className={viewMode === 'table' ? 'bg-gray-100' : ''}
+                >
+                  Vista Lista
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => handleViewModeChange('grid')}
+                  className={viewMode === 'grid' ? 'bg-gray-100' : ''}
+                >
+                  Vista Tarjetas
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
 
-        {/* Usar un solo componente DataTable con renderizado condicional para mejorar el rendimiento */}
+        {/* Renderizado condicional basado en el tipo de visualización */}
         <TabsContent value={filtroEstado}>
           <Card>
-            <CardContent className="p-0">
-              <DataTable
-                columns={columns}
-                data={geocercasFiltradas}
-                searchQuery={searchQuery}
-              />
+            <CardContent className={viewMode === 'table' ? "p-0" : ""}>
+              {viewMode === 'table' ? (
+                <DataTable
+                  columns={columns}
+                  data={geocercasFiltradas}
+                  searchQuery={searchQuery}
+                />
+              ) : (
+                <GeocercaGridView 
+                  geocercas={geocercasFiltradas}
+                  onView={handleViewGeocerca}
+                  onEdit={handleEditGeocerca}
+                  onDelete={handleShowDeleteModal}
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>

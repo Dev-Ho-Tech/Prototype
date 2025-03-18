@@ -70,6 +70,7 @@ export const createGeocercaColumns = (
     header: "Fecha de creación",
   },
   {
+    header: "Acciones",
     id: "acciones",
     cell: ({ row }) => {
       const geocerca = row.original
