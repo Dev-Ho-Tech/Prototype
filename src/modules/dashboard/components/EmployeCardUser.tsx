@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect, SVGProps } from 'react';
 import { MapPin, Users, Clock, Fingerprint, CreditCard, Key, Check, X, Briefcase, AlertCircle, Calendar } from 'lucide-react';
 import type { Employee, Marcaje } from '../interface/types';
@@ -392,6 +393,9 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
   const horaSalida = getHoraSalida();
   const metodoBiometricoEntrada = getMetodoBiometricoEntrada();
 
+  // Verificar si el estado es "trabajando"
+  const isTrabajando = empleado.estado === 'trabajando';
+
   // Log para verificar el estado del tooltip
   console.log(`Estado del tooltip para ${empleado.nombre}:`, { 
     showTooltip, 
@@ -417,7 +421,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
       )}
       
       {/* Eliminamos ambos tooltips de React y dejamos solo la implementación en Vanilla JS */}
-
+  
       {/* Encabezado con la información principal - altura fija */}
       <div className="p-4 bg-white flex-grow flex flex-col">
         {/* Foto y nombre - espacio fijo */}
@@ -454,10 +458,10 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
         
         {/* Horarios de entrada/salida con iconos biométricos debajo - espacio fijo */}
         <div className="flex justify-between mb-4 h-[50px]">
-          {/* Hora de entrada */}
+          {/* Hora de entrada - siempre visible */}
           <div className="flex flex-col items-center">
             <div className="flex items-center">
-            <span className="text-green-500 mr-1 text-xl font-bold px-2">→</span>
+              <span className="text-green-500 mr-1 text-xl font-bold px-2">→</span>
               <span className="text-sm text-gray-600">{horaEntrada}</span>
             </div>
             <div className="mt-1">
@@ -465,16 +469,20 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ empleado, onSelect, activeF
             </div>
           </div>
           
-          {/* Hora de salida */}
-          <div className="flex flex-col items-center">
-            <div className="flex items-center">
-            <span className="text-red-500 mr-1 text-xl font-bold px-2">←</span>
-              <span className="text-sm text-gray-600">{horaSalida}</span>
+          {/* Espacio para la hora de salida - mantiene la estructura even cuando está trabajando */}
+          {isTrabajando ? (
+            <div className="flex-1"></div>
+          ) : (
+            <div className="flex flex-col items-center">
+              <div className="flex items-center">
+                <span className="text-red-500 mr-1 text-xl font-bold px-2">←</span>
+                <span className="text-sm text-gray-600">{horaSalida}</span>
+              </div>
+              <div className="mt-1">
+                {getBiometricIcon(metodoBiometricoEntrada)}
+              </div>
             </div>
-            <div className="mt-1">
-              {getBiometricIcon(metodoBiometricoEntrada)}
-            </div>
-          </div>
+          )}
         </div>
         
         {/* Total de horas - espacio fijo */}

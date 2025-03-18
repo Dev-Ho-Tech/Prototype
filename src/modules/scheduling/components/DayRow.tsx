@@ -172,7 +172,8 @@ const DayRow: React.FC<DayRowProps> = ({
       isResizingStart: true,
       isResizingEnd: false,
       isMoving: false,
-      initialX: e.clientX // Guardamos la posición inicial del mouse
+      initialX: e.clientX, // Guardamos la posición inicial del mouse
+      sensitivity: 0.2 // Añadimos factor de sensibilidad
     };
     
     setIsResizing(true);
@@ -199,7 +200,8 @@ const DayRow: React.FC<DayRowProps> = ({
       isResizingStart: false,
       isResizingEnd: true,
       isMoving: false,
-      initialX: e.clientX // Guardamos la posición inicial del mouse
+      initialX: e.clientX, // Guardamos la posición inicial del mouse
+      sensitivity: 0.2 // Añadimos factor de sensibilidad
     };
     
     setIsResizing(true);
@@ -226,7 +228,8 @@ const DayRow: React.FC<DayRowProps> = ({
       isResizingStart: false,
       isResizingEnd: false,
       isMoving: true,
-      initialX: e.clientX // Guardamos la posición inicial del mouse
+      initialX: e.clientX, // Guardamos la posición inicial del mouse
+      sensitivity: 0.2 // Añadimos factor de sensibilidad para el movimiento
     };
     
     setIsResizing(true);

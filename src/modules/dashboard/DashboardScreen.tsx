@@ -283,27 +283,27 @@ const DashboardScreen: React.FC = () => {
           
           {/* Buscador - solo se muestra en vistas grid y list */}
           {showGlobalSearch ? (
-            <SearchComponent 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              showAdvancedFilters={showAdvancedFilters}
-              toggleAdvancedFilters={toggleAdvancedFilters}
-              placeholder="Buscar por ID, Cédula, Nombre, Sede, Departamento..."
-              className="relative flex-1 max-w-2xl mx-8"
-              advancedFiltersComponent={
-                <AdvancedFiltersDashboard
-                  searchTerm={searchTerm}
-                  onSearchTermChange={setSearchTerm}
-                  onFilterChange={handleFilterChange}
-                  onClearFilters={clearAllFilters}
-                  employees={formattedEmployees}
-                />
-              }
-            />
-          ) : (
-            // Espacio flexible para mantener el layout cuando no se muestra el buscador
-            <div className="flex-1"></div>
-          )}
+          <SearchComponent 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            showAdvancedFilters={showAdvancedFilters}
+            toggleAdvancedFilters={toggleAdvancedFilters}
+            placeholder="Buscar por código, Cédula, Género, Tipo de Trabajo, Departamento, Sección, Unidad..."
+            className="relative flex-1 max-w-3xl lg:max-w-4xl mx-4 lg:mx-8"
+            advancedFiltersComponent={
+              <AdvancedFiltersDashboard
+                searchTerm={searchTerm}
+                onSearchTermChange={setSearchTerm}
+                onFilterChange={handleFilterChange}
+                onClearFilters={clearAllFilters}
+                employees={formattedEmployees}
+              />
+            }
+          />
+        ) : (
+          // Espacio flexible para mantener el layout cuando no se muestra el buscador
+          <div className="flex-1"></div>
+        )}
 
           <div className="flex items-center space-x-2">
             {/* <button

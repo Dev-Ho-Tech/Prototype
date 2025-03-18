@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, {  } from 'react';
 import {useLocation, Outlet } from 'react-router-dom';
 import { useReports } from './hooks/useReports';
 import ReportCategoryList from './components/ReportCategoryList';
 import ReportDatePicker from './components/ReportDatePicker';
-import ReportTabs from './components/ReportTabs';
+// import ReportTabs from './components/ReportTabs';
 
 // Importamos los datos mock para uso en este componente
 import { mockReportCategories } from './temp/reportCategories';
@@ -12,17 +12,17 @@ const ReportsModule: React.FC = () => {
   // const navigate = useNavigate();
   const location = useLocation();
   const { filter, updateFilter } = useReports();
-  const [activeTab, setActiveTab] = useState('most-used'); // 'most-used' | 'all'
+  // const [activeTab, setActiveTab] = useState('most-used'); // 'most-used' | 'all'
 
-  const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
-  };
+  // const handleTabChange = (tabId: string) => {
+  //   setActiveTab(tabId);
+  // };
 
   // Determinar si estamos en la vista principal o en una vista de reporte específica
   const isReportMainView = location.pathname === '/reports/attendance';
 
   // Obtenemos las categorías de reportes más utilizadas (simulado)
-  const mostUsedCategories = mockReportCategories.slice(0, 6);
+  // const mostUsedCategories = mockReportCategories.slice(0, 6);
 
   // Función para manejar la navegación cuando se clickea una categoría
   // const handleCategoryClick = (path: string) => {
@@ -47,9 +47,15 @@ const ReportsModule: React.FC = () => {
           />
         </div>
       </div>
-
+      <ReportCategoryList 
+          categories={mockReportCategories.map(cat => ({
+            ...cat,
+            path: `/reports/attendance${cat.path}` // Ajustamos las rutas para que funcionen con el router
+          }))} 
+          title="Todos los reportes" 
+        />
       {/* Pestañas */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <ReportTabs 
           categories={[
             { id: 'most-used', name: 'Más usados', description: 'Reportes más utilizados', icon: 'star', color: 'bg-blue-500', path: '#' },
@@ -58,10 +64,10 @@ const ReportsModule: React.FC = () => {
           activeTab={activeTab}
           onTabChange={handleTabChange}
         />
-      </div>
+      </div> */}
 
       {/* Lista de categorías */}
-      {activeTab === 'most-used' ? (
+      {/* {activeTab === 'most-used' ? (
         <ReportCategoryList 
           categories={mostUsedCategories.map(cat => ({
             ...cat,
@@ -77,7 +83,7 @@ const ReportsModule: React.FC = () => {
           }))} 
           title="Todos los reportes" 
         />
-      )}
+      )} */}
     </div>
   );
 };

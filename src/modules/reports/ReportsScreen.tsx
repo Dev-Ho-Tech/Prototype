@@ -9,6 +9,7 @@ import HotelHoursSummaryReport from './views/HotelHoursSummaryReport';
 import DailyHoursConsolidatedReport from './views/DailyHoursConsolidatedReport';
 import EmployeeListReport from './views/EmployeeListReport';
 import MassUploadReport from './views/MassUploadReport';
+import PendingApprovalReport from './views/PendingApprovalReport';
 
 const ReportsScreen: React.FC = () => {
   return (
@@ -25,10 +26,8 @@ const ReportsScreen: React.FC = () => {
         <Route path="daily-hours-consolidated" element={<DailyHoursConsolidatedReport />} />
         <Route path="employee-list" element={<EmployeeListReport />} />
         <Route path="mass-upload" element={<MassUploadReport />} />
-        MassUploadReport
-        {/* 
-        <Route path="mass-upload" element={<MassUploadReport />} />
-         */}
+        <Route path="pending-approval" element={<PendingApprovalReport />} />
+
       </Route>
     </Routes>
   );

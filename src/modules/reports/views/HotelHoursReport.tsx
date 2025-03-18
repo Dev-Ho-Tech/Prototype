@@ -3,8 +3,8 @@ import { useReports } from '../hooks/useReports';
 import ReportLayout from '../components/ReportLayout';
 import { Employee } from '../interfaces/Employee';
 import { HotelHoursData } from '../interfaces/Report';
-import { ChevronLeft, FileText, FileSpreadsheet } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import {  FileText, FileSpreadsheet } from 'lucide-react';
+// import { useNavigate } from 'react-router-dom';
 
 interface EmployeeHoursData {
   employee: Employee;
@@ -17,7 +17,7 @@ interface EmployeeHoursData {
 }
 
 const HotelHoursReport: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { 
     employees, 
     filter, 
@@ -134,20 +134,14 @@ const HotelHoursReport: React.FC = () => {
   };
 
   // Función para regresar a la pantalla de selección de reportes
-  const handleGoBack = () => {
-    navigate('/reports/attendance');
-  };
+  // const handleGoBack = () => {
+  //   navigate('/reports/attendance');
+  // };
 
   return (
     <ReportLayout
       title={
         <div className="flex items-center">
-          <button 
-            onClick={handleGoBack}
-            className="mr-4 p-2 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            <ChevronLeft className="h-5 w-5 text-gray-600" />
-          </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Hotelería - Horas Trabajadas</h1>
           </div>

@@ -272,7 +272,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Gerardo Campos',
     foto: 'https://randomuser.me/api/portraits/men/33.jpg',
     estado: 'trabajando',
-    horas: '9 hrs 45 min',
+    horas: '5 hrs 25 min',
     pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '07:45',
     dispositivo: 'computadora',
@@ -301,7 +301,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Carlos Peña',
     foto: 'https://randomuser.me/api/portraits/men/34.jpg',
     estado: 'trabajando',
-    horas: '8 hrs 45 min', // Ya está bien para horas extras
+    horas: '3 hrs 45 min', // Ya está bien para horas extras
     pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '06:45',
     ultimaAccion2: '15:30',
@@ -356,7 +356,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Maria Guerra',
     foto: 'https://randomuser.me/api/portraits/women/33.jpg',
     estado: 'trabajando',
-    horas: '9 hrs 15 min', // Ya está bien para horas extras
+    horas: '5 hrs 15 min', // Ya está bien para horas extras
     pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '07:30',
     dispositivo: 'smartphone',
@@ -372,7 +372,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Jose Del Nardo',
     foto: 'https://randomuser.me/api/portraits/men/38.jpg',
     estado: 'trabajando',
-    horas: '11 hrs 05 min', // Ya está bien para horas extras
+    horas: '6 hrs 05 min', // Ya está bien para horas extras
     pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '08:15',
     ultimaAccion2: '19:20',
@@ -432,7 +432,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Ana Mendoza',
     foto: 'https://randomuser.me/api/portraits/women/41.jpg',
     estado: 'trabajando',
-    horas: '7 hrs 30 min',
+    horas: '2 hrs 30 min',
     pais: 'Hodelpa Hotels & Resorts',
     ultimaAccion: '08:30', // Tardanza (después de las 8:00)
     dispositivo: 'smartphone',
@@ -463,7 +463,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Valentina Romero',
     foto: 'https://randomuser.me/api/portraits/women/42.jpg',
     estado: 'trabajando',
-    horas: '8 hrs 45 min', // Ya está bien para horas extras
+    horas: '4 hrs 45 min', // Ya está bien para horas extras
     pais: 'Banco Popular Dominicano',
     ultimaAccion: '07:15',
     dispositivo: 'computadora',
@@ -597,7 +597,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Ricardo Vargas',
     foto: 'https://randomuser.me/api/portraits/men/47.jpg',
     estado: 'trabajando',
-    horas: '7 hrs 45 min',
+    horas: '3 hrs 45 min',
     pais: 'Hodelpa Garden Court',
     ultimaAccion: '07:15',
     dispositivo: 'computadora',
@@ -644,7 +644,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Daniel Ortega',
     foto: 'https://randomuser.me/api/portraits/men/51.jpg',
     estado: 'trabajando',
-    horas: '11 hrs 30 min', // Horas extras
+    horas: '5 hrs 30 min', // Horas extras
     pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '07:00',
     ultimaAccion2: '18:30',
@@ -660,7 +660,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Lucía Mendez',
     foto: 'https://randomuser.me/api/portraits/women/51.jpg',
     estado: 'trabajando',
-    horas: '11 hrs 15 min', // Horas extras
+    horas: '3 hrs 15 min', // Horas extras
     pais: 'Hodelpa Garden Court',
     ultimaAccion: '06:30',
     ultimaAccion2: '17:45',
@@ -676,7 +676,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Javier Santos',
     foto: 'https://randomuser.me/api/portraits/men/52.jpg',
     estado: 'trabajando',
-    horas: '12 hrs 5 min', // Horas extras
+    horas: '5 hrs 5 min', // Horas extras
     pais: 'Hodelpa Gran Almirante',
     ultimaAccion: '07:10',
     ultimaAccion2: '19:15',
@@ -692,7 +692,7 @@ export const empleadosDataEnriquecida: Employee[] = [
     nombre: 'Clara Duarte',
     foto: 'https://randomuser.me/api/portraits/women/52.jpg',
     estado: 'trabajando',
-    horas: '10 hrs 0 min', // Horas extras
+    horas: '6 hrs 0 min', // Horas extras
     pais: 'Hodelpa Garden Court',
     ultimaAccion: '08:00',
     ultimaAccion2: '18:00',

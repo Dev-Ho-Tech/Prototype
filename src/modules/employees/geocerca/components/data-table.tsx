@@ -13,6 +13,13 @@ import {
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Button } from "./ui/button"
+import { ChevronDown } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "./ui/dropdown"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -30,6 +37,10 @@ export const DataTable = memo(function DataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [appliedFilters, setAppliedFilters] = useState<ColumnFiltersState>([])
+  const [pageSize, setPageSize] = useState(10)
+
+  // Opciones de tamaño de página
+  const pageSizeOptions = [10, 15, 25, 50, 100]
 
   // Manejar los filtros de manera separada para evitar ciclos
   useEffect(() => {
@@ -59,6 +70,12 @@ export const DataTable = memo(function DataTable<TData, TValue>({
     setAppliedFilters(newFilters);
   }, [searchQuery, searchField, columnFilters]);
 
+  // Función para cambiar el número de filas por página
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    table.setPageSize(size);
+  };
+
   // Memoizar la tabla para evitar recreaciones innecesarias
   const table = useReactTable({
     data,
@@ -75,7 +92,7 @@ export const DataTable = memo(function DataTable<TData, TValue>({
     },
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: pageSize,
       },
     },
   })
@@ -152,9 +169,29 @@ export const DataTable = memo(function DataTable<TData, TValue>({
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">
             <p className="text-sm font-medium">Filas por página</p>
-            <div className="h-8 w-[70px] flex items-center justify-center border border-gray-300 rounded-md">
-              <span className="text-sm">10</span>
-            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="h-8 px-2 min-w-[70px] flex items-center justify-between"
+                >
+                  {pageSize}
+                  <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {pageSizeOptions.map((size) => (
+                  <DropdownMenuItem 
+                    key={size} 
+                    onClick={() => handlePageSizeChange(size)}
+                    className={pageSize === size ? "bg-gray-100" : ""}
+                  >
+                    {size}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex items-center space-x-2">
             <Button

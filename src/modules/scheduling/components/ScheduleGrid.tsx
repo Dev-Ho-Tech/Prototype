@@ -64,6 +64,8 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       }));
       
       // Obtener elemento que se está redimensionando
+      if (!dragInfo?.scheduleEntry) return;
+      
       const dayDate = dragInfo.scheduleEntry.date;
       const shiftId = dragInfo.scheduleEntry.shift;
       const entryId = `schedule-entry-${dayDate}-${shiftId}`;
@@ -83,14 +85,28 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       const startTimeParts = dragInfo.scheduleEntry.startTime.split(':');
       const endTimeParts = dragInfo.scheduleEntry.endTime.split(':');
       
-      let startTimeHour = parseInt(startTimeParts[0]);
-      let startTimeMinutes = parseInt(startTimeParts[1] || '0');
-      let endTimeHour = parseInt(endTimeParts[0]);
-      let endTimeMinutes = parseInt(endTimeParts[1] || '0');
+      const startTimeHour = parseInt(startTimeParts[0]);
+      const startTimeMinutes = parseInt(startTimeParts[1] || '0');
+      const endTimeHour = parseInt(endTimeParts[0]);
+      const endTimeMinutes = parseInt(endTimeParts[1] || '0');
       
       // Obtener posición del mouse relativa a la cuadrícula
       const offsetX = e.clientX - gridRect.left - 80;
-      const hourDecimal = startHour + (offsetX / totalWidth) * totalHours;
+      
+      // Factor de reducción de sensibilidad (0.5 = mitad de sensible)
+      const sensitivityFactor = 0.6;
+      
+      // Aplicar el factor de sensibilidad para reducir los cambios
+      // Calculamos el movimiento relativo al punto inicial y lo reducimos
+      const relativeMovement = e.clientX - dragInfo.startX;
+      const adjustedMovement = relativeMovement * sensitivityFactor;
+      const adjustedClientX = dragInfo.startX + adjustedMovement;
+      
+      // Recalcular offsetX con la posición ajustada
+      const adjustedOffsetX = adjustedClientX - gridRect.left - 80;
+      
+      // Calcular la hora usando el movimiento ajustado
+      const hourDecimal = startHour + (adjustedOffsetX / totalWidth) * totalHours;
       
       // Calcular hora y minutos con snap a incrementos
       const hour = Math.floor(hourDecimal);
@@ -172,10 +188,10 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
           }
         }
       } else {
-        // Mover evento completo
+        // Mover evento completo con sensibilidad reducida
         // Ajustar posición para centrar en el mouse
         const eventMouseOffset = dragInfo.initialWidth / 2;
-        const adjustedOffsetX = offsetX - eventMouseOffset;
+        const adjustedOffsetX = adjustedOffsetX - eventMouseOffset;
         const adjustedHourDecimal = startHour + (adjustedOffsetX / totalWidth) * totalHours;
         
         // Calcular nueva hora de inicio con snap a incrementos

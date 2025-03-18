@@ -33,33 +33,30 @@ export const menuItems: MenuItem[] = [
       //   icon: FileText,
       //   path: '/employees/records'
       // },
+      
+      
+    ],
+    
+  },
+  {
+    id: 'time-control',
+    label: 'Control de Tiempo',
+    icon: Clock,
+    path: '/time-control',
+    children: [
       {
         id: 'schedule-assignment',
         label: 'Planificador de horarios',
         icon: Clock,
         path: '/employees/schedule'
       },
-      
-      // {
-      //   id: 'biometric',
-      //   label: 'Información Biométrica',
-      //   icon: Fingerprint,
-      //   path: '/employees/biometric'
-      // },
       {
         id: 'incidencias',
         label: 'Gestión de Incidencias',
         icon: Fingerprint,
         path: '/employees/incidencias'
       },
-      {
-        id: 'time-control',
-        label: 'Control de Tiempo',
-        icon: Clock,
-        path: '/time-control',
-      }
-    ],
-    
+    ]
   },
   // {
   //   id: 'time-control',
@@ -198,7 +195,7 @@ export const menuItems: MenuItem[] = [
     children: [
       {
         id: 'attendance-reports',
-        label: 'Asistencia',
+        label: 'Reportes más usados',
         icon: Clock,
         path: '/reports/attendance'
       }

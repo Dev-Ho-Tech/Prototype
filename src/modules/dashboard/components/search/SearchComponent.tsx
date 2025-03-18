@@ -59,11 +59,11 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
         placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full pl-10 pr-36 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        className="w-full pl-10 pr-44 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
       />
       <button
         onClick={toggleAdvancedFilters}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-xs text-blue-600 hover:bg-blue-50 rounded-md flex items-center"
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-xs text-blue-600 hover:bg-blue-50 rounded-md flex items-center whitespace-nowrap"
         type="button"
       >
         {showAdvancedFilters ? 'Búsqueda simple' : 'Búsqueda avanzada'}
@@ -74,7 +74,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
       {showAdvancedFilters && advancedFiltersComponent && (
         <div 
           ref={advancedFiltersRef} 
-          className="bg-white rounded-lg border border-gray-200 shadow-sm absolute left-0 z-20 w-96"
+          className="bg-white rounded-lg border border-gray-200 shadow-sm absolute left-0 z-20 w-full max-w-lg"
           onClick={(e) => {
             // Evitar que los clics dentro del panel de filtros propaguen al documento
             e.stopPropagation();
