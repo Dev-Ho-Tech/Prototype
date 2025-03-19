@@ -45,6 +45,12 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
     y: 0
   });
   
+  // Prevenir menú contextual (click derecho)
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
+  
   // Efecto para manejar eventos globales durante redimensionado
   useEffect(() => {
     if (!isDragging || !dragInfo) return;
@@ -345,6 +351,9 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
   // Iniciar operación de redimensionado
   const handleMouseDown = (e: React.MouseEvent, scheduleEntry: ScheduleEntry) => {
+    // Solo procesar click izquierdo (e.button === 0)
+    if (e.button !== 0) return;
+    
     e.preventDefault();
     e.stopPropagation();
     
@@ -433,7 +442,10 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   }
 
   return (
-    <div className="overflow-auto rounded-lg mr-4 flex-1 relative">
+    <div 
+      className="overflow-auto rounded-lg mr-4 flex-1 relative"
+      onContextMenu={handleContextMenu}
+    >
       {tooltip.show && (
         <div 
           className="fixed bg-gray-800 text-white px-2 py-1 text-xs rounded z-50 pointer-events-none"
@@ -447,7 +459,11 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         </div>
       )}
     
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200" ref={gridRef}>
+      <div 
+        className="bg-white rounded-lg shadow-sm border border-gray-200" 
+        ref={gridRef}
+        onContextMenu={handleContextMenu}
+      >
         <div className="grid grid-cols-[auto,1fr]">
           <div className="w-20 rounded-tl-lg bg-gray-50 border-r border-gray-200"></div>
           <TimeSlotHeader startHour={startHour} endHour={endHour} />
