@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Permiso,  } from './interfaces/permisos';
+import { Permiso } from './interfaces/permisos';
 import PermisosHeader from './components/Permisos/PermisosHeader';
 import PermisosStats from './components/Permisos/PermisosStats';
 import { PermisosList } from './components/Permisos/PermisosList';
-// import PermisosCardView from './components/Permisos/PermisosCardView';
-import { PermisoForm } from './components/Permisos/PermisoForm';
-import { mockPermisosData } from './temp/mock-data';
 import PermisosCardView from './components/Permisos/PermisosCardView';
+import { PermisoForm } from './components/Permisos/PermisoForm';
+import { DeletePermisoModal } from './components/DeletePermisoModal';
+import { PermisoViewModal } from './components/Permisos/PermisoViewModal';
+import { mockPermisosData } from './temp/mock-data';
 
 const PermisosScreen: React.FC = () => {
   // Estados para manejar los permisos y la interfaz
@@ -18,18 +19,22 @@ const PermisosScreen: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState('todos');
   const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
   const [showForm, setShowForm] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedPermiso, setSelectedPermiso] = useState<Permiso | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [permisoToDelete, setPermisoToDelete] = useState<{id: string, nombre: string} | null>(null);
   
   // Aplicar filtros
   useEffect(() => {
     let result = [...permisos];
     
     // Filtro por término de búsqueda
-    if (searchTerm) {
-      const searchTermLower = searchTerm.toLowerCase();
+    if (searchTerm.trim()) {
+      const searchTermLower = searchTerm.toLowerCase().trim();
       result = result.filter(permiso => 
         permiso.nombre.toLowerCase().includes(searchTermLower) || 
-        permiso.descripcion.toLowerCase().includes(searchTermLower)
+        permiso.descripcion.toLowerCase().includes(searchTermLower) ||
+        permiso.id.toLowerCase().includes(searchTermLower)
       );
     }
     
@@ -56,7 +61,7 @@ const PermisosScreen: React.FC = () => {
   const pendingPermisos = permisos.filter(p => p.estado === 'pendiente').length;
   const inactivePermisos = permisos.filter(p => p.estado === 'inactivo').length;
   const totalUsers = permisos.reduce((sum, permiso) => sum + permiso.usuariosAsignados, 0);
-  const restrictedAreas = [...new Set(permisos.flatMap(p => p.areas).filter(a => a.nivelSeguridad === 'alto' || a.nivelSeguridad === 'critico'))].length;
+  const restrictedAreas = [...new Set(permisos.flatMap(p => p.areas || []).filter(a => a.nivelSeguridad === 'alto' || a.nivelSeguridad === 'critico'))].length;
   
   // Manejadores de eventos
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,21 +88,40 @@ const PermisosScreen: React.FC = () => {
   const handleViewPermiso = (id: string) => {
     const permiso = permisos.find(p => p.id === id);
     if (permiso) {
-      setSelectedPermiso(permiso);
-      setShowForm(true);
+      setSelectedPermiso({...permiso});
+      setShowViewModal(true);
     }
   };
   
   const handleEditPermiso = (id: string) => {
     const permiso = permisos.find(p => p.id === id);
     if (permiso) {
-      setSelectedPermiso(permiso);
+      setSelectedPermiso({...permiso});
+      // Cerrar modal de vista si está abierto
+      setShowViewModal(false);
       setShowForm(true);
     }
   };
   
-  const handleDeletePermiso = (id: string) => {
-    setPermisos(prev => prev.filter(p => p.id !== id));
+  const handleDeleteClick = (id: string) => {
+    const permiso = permisos.find(p => p.id === id);
+    if (permiso) {
+      setPermisoToDelete({ id: permiso.id, nombre: permiso.nombre });
+      setShowDeleteModal(true);
+    }
+  };
+  
+  const handleConfirmDelete = () => {
+    if (permisoToDelete) {
+      setPermisos(prev => prev.filter(p => p.id !== permisoToDelete.id));
+      setShowDeleteModal(false);
+      setPermisoToDelete(null);
+    }
+  };
+  
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setPermisoToDelete(null);
   };
   
   const handleSavePermiso = (permiso: Permiso) => {
@@ -158,17 +182,29 @@ const PermisosScreen: React.FC = () => {
             permisos={filteredPermisos}
             onView={handleViewPermiso}
             onEdit={handleEditPermiso}
-            onDelete={handleDeletePermiso}
+            onDelete={handleDeleteClick}
           />
         ) : (
           <PermisosCardView
             permisos={filteredPermisos}
             onView={handleViewPermiso}
             onEdit={handleEditPermiso}
-            onDelete={handleDeletePermiso}
+            onDelete={handleDeleteClick}
           />
         )}
       </div>
+      
+      {/* Modal de vista detallada */}
+      {showViewModal && selectedPermiso && (
+        <PermisoViewModal
+          permiso={selectedPermiso}
+          onClose={() => setShowViewModal(false)}
+          onEdit={() => {
+            setShowViewModal(false);
+            setShowForm(true);
+          }}
+        />
+      )}
       
       {/* Formulario modal */}
       {showForm && (
@@ -176,6 +212,15 @@ const PermisosScreen: React.FC = () => {
           permiso={selectedPermiso}
           onClose={() => setShowForm(false)}
           onSave={handleSavePermiso}
+        />
+      )}
+
+      {/* Modal de confirmación para eliminar */}
+      {showDeleteModal && permisoToDelete && (
+        <DeletePermisoModal
+          permisoNombre={permisoToDelete.nombre}
+          onDelete={handleConfirmDelete}
+          onCancel={handleCancelDelete}
         />
       )}
     </div>
