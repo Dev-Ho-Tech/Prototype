@@ -21,6 +21,12 @@ const ResizeHandle: React.FC<{
   position: 'left' | 'right',
   onMouseDown: (e: React.MouseEvent) => void
 }> = ({ position, onMouseDown }) => {
+  // Prevenir menú contextual (click derecho)
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
+
   return (
     <div
       className={`absolute inset-y-0 ${position}-0 w-4 z-40 cursor-${position === 'left' ? 'w' : 'e'}-resize flex items-center justify-center`}
@@ -33,6 +39,7 @@ const ResizeHandle: React.FC<{
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
       }}
       onMouseDown={onMouseDown}
+      onContextMenu={handleContextMenu}
     >
       <div className="h-10 w-1 bg-white bg-opacity-40 rounded"></div>
     </div>
@@ -56,6 +63,12 @@ const DayRow: React.FC<DayRowProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const [initialPosition, setInitialPosition] = useState({ x: 0, width: 0 });
   
+  // Prevenir menú contextual (click derecho)
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
+  
   // Formatear fecha para mostrar MM/DD
   const formattedShortDate = date.split('-').slice(1).join('/');
   
@@ -75,6 +88,7 @@ const DayRow: React.FC<DayRowProps> = ({
       <div 
         key={index} 
         className={`h-full min-h-[50px] ${isEveningHour ? 'bg-gray-50' : ''}`}
+        onContextMenu={handleContextMenu}
       ></div>
     );
   });
@@ -154,6 +168,9 @@ const DayRow: React.FC<DayRowProps> = ({
   
   // Manejador para iniciar redimensionado desde el borde izquierdo
   const handleLeftResize = (e: React.MouseEvent) => {
+    // Solo procesar click izquierdo (e.button === 0)
+    if (e.button !== 0) return;
+    
     e.stopPropagation();
     e.preventDefault();
     
@@ -182,6 +199,9 @@ const DayRow: React.FC<DayRowProps> = ({
   
   // Manejador para iniciar redimensionado desde el borde derecho
   const handleRightResize = (e: React.MouseEvent) => {
+    // Solo procesar click izquierdo (e.button === 0)
+    if (e.button !== 0) return;
+    
     e.stopPropagation();
     e.preventDefault();
     
@@ -210,6 +230,9 @@ const DayRow: React.FC<DayRowProps> = ({
   
   // Manejador para iniciar movimiento
   const handleMove = (e: React.MouseEvent) => {
+    // Solo procesar click izquierdo (e.button === 0)
+    if (e.button !== 0) return;
+    
     e.stopPropagation();
     e.preventDefault();
     
@@ -246,7 +269,8 @@ const DayRow: React.FC<DayRowProps> = ({
 
   return (
     <React.Fragment>
-      <div className="w-20 px-2 py-3 text-xs border-t border-gray-200 bg-gray-50">
+      <div className="w-20 px-2 py-3 text-xs border-t border-gray-200 bg-gray-50"
+           onContextMenu={handleContextMenu}>
         <div className="font-medium">{day}</div>
         <div className="text-gray-500">{formattedShortDate}</div>
       </div>
@@ -255,6 +279,7 @@ const DayRow: React.FC<DayRowProps> = ({
         style={{ gridTemplateColumns: `repeat(${totalColumns}, minmax(80px, 1fr))` }}
         onMouseMove={onMouseMove}
         onMouseUp={handleLocalMouseUp}
+        onContextMenu={handleContextMenu}
       >
         {/* Celdas de fondo */}
         {cells}
@@ -269,10 +294,11 @@ const DayRow: React.FC<DayRowProps> = ({
               top: '5%',
               zIndex: isResizing ? 30 : 10, // Aumentar z-index durante redimensionado
               cursor: 'move',
-              transition: 'box-shadow 0.1s ease',
+              transition: isResizing ? 'none' : 'box-shadow 0.1s ease', // Eliminar transición durante el arrastre
               boxShadow: isResizing ? '0 0 0 2px rgba(255,255,255,0.5), 0 4px 8px rgba(0,0,0,0.15)' : 'none'
             }}
             onMouseDown={handleMove}
+            onContextMenu={handleContextMenu}
             id={`schedule-entry-${date}-${schedule.shift}`}
           >
             <div className="flex items-center space-x-2 text-xs overflow-hidden">
@@ -286,13 +312,13 @@ const DayRow: React.FC<DayRowProps> = ({
               )}
             </div>
             
-            {/* Manija izquierda para redimensionar - Más delgada para mejor sensibilidad */}
+            {/* Manija izquierda para redimensionar */}
             <ResizeHandle 
               position="left" 
               onMouseDown={handleLeftResize} 
             />
             
-            {/* Manija derecha para redimensionar - Más delgada para mejor sensibilidad */}
+            {/* Manija derecha para redimensionar */}
             <ResizeHandle 
               position="right" 
               onMouseDown={handleRightResize} 
@@ -310,6 +336,7 @@ const DayRow: React.FC<DayRowProps> = ({
               zIndex: 20
             }}
             title={`Entrada: ${schedule.actualEntryTime}`}
+            onContextMenu={handleContextMenu}
           />
         )}
         
@@ -322,6 +349,7 @@ const DayRow: React.FC<DayRowProps> = ({
               zIndex: 20
             }}
             title={`Salida: ${schedule.actualExitTime}`}
+            onContextMenu={handleContextMenu}
           />
         )}
       </div>
