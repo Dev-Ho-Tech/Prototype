@@ -27,7 +27,7 @@ import { DiningScheduleScreen } from './modules/dining/schedule/DiningScheduleSc
 import { DiningAccessScreen } from './modules/dining/access/DiningAccessScreen';
 import { DiningReportsScreen } from './modules/dining/reports/DiningReportsScreen';
 import { DoorsScreen } from './modules/access-control/doors/DoorsScreen';
-import { VisitorsScreen } from './modules/access-control/visitors/VisitorsScreen';
+// import { VisitorsScreen } from './modules/access-control/visitors/VisitorsScreen';
 import { PermissionsScreen } from './modules/access-control/permissions/PermissionsScreen';
 import { MonitoringScreen } from './modules/access-control/monitoring/MonitoringScreen';
 import { LoginScreen } from './modules/auth/login/LoginScreen';
@@ -40,6 +40,7 @@ import EmailTemplatesPage from './modules/system-config/emial/emailScreen';
 import { ProfileManagementScreen } from './modules/administration/profiles/ProfileManagementScreen';
 import { WorkShiftsScreen } from './modules/system-config/modality/WorkShiftsScreen';
 import ReportsScreen from './modules/reports/ReportsScreen';
+import VisitorsScreen from './modules/access-control/visitors/VisitorsScreen';
 
 // Variable para almacenar el estado global (podemos mantenerla por compatibilidad)
 // eslint-disable-next-line react-refresh/only-export-components

@@ -1,410 +1,324 @@
-import React, { useState } from 'react';
-import { X, Upload, Camera, Clock, MapPin, User, Building2, Mail, Phone, FileText } from 'lucide-react';
-import type { Visitor } from '../../../../types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
+import { VisitorFormProps, Visitor} from '../interfaces/types';
 
-interface VisitorFormProps {
-  visitor?: Visitor;
-  onClose: () => void;
-}
-
-export function VisitorForm({ visitor, onClose }: VisitorFormProps) {
-  const [formData, setFormData] = useState<Partial<Visitor>>(
-    visitor || {
-      firstName: '',
-      lastName: '',
-      documentType: 'cedula',
-      documentNumber: '',
-      company: '',
-      email: '',
-      phone: '',
-      visit: {
-        reason: '',
-        host: '',
-        hostDepartment: '',
-        areas: [],
-        startTime: '',
-        endTime: '',
-        duration: ''
-      },
-      credentials: {
-        type: 'card',
-        requiresEscort: false
-      }
+// Componente para formulario de visitantes
+const VisitorForm: React.FC<VisitorFormProps> = ({ visitor, onClose, onSave }) => {
+  // Estado inicial para nuevo visitante
+  const emptyVisitor: Visitor = {
+    id: '',
+    firstName: '',
+    lastName: '',
+    company: '',
+    documentType: 'cedula',
+    documentNumber: '',
+    photo: 'https://randomuser.me/api/portraits/men/1.jpg', // Placeholder
+    status: 'pending',
+    visit: {
+      reason: '',
+      host: '',
+      hostDepartment: '',
+      startTime: new Date().toISOString(),
+      endTime: new Date(Date.now() + 3600000).toISOString(), // 1 hora después
+      duration: '1h'
+    },
+    credentials: {
+      type: 'card',
+      requiresEscort: false
     }
-  );
+  };
 
+  // Estado para el formulario
+  const [formData, setFormData] = useState<Visitor>(visitor || emptyVisitor);
+  
+  // Inicializar formulario cuando cambia el visitante
+  useEffect(() => {
+    if (visitor) {
+      setFormData(visitor);
+    }
+  }, [visitor]);
+
+  // Manejar cambios en campos simples
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Manejar cambios en campos anidados
+  const handleNestedChange = (section: 'visit' | 'credentials', name: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [name]: value
+      }
+    }));
+  };
+
+  // Manejar checkbox
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      credentials: {
+        ...prev.credentials,
+        [name]: checked
+      }
+    }));
+  };
+
+  // Manejar envío del formulario
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
+    
+    // Validar campos requeridos
+    if (!formData.firstName || !formData.lastName || !formData.documentNumber || 
+        !formData.visit.reason || !formData.visit.host) {
+      alert('Por favor complete todos los campos obligatorios');
+      return;
+    }
+
+    // Asignar ID para nuevo visitante
+    const visitorToSave: Visitor = {
+      ...formData,
+      id: formData.id || `visitor-${Date.now()}`
+    };
+
+    onSave(visitorToSave);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {visitor ? 'Editar Visitante' : 'Nuevo Visitante'}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        {/* Cabecera */}
+        <div className="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
+          <h2 className="text-lg font-medium">
+            {visitor ? 'Editar Visitante' : 'Nuevo Visitante'}
+          </h2>
+          <button 
+            onClick={onClose}
+            className="text-white hover:text-gray-200"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Información personal
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="relative">
-                        <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                          {formData.photo ? (
-                            <img
-                              src={formData.photo}
-                              alt="Visitor"
-                              className="w-24 h-24 rounded-lg object-cover"
-                            />
-                          ) : (
-                            <Camera className="w-8 h-8 text-gray-400" />
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          className="absolute bottom-0 right-0 p-1 bg-white rounded-full shadow-sm border border-gray-200"
-                        >
-                          <Upload className="w-4 h-4 text-gray-500" />
-                        </button>
-                      </div>
-                      <div className="flex-1">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                              Nombre
-                            </label>
-                            <input
-                              type="text"
-                              value={formData.firstName}
-                              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                              Apellidos
-                            </label>
-                            <input
-                              type="text"
-                              value={formData.lastName}
-                              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Tipo de documento
-                        </label>
-                        <select
-                          value={formData.documentType}
-                          onChange={(e) => setFormData({ ...formData, documentType: e.target.value as any })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                          <option value="cedula">Cédula</option>
-                          <option value="passport">Pasaporte</option>
-                          <option value="license">Licencia</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Número de documento
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.documentNumber}
-                          onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Empresa/Organización
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.company}
-                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Correo electrónico
-                        </label>
-                        <input
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Teléfono
-                        </label>
-                        <input
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
+        {/* Formulario */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-130px)]">
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Columna 1: Información del visitante */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Visitante</h3>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Apellido <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Empresa
+                  </label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tipo de Documento
+                  </label>
+                  <select
+                    name="documentType"
+                    value={formData.documentType}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="cedula">Cédula</option>
+                    <option value="passport">Pasaporte</option>
+                    <option value="license">Licencia</option>
+                  </select>
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Número de Documento <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="documentNumber"
+                    value={formData.documentNumber}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Estado
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="pending">Pendiente</option>
+                    <option value="active">Activo</option>
+                    <option value="completed">Completado</option>
+                    <option value="cancelled">Cancelado</option>
+                  </select>
                 </div>
               </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Detalles de la visita
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Motivo de la visita
-                      </label>
-                      <textarea
-                        value={formData.visit?.reason}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          visit: { ...formData.visit!, reason: e.target.value }
-                        })}
-                        rows={3}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Persona a visitar
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.visit?.host}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            visit: { ...formData.visit!, host: e.target.value }
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Departamento
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.visit?.hostDepartment}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            visit: { ...formData.visit!, hostDepartment: e.target.value }
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Fecha/hora inicio
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={formData.visit?.startTime?.slice(0, 16)}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            visit: { ...formData.visit!, startTime: e.target.value }
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Fecha/hora fin
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={formData.visit?.endTime?.slice(0, 16)}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            visit: { ...formData.visit!, endTime: e.target.value }
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Áreas autorizadas
-                      </label>
-                      <div className="space-y-2">
-                        {['Recepción', 'Oficinas', 'Sala de Reuniones', 'Área Técnica'].map((area) => (
-                          <label key={area} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={formData.visit?.areas?.includes(area)}
-                              onChange={(e) => {
-                                const areas = formData.visit?.areas || [];
-                                setFormData({
-                                  ...formData,
-                                  visit: {
-                                    ...formData.visit!,
-                                    areas: e.target.checked
-                                      ? [...areas, area]
-                                      : areas.filter(a => a !== area)
-                                  }
-                                });
-                              }}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="ml-2 text-sm text-gray-700">{area}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
+              
+              {/* Columna 2: Información de la visita */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Información de la Visita</h3>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Motivo de Visita <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.visit.reason}
+                    onChange={(e) => handleNestedChange('visit', 'reason', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Anfitrión <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.visit.host}
+                    onChange={(e) => handleNestedChange('visit', 'host', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Departamento
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.visit.hostDepartment}
+                    onChange={(e) => handleNestedChange('visit', 'hostDepartment', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hora Inicio
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={new Date(formData.visit.startTime).toISOString().slice(0, 16)}
+                      onChange={(e) => handleNestedChange('visit', 'startTime', new Date(e.target.value).toISOString())}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hora Fin
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={new Date(formData.visit.endTime).toISOString().slice(0, 16)}
+                      onChange={(e) => handleNestedChange('visit', 'endTime', new Date(e.target.value).toISOString())}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    />
                   </div>
                 </div>
-
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Credenciales
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Tipo de acceso
-                      </label>
-                      <select
-                        value={formData.credentials?.type}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          credentials: { ...formData.credentials!, type: e.target.value as any }
-                        })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      >
-                        <option value="card">Tarjeta</option>
-                        <option value="pin">PIN</option>
-                        <option value="both">Ambos</option>
-                      </select>
-                    </div>
-
-                    {(formData.credentials?.type === 'card' || formData.credentials?.type === 'both') && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Número de tarjeta
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.credentials?.cardNumber}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            credentials: { ...formData.credentials!, cardNumber: e.target.value }
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    )}
-
-                    {(formData.credentials?.type === 'pin' || formData.credentials?.type === 'both') && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          PIN temporal
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.credentials?.pin}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            credentials: { ...formData.credentials!, pin: e.target.value }
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    )}
-
-                    <div>
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={formData.credentials?.requiresEscort}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            credentials: { ...formData.credentials!, requiresEscort: e.target.checked }
-                          })}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">
-                          Requiere acompañante
-                        </span>
-                      </label>
-                    </div>
-
-                    {formData.credentials?.requiresEscort && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Nombre del acompañante
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.credentials?.escortName}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            credentials: { ...formData.credentials!, escortName: e.target.value }
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    )}
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tipo de Credencial
+                  </label>
+                  <select
+                    value={formData.credentials.type}
+                    onChange={(e) => handleNestedChange('credentials', 'type', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="card">Tarjeta</option>
+                    <option value="pin">PIN</option>
+                    <option value="card_pin">Tarjeta + PIN</option>
+                  </select>
+                </div>
+                
+                <div className="mb-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="requiresEscort"
+                      checked={formData.credentials.requiresEscort}
+                      onChange={handleCheckboxChange}
+                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    />
+                    <label className="ml-2 block text-sm text-gray-700">
+                      Requiere acompañante
+                    </label>
                   </div>
                 </div>
               </div>
             </div>
-
-            <div className="flex justify-end space-x-3">
+            
+            {/* Botones de acción */}
+            <div className="mt-8 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
-                {visitor ? 'Guardar cambios' : 'Registrar visitante'}
+                {visitor ? 'Actualizar' : 'Guardar'}
               </button>
             </div>
           </form>
@@ -412,4 +326,6 @@ export function VisitorForm({ visitor, onClose }: VisitorFormProps) {
       </div>
     </div>
   );
-}
+};
+
+export default VisitorForm;
