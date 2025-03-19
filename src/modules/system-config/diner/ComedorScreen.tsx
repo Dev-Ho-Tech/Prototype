@@ -20,7 +20,7 @@ import ComedorList from './components/ComedorList';
 import HorarioComidaList from './components/HorarioComidaList';
 import EstacionComidaList from './components/EstacionComidaList';
 import PerfilComidaList from './components/PerfilComidaList';
-import { Plus, Search} from 'lucide-react';
+import ComedoresHeader from './components/ComedoresHeader';
 
 const ComedorScreen: React.FC = () => {
   // Estados para los datos
@@ -35,31 +35,78 @@ const ComedorScreen: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   
+  // Estados para filtrado por estado
+  const [comedoresStatus, setComedoresStatus] = useState('todas');
+  const [horariosStatus, setHorariosStatus] = useState('todas');
+  const [estacionesStatus, setEstacionesStatus] = useState('todas');
+  const [perfilesStatus, setPerfilesStatus] = useState('todas');
+  
   // Estado para confirmación de eliminación
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [deleteType, setDeleteType] = useState<string>('');
 
-  // Búsqueda y filtrado
-  const filteredComedores = comedores.filter(comedor => 
-    comedor.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    comedor.ubicacion.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Contadores para los StatusTabs
+  const comedoresCounts = {
+    active: comedores.filter(comedor => comedor.estado === 'activo').length,
+    inactive: comedores.filter(comedor => comedor.estado === 'inactivo').length,
+    total: comedores.length
+  };
   
-  const filteredHorarios = horarios.filter(horario => 
-    horario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    comedores.find(c => c.id === horario.comedorId)?.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const horariosCounts = {
+    active: horarios.filter(horario => horario.estado === 'activo').length,
+    inactive: horarios.filter(horario => horario.estado === 'inactivo').length,
+    total: horarios.length
+  };
   
-  const filteredEstaciones = estaciones.filter(estacion => 
-    estacion.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    comedores.find(c => c.id === estacion.comedorId)?.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const estacionesCounts = {
+    active: estaciones.filter(estacion => estacion.estado === 'activo').length,
+    inactive: estaciones.filter(estacion => estacion.estado === 'inactivo').length,
+    total: estaciones.length
+  };
   
-  const filteredPerfiles = perfiles.filter(perfil => 
-    perfil.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    perfil.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const perfilesCounts = {
+    active: perfiles.filter(perfil => perfil.estado === 'activo').length,
+    inactive: perfiles.filter(perfil => perfil.estado === 'inactivo').length,
+    total: perfiles.length
+  };
+
+  // Búsqueda y filtrado combinado (búsqueda + estado)
+  const filteredComedores = comedores.filter(comedor => {
+    const matchesSearch = 
+      comedor.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      comedor.ubicacion.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (comedoresStatus === 'todas') return matchesSearch;
+    return matchesSearch && comedor.estado === comedoresStatus;
+  });
+  
+  const filteredHorarios = horarios.filter(horario => {
+    const matchesSearch = 
+      horario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      comedores.find(c => c.id === horario.comedorId)?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (horariosStatus === 'todas') return matchesSearch;
+    return matchesSearch && horario.estado === horariosStatus;
+  });
+  
+  const filteredEstaciones = estaciones.filter(estacion => {
+    const matchesSearch =
+      estacion.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      comedores.find(c => c.id === estacion.comedorId)?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (estacionesStatus === 'todas') return matchesSearch;
+    return matchesSearch && estacion.estado === estacionesStatus;
+  });
+  
+  const filteredPerfiles = perfiles.filter(perfil => {
+    const matchesSearch =
+      perfil.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      perfil.descripcion?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (perfilesStatus === 'todas') return matchesSearch;
+    return matchesSearch && perfil.estado === perfilesStatus;
+  });
 
   // Manejadores para el CRUD de Comedores
   const handleSaveComedor = (comedor: Comedor) => {
@@ -263,10 +310,60 @@ const ComedorScreen: React.FC = () => {
     }
   };
 
+  // Función para obtener el estado y contador activos según la pestaña
+  const getActiveStatusProps = () => {
+    switch (activeTab) {
+      case 'comedores':
+        return {
+          currentStatus: comedoresStatus,
+          onStatusChange: setComedoresStatus,
+          counts: comedoresCounts
+        };
+      case 'horarios':
+        return {
+          currentStatus: horariosStatus,
+          onStatusChange: setHorariosStatus,
+          counts: horariosCounts
+        };
+      case 'estaciones':
+        return {
+          currentStatus: estacionesStatus,
+          onStatusChange: setEstacionesStatus,
+          counts: estacionesCounts
+        };
+      case 'perfiles':
+        return {
+          currentStatus: perfilesStatus,
+          onStatusChange: setPerfilesStatus,
+          counts: perfilesCounts
+        };
+      default:
+        return {
+          currentStatus: 'todas',
+          onStatusChange: () => {},
+          counts: { active: 0, inactive: 0, total: 0 }
+        };
+    }
+  };
+
+  const statusProps = getActiveStatusProps();
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Administración de Comedores</h1>
-      
+      {/* Cabecera Mejorada con StatusTabs */}
+      <ComedoresHeader 
+        searchTerm={searchTerm}
+        onSearchChange={(e) => setSearchTerm(e.target.value)}
+        onNewClick={() => {
+          setEditingItem(null);
+          setShowForm(true);
+        }}
+        title={getFormTitle()}
+        currentStatus={statusProps.currentStatus}
+        onStatusChange={statusProps.onStatusChange}
+        counts={statusProps.counts}
+      />
+          
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <div className="flex space-x-1">
@@ -311,32 +408,7 @@ const ComedorScreen: React.FC = () => {
               Perfiles
             </button>
           </div>
-          
-          <div className="flex space-x-2">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Buscar..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            
-            <button 
-              onClick={() => {
-                setEditingItem(null);
-                setShowForm(true);
-              }}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              <Plus className="h-5 w-5 mr-1" />
-              Nuevo {getFormTitle()}
-            </button>
-          </div>
+        
         </div>
 
         <div className="bg-white rounded-lg shadow">
@@ -424,6 +496,7 @@ const ComedorScreen: React.FC = () => {
             )
           )}
         </div>
+
       </div>
       
       {/* Modal de confirmación de eliminación */}

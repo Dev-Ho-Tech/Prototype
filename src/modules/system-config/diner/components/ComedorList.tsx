@@ -1,12 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ComedorListProps } from '../interfaces/types';
-import { Edit, Trash2, Users } from 'lucide-react';
+import { Edit, Trash2, Users, ArrowUpDown } from 'lucide-react';
+import Pagination from './Pagination';
 
 const ComedorList: React.FC<ComedorListProps> = ({
   comedores,
   onEdit,
   onDelete
 }) => {
+  // Estados para paginación y filtrado
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filteredStatus,] = useState('todas');
+  const [sortBySede, setSortBySede] = useState(false);
+
+  // Filtrar comedores por estado
+  const filteredComedores = comedores.filter(comedor => {
+    if (filteredStatus === 'todas') return true;
+    return comedor.estado === filteredStatus;
+  });
+
+  // Ordenar por sede si es necesario
+  const sortedComedores = sortBySede 
+    ? [...filteredComedores].sort((a, b) => a.ubicacion.localeCompare(b.ubicacion))
+    : filteredComedores;
+
+  // Calcular comedores paginados
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentComedores = sortedComedores.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Calcular número total de páginas
+  const totalPages = Math.ceil(sortedComedores.length / itemsPerPage);
+
+  // Manejar cambio de página
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  // Manejar ordenamiento por sede
+  const handleSortBySede = () => {
+    setSortBySede(!sortBySede);
+  };
+
+  // Asegurar que la página actual sea válida cuando cambian los filtros
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [filteredStatus, totalPages, currentPage]);
+
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -17,7 +62,10 @@ const ComedorList: React.FC<ComedorListProps> = ({
                 Nombre
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ubicación
+                <div className="flex items-center cursor-pointer" onClick={handleSortBySede}>
+                  Sede
+                  <ArrowUpDown className="h-4 w-4 ml-1" />
+                </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Capacidad
@@ -37,14 +85,14 @@ const ComedorList: React.FC<ComedorListProps> = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {comedores.length === 0 ? (
+            {currentComedores.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
                   No hay comedores registrados
                 </td>
               </tr>
             ) : (
-              comedores.map((comedor) => (
+              currentComedores.map((comedor) => (
                 <tr key={comedor.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -96,6 +144,18 @@ const ComedorList: React.FC<ComedorListProps> = ({
           </tbody>
         </table>
       </div>
+
+      {/* Componente de paginación */}
+      <Pagination 
+        currentPage={currentPage}
+        totalItems={sortedComedores.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+        onItemsPerPageChange={(value) => {
+          setItemsPerPage(value);
+          setCurrentPage(1); // Reiniciar a primera página al cambiar el tamaño
+        }}
+      />
     </div>
   );
 };
