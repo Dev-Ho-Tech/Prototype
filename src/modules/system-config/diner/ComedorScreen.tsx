@@ -22,6 +22,8 @@ import EstacionComidaList from './components/EstacionComidaList';
 import PerfilComidaList from './components/PerfilComidaList';
 import ComedoresHeader from './components/ComedoresHeader';
 
+type ViewMode = 'list' | 'card';
+
 const ComedorScreen: React.FC = () => {
   // Estados para los datos
   const [comedores, setComedores] = useState<Comedor[]>(initialComedores);
@@ -34,6 +36,9 @@ const ComedorScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+  
+  // Estado para el modo de visualización
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   
   // Estados para filtrado por estado
   const [comedoresStatus, setComedoresStatus] = useState('todas');
@@ -362,6 +367,8 @@ const ComedorScreen: React.FC = () => {
         currentStatus={statusProps.currentStatus}
         onStatusChange={statusProps.onStatusChange}
         counts={statusProps.counts}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
           
       <div className="mb-6">
@@ -408,7 +415,6 @@ const ComedorScreen: React.FC = () => {
               Perfiles
             </button>
           </div>
-        
         </div>
 
         <div className="bg-white rounded-lg shadow">
@@ -427,6 +433,7 @@ const ComedorScreen: React.FC = () => {
                 comedores={filteredComedores}
                 onEdit={handleEditComedor}
                 onDelete={handleDeleteComedor}
+                viewMode={viewMode}
               />
             )
           )}
@@ -448,6 +455,7 @@ const ComedorScreen: React.FC = () => {
                 comedores={comedores}
                 onEdit={handleEditHorario}
                 onDelete={handleDeleteHorario}
+                viewMode={viewMode}
               />
             )
           )}
@@ -469,6 +477,7 @@ const ComedorScreen: React.FC = () => {
                 comedores={comedores}
                 onEdit={handleEditEstacion}
                 onDelete={handleDeleteEstacion}
+                viewMode={viewMode}
               />
             )
           )}
@@ -492,11 +501,11 @@ const ComedorScreen: React.FC = () => {
                 estaciones={estaciones}
                 onEdit={handleEditPerfil}
                 onDelete={handleDeletePerfil}
+                viewMode={viewMode}
               />
             )
           )}
         </div>
-
       </div>
       
       {/* Modal de confirmación de eliminación */}

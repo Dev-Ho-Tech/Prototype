@@ -80,10 +80,12 @@ export interface PerfilComidaFormProps {
   onCancel: () => void;
 }
 
+// Props para las listas - Actualizados para soportar diferentes vistas
 export interface ComedorListProps {
   comedores: Comedor[];
   onEdit: (comedor: Comedor) => void;
   onDelete: (id: string) => void;
+  viewMode?: 'list' | 'card';
 }
 
 export interface HorarioComidaListProps {
@@ -106,4 +108,46 @@ export interface PerfilComidaListProps {
   estaciones: EstacionComida[];
   onEdit: (perfil: PerfilComida) => void;
   onDelete: (id: string) => void;
+}
+
+// Props para componentes de UI
+export interface StatusTabsProps {
+  currentStatus: string;
+  onStatusChange: (status: string) => void;
+  counts: {
+    active: number;
+    inactive: number;
+    total: number;
+  }
+}
+
+export interface PaginationProps {
+  currentPage: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange: (itemsPerPage: number) => void;
+}
+
+export interface ComedorCardProps {
+  comedor: Comedor;
+  onEdit: (comedor: Comedor) => void;
+  onDelete: (id: string) => void;
+  onView?: (comedor: Comedor) => void;
+}
+
+export interface ComedoresHeaderProps {
+  searchTerm: string;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onNewClick: () => void;
+  title: string;
+  currentStatus: string;
+  onStatusChange: (status: string) => void;
+  counts: {
+    active: number;
+    inactive: number;
+    total: number;
+  };
+  viewMode: 'list' | 'card';
+  onViewModeChange: (mode: 'list' | 'card') => void;
 }

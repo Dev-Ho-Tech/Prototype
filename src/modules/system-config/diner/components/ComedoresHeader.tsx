@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, Plus, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Plus, ChevronDown, List, Grid } from 'lucide-react';
 import StatusTabs from './StatusTabs';
 
 interface ComedoresHeaderProps {
@@ -14,6 +14,8 @@ interface ComedoresHeaderProps {
     inactive: number;
     total: number;
   };
+  viewMode: 'list' | 'card';
+  onViewModeChange: (mode: 'list' | 'card') => void;
 }
 
 const ComedoresHeader: React.FC<ComedoresHeaderProps> = ({
@@ -23,8 +25,13 @@ const ComedoresHeader: React.FC<ComedoresHeaderProps> = ({
   title,
   currentStatus,
   onStatusChange,
-  counts
+  counts,
+  viewMode,
+  onViewModeChange
 }) => {
+  // Estado para manejar si el menú de vista está abierto o cerrado
+  const [viewMenuOpen, setViewMenuOpen] = useState(false);
+
   return (
     <div className="mb-6">
       {/* Título y Botón de Nuevo */}
@@ -35,7 +42,7 @@ const ComedoresHeader: React.FC<ComedoresHeaderProps> = ({
         </div>
         <button 
           onClick={onNewClick}
-          className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           <Plus className="h-5 w-5 mr-1" />
           Nuevo {title}
@@ -64,10 +71,53 @@ const ComedoresHeader: React.FC<ComedoresHeaderProps> = ({
             />
           </div>
           
-          <button className="flex items-center px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700">
-            Modo Lista
-            <ChevronDown className="h-4 w-4 ml-2" />
-          </button>
+          {/* Menú desplegable para cambiar la vista */}
+          <div className="relative">
+            <button 
+              className="flex items-center px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700"
+              onClick={() => setViewMenuOpen(!viewMenuOpen)}
+            >
+              {viewMode === 'list' ? (
+                <>
+                  <List className="h-4 w-4 mr-2" />
+                  Modo Lista
+                </>
+              ) : (
+                <>
+                  <Grid className="h-4 w-4 mr-2" />
+                  Modo Tarjeta
+                </>
+              )}
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </button>
+            
+            {viewMenuOpen && (
+              <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                <ul>
+                  <li 
+                    className={`px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center ${viewMode === 'list' ? 'text-blue-600 font-medium' : ''}`}
+                    onClick={() => {
+                      onViewModeChange('list');
+                      setViewMenuOpen(false);
+                    }}
+                  >
+                    <List className="h-4 w-4 mr-2" />
+                    Vista Lista
+                  </li>
+                  <li 
+                    className={`px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center ${viewMode === 'card' ? 'text-blue-600 font-medium' : ''}`}
+                    onClick={() => {
+                      onViewModeChange('card');
+                      setViewMenuOpen(false);
+                    }}
+                  >
+                    <Grid className="h-4 w-4 mr-2" />
+                    Vista Tarjeta
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
