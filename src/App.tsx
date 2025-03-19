@@ -41,7 +41,7 @@ import { ProfileManagementScreen } from './modules/administration/profiles/Profi
 import { WorkShiftsScreen } from './modules/system-config/modality/WorkShiftsScreen';
 import ReportsScreen from './modules/reports/ReportsScreen';
 import VisitorsScreen from './modules/access-control/visitors/VisitorsScreen';
-import { PermisosScreen } from './modules/access-control/permissions/PermissionsScreen';
+import  PermisosScreen  from './modules/access-control/permissions/PermissionsScreen';
 
 // Variable para almacenar el estado global (podemos mantenerla por compatibilidad)
 // eslint-disable-next-line react-refresh/only-export-components

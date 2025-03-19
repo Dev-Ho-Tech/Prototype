@@ -183,7 +183,7 @@ export function PermisosList({ permisos, viewMode, onEdit, onDelete }: PermisosL
                   </button>
                   <button
                     onClick={() => onEdit(permiso)}
-                    className="text-indigo-600 hover:text-indigo-900"
+                    className="text-blue-600 hover:text-blue-900"
                   >
                     <Edit className="w-5 h-5" />
                   </button>

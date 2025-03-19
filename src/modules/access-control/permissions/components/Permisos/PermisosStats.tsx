@@ -20,9 +20,9 @@ const PermisosStats: React.FC<PermisosStatsProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-500">Permisos activos</p>
-            <p className="text-2xl font-semibold text-indigo-600">{active}</p>
+            <p className="text-2xl font-semibold text-blue-600">{active}</p>
           </div>
-          <Shield className="w-8 h-8 text-indigo-400" />
+          <Shield className="w-8 h-8 text-blue-400" />
         </div>
       </div>
       
