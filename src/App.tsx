@@ -42,6 +42,7 @@ import { WorkShiftsScreen } from './modules/system-config/modality/WorkShiftsScr
 import ReportsScreen from './modules/reports/ReportsScreen';
 import VisitorsScreen from './modules/access-control/visitors/VisitorsScreen';
 import  PermisosScreen  from './modules/access-control/permissions/PermissionsScreen';
+import CalendarioPage from './modules/calendars/CalendarioPage';
 
 // Variable para almacenar el estado global (podemos mantenerla por compatibilidad)
 // eslint-disable-next-line react-refresh/only-export-components
@@ -134,6 +135,8 @@ function AppContent() {
           <Route path="/employees/geocerca" element={<GeofenceModule />} />
           <Route path="/employees/biometric" element={<BiometricScreen />} />
           <Route path="/employees/incidencias" element={<IncidenciasScreen />} />
+          <Route path="/employees/calendar" element={<CalendarioPage />} />
+
           <Route path="/administration/licenses" element={<LicensesScreen />} />
           <Route path="/administration/users" element={<UsersScreen />} />
           <Route path="/administration/perfil" element={<ProfileManagementScreen />} />
