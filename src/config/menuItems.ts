@@ -1,4 +1,4 @@
-import { BarChart2, Users, Clock, DoorClosed, Settings, Building2, Briefcase, Fingerprint, UserCheck, FileText, Mail, Utensils, LucideIcon } from 'lucide-react';
+import { BarChart2, Users, Clock, DoorClosed, Settings, Building2, Briefcase, Calendar, Fingerprint, UserCheck, FileText, Mail, Utensils, LucideIcon } from 'lucide-react';
 
 export interface MenuItem {
   id: string;
@@ -55,6 +55,12 @@ export const menuItems: MenuItem[] = [
         label: 'Gestión de Incidencias',
         icon: Fingerprint,
         path: '/employees/incidencias'
+      },
+      {
+        id: 'calendar',
+        label: 'Calendario',
+        icon: Calendar,
+        path: '/employees/calendar'
       },
     ]
   },
