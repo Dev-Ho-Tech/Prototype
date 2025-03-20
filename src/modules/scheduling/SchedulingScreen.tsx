@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Period, DragInfo } from './interfaces/types';
 import { locations, departments, workShifts, licenses } from './../../global/temp/data_global_temp';
 import TopBar from './components/TopBar';
 import ScheduleGrid from './components/ScheduleGrid';
 import Legends from './components/Legends';
-// Importar el contexto de estado global
 import { useAppState } from '../../global/context/AppStateContext';
 import { UnifiedEmployee } from '../../global/interfaces/unifiedTypes';
 
@@ -26,10 +25,14 @@ export function SchedulingScreen() {
   const [startDate, setStartDate] = useState('2025-02-14');
   const [endDate, setEndDate] = useState('2025-02-14');
   const [selectedEmployee, setSelectedEmployee] = useState<UnifiedEmployee | null>(null);
+  // Nuevo estado para selección múltiple
+  const [selectedEmployees, setSelectedEmployees] = useState<UnifiedEmployee[]>([]);
   const [showShifts, setShowShifts] = useState(true);
   const [showLicenses, setShowLicenses] = useState(true);
   const [editMode] = useState(false);
   const [dragInfo, setDragInfo] = useState<DragInfo | null>(null);
+  const [panelWidth, setPanelWidth] = useState<number>(320); // Ancho inicial del panel izquierdo
+  const [isResizing, setIsResizing] = useState<boolean>(false);
 
   // Estado para los filtros avanzados (mismo formato que en EmployeeManagementScreen)
   const [filterState, setFilterState] = useState({
@@ -41,6 +44,9 @@ export function SchedulingScreen() {
 
   // Estado para los empleados filtrados
   const [filteredEmployees, setFilteredEmployees] = useState<UnifiedEmployee[]>([]);
+
+  // Ref para el panel
+  const panelRef = useRef<HTMLDivElement>(null);
 
   // Inicializar la pantalla actual
   useEffect(() => {
@@ -95,21 +101,22 @@ export function SchedulingScreen() {
     setFilteredEmployees(filtered);
   }, [searchTerm, filterState, allEmployees]);
 
+  // Ordenar los empleados alfabéticamente
+  useEffect(() => {
+    // Ordenar los empleados alfabéticamente
+    setFilteredEmployees(prevEmployees => {
+      return [...prevEmployees].sort((a, b) => {
+        const nameA = (a.displayName || a.name || '').toLowerCase();
+        const nameB = (b.displayName || b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+    });
+  }, [filteredEmployees.length]); // Solo ordenar cuando cambia la cantidad de empleados filtrados
+
   // Manejar cambios en los filtros
   const handleFilterChange = (filters: any) => {
     setFilterState(filters);
   };
-
-  // Limpiar todos los filtros
-  // const clearAllFilters = () => {
-  //   setFilterState({
-  //     sedes: [],
-  //     departamentos: [],
-  //     secciones: [],
-  //     unidades: []
-  //   });
-  //   setSearchTerm('');
-  // };
 
   // Seleccionar el empleado actual cuando cambia
   useEffect(() => {
@@ -119,17 +126,84 @@ export function SchedulingScreen() {
     if (currentEmployee) {
       console.log('Empleado encontrado en el contexto global:', currentEmployee.displayName);
       setSelectedEmployee(currentEmployee);
+      setSelectedEmployees([currentEmployee]); // También actualizar el array de seleccionados
     } else if (allEmployees.length > 0) {
       // Si no hay empleado seleccionado en el contexto, usar el primero de la lista
       console.log('No hay empleado seleccionado, usando el primero de la lista');
       setSelectedEmployee(allEmployees[0]);
+      setSelectedEmployees([allEmployees[0]]); // También actualizar el array de seleccionados
     }
   }, [currentEmployee, allEmployees]);
 
   // Manejar la selección de un empleado
-  const handleSelectEmployee = (employee: UnifiedEmployee) => {
-    setSelectedEmployee(employee);
-    setCurrentEmployee(employee);
+  const handleSelectEmployee = (employee: UnifiedEmployee, isMultiSelect: boolean) => {
+    if (isMultiSelect) {
+      // Si se está presionando Ctrl/Cmd, alternar la selección
+      if (selectedEmployees.some(emp => emp.id === employee.id)) {
+        // Eliminar si ya está seleccionado
+        const newSelected = selectedEmployees.filter(emp => emp.id !== employee.id);
+        setSelectedEmployees(newSelected);
+        
+        // Si se deseleccionó el empleado actual, seleccionar el primero de la lista (si hay alguno)
+        if (selectedEmployee?.id === employee.id && newSelected.length > 0) {
+          setSelectedEmployee(newSelected[0]);
+          setCurrentEmployee(newSelected[0]);
+        } else if (newSelected.length === 0) {
+          setSelectedEmployee(null);
+          setCurrentEmployee(null);
+        }
+      } else {
+        // Añadir a la selección
+        const newSelected = [...selectedEmployees, employee];
+        setSelectedEmployees(newSelected);
+        
+        // Si no había empleado seleccionado actualmente, establecer este como el actual
+        if (!selectedEmployee) {
+          setSelectedEmployee(employee);
+          setCurrentEmployee(employee);
+        }
+      }
+    } else {
+      // Selección simple (sin Ctrl/Cmd)
+      setSelectedEmployee(employee);
+      setCurrentEmployee(employee);
+      setSelectedEmployees([employee]);
+    }
+  };
+
+  // Manejar el inicio del redimensionamiento
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      // Establecer el nuevo ancho basado en la posición del cursor
+      const newWidth = moveEvent.clientX;
+      
+      // Limitar el ancho a mínimos y máximos
+      const minPanelWidth = 280; // Ancho mínimo del panel izquierdo
+      const maxPanelWidth = window.innerWidth * 0.7; // Ancho máximo (70% de la ventana)
+      
+      // También asegurar que quede espacio suficiente para el panel derecho
+      const minRightPanelWidth = 400; // Ancho mínimo que debe tener el panel derecho
+      const maxAllowedLeftPanelWidth = window.innerWidth - minRightPanelWidth;
+      
+      // Calcular el ancho final respetando todas las restricciones
+      const finalWidth = Math.max(minPanelWidth, Math.min(newWidth, maxPanelWidth, maxAllowedLeftPanelWidth));
+      
+      setPanelWidth(finalWidth);
+    };
+    
+    const onMouseUp = () => {
+      setIsResizing(false);
+      // Eliminar event listeners cuando se suelta el ratón
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    
+    // Agregar event listeners para seguir el movimiento del ratón
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   };
 
   return (
@@ -159,7 +233,11 @@ export function SchedulingScreen() {
 
       <div className="flex-1 overflow-hidden flex p-4">
         {/* Panel izquierdo - Lista de empleados adaptada para usar el modelo unificado */}
-        <div className="w-80 border border-gray-200 rounded-lg bg-white flex flex-col mr-4 ml-4 shadow-sm">
+        <div 
+          ref={panelRef}
+          className={`border border-gray-200 rounded-lg bg-white flex flex-col mr-4 ml-4 shadow-sm ${selectedEmployee ? '' : 'w-full'}`}
+          style={selectedEmployee ? { width: `${panelWidth}px` } : {}}
+        >
           <div className="p-2 bg-blue-600 border-b border-gray-200 flex justify-center rounded-t-lg">
             <h3 className="font-medium text-white text-md">Empleados</h3>
           </div>
@@ -171,21 +249,31 @@ export function SchedulingScreen() {
               </div>
             ) : (
               filteredEmployees.map((employee) => {
+                const isSelected = selectedEmployees.some(emp => emp.id === employee.id);
                 return (
                   <button
                     key={employee.id}
-                    onClick={() => handleSelectEmployee(employee)}
-                    className={`w-full text-left p-3 border-b border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-between ${
-                      selectedEmployee?.id === employee.id ? 'bg-blue-50' : ''
+                    onClick={(e) => handleSelectEmployee(employee, e.ctrlKey || e.metaKey)}
+                    className={`w-full text-left py-2 px-3 border-b border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-between ${
+                      isSelected ? 'bg-blue-50' : ''
                     }`}
                   >
-                    <div>
-                      <h3 className="font-medium text-gray-900">{employee.displayName || employee.name}</h3>
-                      <p className="text-xs text-gray-500">{employee.position || employee.cargo}</p>
-                      <p className="text-xs text-gray-500">{employee.department}</p>
+                    <div className="flex items-center space-x-2 overflow-hidden">
+                      <div className="flex-shrink-0 w-1 h-10 rounded-full" style={{ backgroundColor: isSelected ? '#3b82f6' : 'transparent' }}></div>
+                      <div>
+                        <div className="flex items-center">
+                          <h3 className="font-medium text-gray-900 truncate mr-2">{employee.displayName || employee.name}</h3>
+                          <span className="text-xs text-gray-500 truncate">• {employee.department}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 truncate">{employee.position || employee.cargo}</p>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-1">
-                      {/* Aquí iría el ícono de estado si aplica */}
+                      {isSelected && (
+                        <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                      )}
                     </div>
                   </button>
                 );
@@ -194,9 +282,19 @@ export function SchedulingScreen() {
           </div>
           
           <div className="p-2 border-t border-gray-200 bg-gray-50 text-xs text-center text-gray-500 rounded-b-lg">
-            Total: {filteredEmployees.length} empleados
+            {selectedEmployees.length > 0 ? 
+              `Seleccionados: ${selectedEmployees.length} de ${filteredEmployees.length} empleados` : 
+              `Total: ${filteredEmployees.length} empleados`}
           </div>
         </div>
+
+        {/* Divisor redimensionable */}
+        {selectedEmployee && (
+          <div 
+            className={`w-1 bg-gray-100 hover:bg-blue-300 cursor-col-resize ${isResizing ? 'bg-blue-400' : ''}`}
+            onMouseDown={handleResizeStart}
+          />
+        )}
 
         {/* Panel derecho - Información y cuadrícula */}
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -232,9 +330,9 @@ export function SchedulingScreen() {
             </div>
           )}
 
-          {/* Cuadrícula de horarios */}
+          {/* Cuadrícula de horarios - Actualizada para múltiples empleados */}
           <ScheduleGrid 
-            employee={selectedEmployee}
+            employees={selectedEmployees}
             selectedDate={selectedDate}
             selectedPeriod={selectedPeriod}
             workShifts={workShifts}
@@ -259,6 +357,7 @@ export function SchedulingScreen() {
       <div className="p-2 bg-white border-t border-gray-200 text-xs text-gray-500 flex justify-between items-center">
         <div>
           Total empleados: {filteredEmployees.length} / {allEmployees.length}
+          {selectedEmployees.length > 0 && ` | Seleccionados: ${selectedEmployees.length}`}
         </div>
         <div>
           {editMode ? (

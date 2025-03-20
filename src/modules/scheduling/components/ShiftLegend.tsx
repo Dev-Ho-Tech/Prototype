@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { WorkShift } from '../interfaces/types';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import DraggableItem from './DraggableItem';
 
 interface ShiftLegendProps {
   workShifts: WorkShift[];
@@ -7,26 +9,52 @@ interface ShiftLegendProps {
 }
 
 const ShiftLegend: React.FC<ShiftLegendProps> = ({ workShifts, visible }) => {
+  const [showAll, setShowAll] = useState(false);
+  
   if (!visible) return null;
 
+  // Mostrar solo 6 turnos inicialmente a menos que se expanda
+  const initialShifts = 6;
+  const displayedShifts = showAll ? workShifts : workShifts.slice(0, initialShifts);
+  const hasMoreShifts = workShifts.length > initialShifts;
+
   return (
-    <div className="flex-1 border bg-white p-4 rounded-lg mb-4 mr-4 shadow-sm">
-      <h4 className="text-md font-medium text-gray-900 mb-4">Turnos de trabajo</h4>
-      <div className="grid sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
-        {workShifts.map(shift => (
-          <div
-            key={shift.id}
-            className="flex items-center space-x-2 text-sm mb-2"
+    <div className="flex flex-wrap items-center gap-3 mt-2 mb-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm mx-4">
+      <div className="flex items-center">
+        <h4 className="text-sm font-medium text-gray-900 mr-2">Turnos de trabajo:</h4>
+        
+        {hasMoreShifts && (
+          <button 
+            onClick={() => setShowAll(!showAll)}
+            className="text-blue-600 text-xs flex items-center"
           >
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${shift.color}`}>
-              {shift.label}
-            </div>
-            <span className="text-gray-600">
-              {shift.startTime}-{shift.endTime}
-            </span>
-          </div>
-        ))}
+            {showAll ? (
+              <>
+                <span>Ver menos</span>
+                <ChevronUp className="w-3 h-3 ml-1" />
+              </>
+            ) : (
+              <>
+                <span>Ver todos</span>
+                <ChevronDown className="w-3 h-3 ml-1" />
+              </>
+            )}
+          </button>
+        )}
       </div>
+      
+      {/* Contenedor flexible para los turnos arrastrables */}
+      {displayedShifts.map(shift => (
+        <DraggableItem 
+          key={shift.id}
+          id={shift.id}
+          label={shift.label || shift.id}
+          color={shift.color || 'bg-blue-500 text-white'}
+          type="shift"
+          startTime={shift.startTime || '08:00'}
+          endTime={shift.endTime || '16:00'}
+        />
+      ))}
     </div>
   );
 };

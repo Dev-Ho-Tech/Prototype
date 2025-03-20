@@ -18,13 +18,17 @@ const Legends: React.FC<LegendsProps> = ({
 }) => {
   return (
     <div className="border-t border-gray-200 mt-4">
-      <div className="grid sm:grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      {/* Ahora todos los componentes tienen un diseño similar - en filas */}
+      {showShifts && (
         <ShiftLegend workShifts={workShifts} visible={showShifts} />
+      )}
+      
+      {showLicenses && (
         <LicenseLegend licenses={licenses} visible={showLicenses} />
-      </div>
+      )}
       
       {/* Indicadores de estado para marcajes biométricos */}
-      <div className="flex items-center space-x-6 mt-2 mb-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm mx-4">
+      <div className="flex flex-wrap items-center gap-6 mt-2 mb-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm mx-4">
         <h4 className="text-sm font-medium text-gray-900">Estado de marcajes:</h4>
         <div className="flex items-center space-x-1">
           <div className="w-4 h-4 bg-green-600 rounded-full"></div>

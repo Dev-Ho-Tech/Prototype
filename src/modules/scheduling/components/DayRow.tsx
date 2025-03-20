@@ -14,6 +14,10 @@ interface DayRowProps {
   startHour: number;
   endHour: number;
   timeStep?: number;
+  isEmployeeName?: boolean;
+  onContextMenu?: (e: React.MouseEvent, date: string, hour: number, employeeId: string | null) => void;
+  onDrop?: (e: React.DragEvent, date: string, hour: number, employeeId: string | null) => void;
+  onDragOver?: (e: React.DragEvent) => void;
 }
 
 // Componente para las manijas de redimensionado
@@ -57,14 +61,22 @@ const DayRow: React.FC<DayRowProps> = ({
   onMouseUp,
   startHour,
   endHour,
-  timeStep = 15
+  timeStep = 15,
+  isEmployeeName = false,
+  onContextMenu,
+  onDrop,
+  onDragOver
 }) => {
   // Estados para manejar el redimensionado localmente
   const [isResizing, setIsResizing] = useState(false);
-  const [initialPosition, setInitialPosition] = useState({ x: 0, width: 0 });
+  const [, setInitialPosition] = useState({ x: 0, width: 0 });
+  const [hoverHour, setHoverHour] = useState<number | null>(null);
+  const [showTooltip, setShowTooltip] = useState<boolean>(false);
+  const [tooltipContent, setTooltipContent] = useState<string>('');
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   
-  // Prevenir menú contextual (click derecho)
-  const handleContextMenu = (e: React.MouseEvent) => {
+  // Manejador para prevenir el comportamiento de menú contextual por defecto
+  const handleContextMenuDefault = (e: React.MouseEvent) => {
     e.preventDefault();
     return false;
   };
@@ -79,6 +91,57 @@ const DayRow: React.FC<DayRowProps> = ({
   const totalColumns = endHour - startHour + 1;
   const totalHours = endHour - startHour;
 
+  // Manejador para el click derecho en la celda
+  const handleCellContextMenu = (e: React.MouseEvent, hour: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (onContextMenu) {
+      onContextMenu(e, date, hour, employee?.id || null);
+    }
+  };
+
+  // Manejador para drag over en la celda
+  const handleCellDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (onDragOver) {
+      onDragOver(e);
+    }
+    
+    // Obtener la hora sobre la que está el cursor
+    const gridCell = e.currentTarget as HTMLElement;
+    const gridRect = gridCell.getBoundingClientRect();
+    const offsetX = e.clientX - gridRect.left;
+    const cellWidth = gridRect.width;
+    
+    // Calcular la hora y minutos
+    const hourFraction = (offsetX / cellWidth) + parseInt(gridCell.dataset.hour || '0');
+    const hour = Math.floor(hourFraction);
+    const minutes = Math.floor((hourFraction - hour) * 60);
+    const roundedMinutes = Math.round(minutes / timeStep) * timeStep;
+    
+    setHoverHour(hour);
+    
+    // Mostrar tooltip con la hora
+    setTooltipContent(`${hour}:${roundedMinutes === 0 ? '00' : roundedMinutes}`);
+    setTooltipPosition({ x: e.clientX, y: e.clientY - 20 });
+    setShowTooltip(true);
+  };
+
+  // Manejador para drag leave
+  const handleCellDragLeave = () => {
+    setShowTooltip(false);
+  };
+
+  // Manejador para drop en la celda
+  const handleCellDrop = (e: React.DragEvent, hour: number) => {
+    e.preventDefault();
+    if (onDrop) {
+      onDrop(e, date, hour, employee?.id || null);
+    }
+    setShowTooltip(false);
+  };
+
   // Crear celdas con el color de fondo correcto
   const cells = Array.from({ length: totalColumns }).map((_, index) => {
     const hour = startHour + index;
@@ -86,10 +149,23 @@ const DayRow: React.FC<DayRowProps> = ({
     
     return (
       <div 
-        key={index} 
-        className={`h-full min-h-[50px] ${isEveningHour ? 'bg-gray-50' : ''}`}
-        onContextMenu={handleContextMenu}
-      ></div>
+        key={index}
+        data-hour={hour}
+        className={`h-full min-h-[50px] ${isEveningHour ? 'bg-gray-50' : ''} border-r border-gray-100 relative`}
+        onContextMenu={(e) => handleCellContextMenu(e, hour)}
+        onDragOver={handleCellDragOver}
+        onDragLeave={handleCellDragLeave}
+        onDrop={(e) => handleCellDrop(e, hour)}
+      >
+        {/* Indicador de hora durante el drag */}
+        {showTooltip && hoverHour === hour && (
+          <div className="absolute top-0 bottom-0 left-0 right-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-blue-500 bg-opacity-20 rounded-lg py-1 px-2 text-xs text-blue-800">
+              {hour}:00
+            </div>
+          </div>
+        )}
+      </div>
     );
   });
   
@@ -186,6 +262,7 @@ const DayRow: React.FC<DayRowProps> = ({
     
     const newSchedule = {
       ...schedule,
+      employeeId: employee?.id || '',
       isResizingStart: true,
       isResizingEnd: false,
       isMoving: false,
@@ -217,6 +294,7 @@ const DayRow: React.FC<DayRowProps> = ({
     
     const newSchedule = {
       ...schedule,
+      employeeId: employee?.id || '',
       isResizingStart: false,
       isResizingEnd: true,
       isMoving: false,
@@ -248,6 +326,7 @@ const DayRow: React.FC<DayRowProps> = ({
     
     const newSchedule = {
       ...schedule,
+      employeeId: employee?.id || '',
       isResizingStart: false,
       isResizingEnd: false,
       isMoving: true,
@@ -269,18 +348,44 @@ const DayRow: React.FC<DayRowProps> = ({
 
   return (
     <React.Fragment>
-      <div className="w-20 px-2 py-3 text-xs border-t border-gray-200 bg-gray-50"
-           onContextMenu={handleContextMenu}>
-        <div className="font-medium">{day}</div>
-        <div className="text-gray-500">{formattedShortDate}</div>
+      <div 
+        className="w-20 px-2 py-2 text-xs border-t border-gray-200 bg-gray-50"
+        onContextMenu={handleContextMenuDefault}
+      >
+        {isEmployeeName ? (
+          // Mostrar el nombre del empleado y departamento
+          <div>
+            <div className="font-medium text-xs truncate">{day}</div>
+            <div className="text-gray-500 text-xs truncate">{employee?.department}</div>
+          </div>
+        ) : (
+          // Mostrar el día de la semana y la fecha
+          <div>
+            <div className="font-medium">{day}</div>
+            <div className="text-gray-500">{formattedShortDate}</div>
+          </div>
+        )}
       </div>
       <div 
         className="relative border-t border-gray-200 grid divide-x divide-gray-200"
         style={{ gridTemplateColumns: `repeat(${totalColumns}, minmax(80px, 1fr))` }}
         onMouseMove={onMouseMove}
         onMouseUp={handleLocalMouseUp}
-        onContextMenu={handleContextMenu}
       >
+        {/* Tooltip para drag & drop */}
+        {showTooltip && (
+          <div 
+            className="fixed bg-gray-800 text-white px-2 py-1 text-xs rounded z-50 pointer-events-none"
+            style={{
+              left: tooltipPosition.x,
+              top: tooltipPosition.y,
+              transform: 'translateX(-50%)'
+            }}
+          >
+            {tooltipContent}
+          </div>
+        )}
+        
         {/* Celdas de fondo */}
         {cells}
         
@@ -298,8 +403,8 @@ const DayRow: React.FC<DayRowProps> = ({
               boxShadow: isResizing ? '0 0 0 2px rgba(255,255,255,0.5), 0 4px 8px rgba(0,0,0,0.15)' : 'none'
             }}
             onMouseDown={handleMove}
-            onContextMenu={handleContextMenu}
-            id={`schedule-entry-${date}-${schedule.shift}`}
+            onContextMenu={(e) => onContextMenu && onContextMenu(e, date, parseInt(schedule.startTime.split(':')[0]), employee?.id || null)}
+            id={`schedule-entry-${date}-${schedule.shift}-${employee?.id}`} // Añadir ID del empleado para hacerlo único
           >
             <div className="flex items-center space-x-2 text-xs overflow-hidden">
               <span className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
@@ -336,20 +441,20 @@ const DayRow: React.FC<DayRowProps> = ({
               zIndex: 20
             }}
             title={`Entrada: ${schedule.actualEntryTime}`}
-            onContextMenu={handleContextMenu}
+            onContextMenu={handleContextMenuDefault}
           />
         )}
         
         {schedule?.actualExitTime && (
           <div 
-            className="absolute top-0 w-3 h-3 bg-red-500 rounded-full transform -translate-y-1/2"
+            className="absolute top-0 w-3 h-3 bg-blue-500 rounded-full transform -translate-y-1/2"
             style={{ 
               left: `${((parseInt(schedule.actualExitTime.split(':')[0]) - startHour + 
                       (parseInt(schedule.actualExitTime.split(':')[1] || '0') / 60)) / totalHours) * 100}%`,
               zIndex: 20
             }}
             title={`Salida: ${schedule.actualExitTime}`}
-            onContextMenu={handleContextMenu}
+            onContextMenu={handleContextMenuDefault}
           />
         )}
       </div>

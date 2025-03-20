@@ -3,9 +3,10 @@ import { WorkShift, License, ScheduleEntry, DragInfo } from '../interfaces/types
 import { UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 import DayRow from './DayRow';
 import TimeSlotHeader from './TimeSlotHeader';
+import ContextMenu from './ContextMenu';
 
 interface ScheduleGridProps {
-  employee: UnifiedEmployee | null;
+  employees: UnifiedEmployee[]; 
   selectedDate: string;
   selectedPeriod: string;
   workShifts: WorkShift[];
@@ -19,7 +20,7 @@ interface ScheduleGridProps {
 }
 
 const ScheduleGrid: React.FC<ScheduleGridProps> = ({
-  employee,
+  employees,
   selectedDate,
   selectedPeriod,
   workShifts,
@@ -44,11 +45,258 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
     x: 0,
     y: 0
   });
+
+  // Estado para el menú contextual
+  const [contextMenu, setContextMenu] = useState<{
+    show: boolean;
+    x: number;
+    y: number;
+    date: string;
+    hour: number;
+    employeeId: string | null;
+  }>({
+    show: false,
+    x: 0,
+    y: 0,
+    date: '',
+    hour: 0,
+    employeeId: null
+  });
   
-  // Prevenir menú contextual (click derecho)
+  // Prevenir menú contextual por defecto
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     return false;
+  };
+
+  // Manejador para mostrar menú contextual
+  const handleShowContextMenu = (e: React.MouseEvent, date: string, hour: number, employeeId: string | null) => {
+    e.preventDefault();
+    
+    setContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+      date,
+      hour,
+      employeeId
+    });
+  };
+
+  // Cerrar menú contextual
+  const handleCloseContextMenu = () => {
+    setContextMenu(prev => ({ ...prev, show: false }));
+  };
+
+  // Manejador para agregar un turno
+  const handleAddShift = (shiftId: string, date: string, hour: number, employeeId: string | null) => {
+    console.log('[GRID] Agregar turno:', { shiftId, date, hour, employeeId });
+    
+    if (!employeeId) return;
+    
+    // Crear entrada de horario para el turno seleccionado
+    const shift = workShifts.find(s => s.id === shiftId);
+    
+    if (!shift) return;
+    
+    // Obtener el empleado
+    const employee = employees.find(e => e.id === employeeId);
+    
+    if (!employee) return;
+    
+    // Formatear hora de inicio y fin
+    const startTime = `${hour.toString().padStart(2, '0')}:00`;
+    const defaultDuration = shift.defaultDuration ? parseInt(shift.defaultDuration) : 8;
+    let endHour = hour + defaultDuration;
+    endHour = Math.min(endHour, endHour);
+    const endTime = `${endHour.toString().padStart(2, '0')}:00`;
+    
+    // Crear entrada de horario
+    const newScheduleEntry: ScheduleEntry = {
+      date,
+      shift: shiftId,
+      startTime,
+      endTime,
+      employeeId
+    };
+    
+    // Actualizar horario
+    if (onScheduleUpdate) {
+      onScheduleUpdate(newScheduleEntry);
+    }
+    
+    // Actualizar el horario en la copia local del empleado
+    if (!employee.schedule) {
+      employee.schedule = [];
+    }
+    
+    // Verificar si ya existe una entrada para esta fecha
+    const existingEntryIndex = employee.schedule.findIndex(s => s.date === date);
+    
+    if (existingEntryIndex >= 0) {
+      // Actualizar entrada existente
+      employee.schedule[existingEntryIndex] = {
+        ...employee.schedule[existingEntryIndex],
+        shift: shiftId,
+        startTime,
+        endTime
+      };
+    } else {
+      // Agregar nueva entrada
+      employee.schedule.push({
+        date,
+        shift: shiftId,
+        startTime,
+        endTime
+      });
+    }
+    
+    // Cerrar menú contextual
+    handleCloseContextMenu();
+  };
+
+  // Manejador para agregar una licencia
+  const handleAddLicense = (licenseId: string, date: string, hour: number, employeeId: string | null) => {
+    console.log('[GRID] Agregar licencia:', { licenseId, date, hour, employeeId });
+    
+    if (!employeeId) return;
+    
+    // Crear entrada de horario para la licencia seleccionada
+    const license = licenses.find(l => l.code === licenseId);
+    
+    if (!license) return;
+    
+    // Obtener el empleado
+    const employee = employees.find(e => e.id === employeeId);
+    
+    if (!employee) return;
+    
+    // Formatear hora de inicio y fin
+    const startTime = `${hour.toString().padStart(2, '0')}:00`;
+    const defaultDuration = license.defaultDuration ? parseInt(license.defaultDuration) : 8;
+    let endHour = hour + defaultDuration;
+    endHour = Math.min(endHour, endHour);
+    const endTime = `${endHour.toString().padStart(2, '0')}:00`;
+    
+    // Crear entrada de horario
+    const newScheduleEntry: ScheduleEntry = {
+      date,
+      shift: licenseId,
+      startTime,
+      endTime,
+      employeeId
+    };
+    
+    // Actualizar horario
+    if (onScheduleUpdate) {
+      onScheduleUpdate(newScheduleEntry);
+    }
+    
+    // Actualizar el horario en la copia local del empleado
+    if (!employee.schedule) {
+      employee.schedule = [];
+    }
+    
+    // Verificar si ya existe una entrada para esta fecha
+    const existingEntryIndex = employee.schedule.findIndex(s => s.date === date);
+    
+    if (existingEntryIndex >= 0) {
+      // Actualizar entrada existente
+      employee.schedule[existingEntryIndex] = {
+        ...employee.schedule[existingEntryIndex],
+        shift: licenseId,
+        startTime,
+        endTime
+      };
+    } else {
+      // Agregar nueva entrada
+      employee.schedule.push({
+        date,
+        shift: licenseId,
+        startTime,
+        endTime
+      });
+    }
+    
+    // Cerrar menú contextual
+    handleCloseContextMenu();
+  };
+
+  // Manejador para agregar un marcaje
+  const handleAddMarking = (type: 'entry' | 'exit', date: string, hour: number, employeeId: string | null) => {
+    console.log('[GRID] Agregar marcaje:', { type, date, hour, employeeId });
+    
+    if (!employeeId) return;
+    
+    // Obtener el empleado
+    const employee = employees.find(e => e.id === employeeId);
+    
+    if (!employee) return;
+    
+    // Formatear hora del marcaje (incluir minutos)
+    const time = `${hour.toString().padStart(2, '0')}:00`;
+    
+    // Actualizar el horario en la copia local del empleado
+    if (!employee.schedule) {
+      employee.schedule = [];
+    }
+    
+    // Verificar si ya existe una entrada para esta fecha
+    const existingEntryIndex = employee.schedule.findIndex(s => s.date === date);
+    
+    if (existingEntryIndex >= 0) {
+      // Actualizar marcaje en entrada existente
+      if (type === 'entry') {
+        employee.schedule[existingEntryIndex].actualEntryTime = time;
+      } else {
+        employee.schedule[existingEntryIndex].actualExitTime = time;
+      }
+    } else {
+      // Crear nueva entrada solo con el marcaje
+      const newEntry: any = { date };
+      
+      if (type === 'entry') {
+        newEntry.actualEntryTime = time;
+      } else {
+        newEntry.actualExitTime = time;
+      }
+      
+      employee.schedule.push(newEntry);
+    }
+    
+    // Cerrar menú contextual
+    handleCloseContextMenu();
+  };
+
+  // Manejador para drop
+  const handleDrop = (e: React.DragEvent, date: string, hour: number, employeeId: string | null) => {
+    e.preventDefault();
+    
+    if (!employeeId) return;
+    
+    try {
+      // Obtener datos del elemento arrastrado
+      const dragDataJson = e.dataTransfer.getData('application/json');
+      
+      if (!dragDataJson) return;
+      
+      const dragData = JSON.parse(dragDataJson);
+      
+      console.log('[GRID] Drop:', { dragData, date, hour, employeeId });
+      
+      if (dragData.type === 'shift') {
+        handleAddShift(dragData.id, date, hour, employeeId);
+      } else if (dragData.type === 'license') {
+        handleAddLicense(dragData.id, date, hour, employeeId);
+      }
+    } catch (error) {
+      console.error('[GRID] Error al procesar drop:', error);
+    }
+  };
+  
+  // Manejador para permitir drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // Necesario para permitir el drop
   };
   
   // Efecto para manejar eventos globales durante redimensionado
@@ -74,7 +322,8 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       
       const dayDate = dragInfo.scheduleEntry.date;
       const shiftId = dragInfo.scheduleEntry.shift;
-      const entryId = `schedule-entry-${dayDate}-${shiftId}`;
+      const empId = dragInfo.scheduleEntry.employeeId || '';
+      const entryId = `schedule-entry-${dayDate}-${shiftId}-${empId}`;
       const entryElement = document.getElementById(entryId);
       
       if (!entryElement) {
@@ -96,14 +345,10 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       const endTimeHour = parseInt(endTimeParts[0]);
       const endTimeMinutes = parseInt(endTimeParts[1] || '0');
       
-      // Obtener posición del mouse relativa a la cuadrícula
-      const offsetX = e.clientX - gridRect.left - 80;
-      
-      // Factor de reducción de sensibilidad (0.5 = mitad de sensible)
+      // Factor de reducción de sensibilidad
       const sensitivityFactor = 0.6;
       
       // Aplicar el factor de sensibilidad para reducir los cambios
-      // Calculamos el movimiento relativo al punto inicial y lo reducimos
       const relativeMovement = e.clientX - dragInfo.startX;
       const adjustedMovement = relativeMovement * sensitivityFactor;
       const adjustedClientX = dragInfo.startX + adjustedMovement;
@@ -159,7 +404,8 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
             // Actualizar tooltip
             setTooltip(prev => ({
               ...prev,
-              content: `${formattedNewTime} - ${dragInfo.scheduleEntry.endTime}`
+              content: `${formattedNewTime} - ${dragInfo.scheduleEntry.endTime}`,
+              show: true
             }));
           }
         } else {
@@ -189,12 +435,13 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
             // Actualizar tooltip
             setTooltip(prev => ({
               ...prev,
-              content: `${dragInfo.scheduleEntry.startTime} - ${formattedNewTime}`
+              content: `${dragInfo.scheduleEntry.startTime} - ${formattedNewTime}`,
+              show: true
             }));
           }
         }
       } else {
-        // Mover evento completo con sensibilidad reducida
+        // Mover evento completo
         // Ajustar posición para centrar en el mouse
         const eventMouseOffset = dragInfo.initialWidth / 2;
         const adjustedOffsetX = adjustedOffsetX - eventMouseOffset;
@@ -205,7 +452,7 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         let adjustedMinutes = Math.floor((adjustedHourDecimal - adjustedHour) * 60);
         adjustedMinutes = Math.round(adjustedMinutes / timeStep) * timeStep;
         
-        const newStartHour = Math.max(startHour, adjustedHour);
+        const newStartHour = Math.max(startHour, Math.min(endHour - 1, adjustedHour));
         const newStartMinutes = adjustedMinutes === 60 ? 0 : adjustedMinutes;
         
         // Calcular nueva hora de fin basada en la duración original
@@ -242,13 +489,14 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
           // Actualizar tooltip
           setTooltip(prev => ({
             ...prev,
-            content: `${formattedStartTime} - ${formattedEndTime}`
+            content: `${formattedStartTime} - ${formattedEndTime}`,
+            show: true
           }));
         }
       }
     };
     
-    const handleGlobalMouseUp = (e: MouseEvent) => {
+    const handleGlobalMouseUp = () => {
       console.log('[GRID] Finalizando operación');
       
       if (dragInfo?.scheduleEntry && onScheduleUpdate) {
@@ -276,7 +524,19 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
   // Calcular los días de la semana para la fecha seleccionada
   const weekDays = React.useMemo(() => {
-    if (selectedPeriod === 'Seleccionar fechas' && startDate && endDate) {
+    // Si hay más de un empleado seleccionado, mostrar solo el día actual
+    if (employees.length > 1) {
+      // Usar la fecha seleccionada en lugar de la fecha actual
+      const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const date = new Date(selectedDate);
+      const dayOfWeek = date.getDay();
+      
+      return [{
+        name: dayNames[dayOfWeek],
+        date: selectedDate
+      }];
+    }
+    else if (selectedPeriod === 'Seleccionar fechas' && startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
       const days = [];
@@ -347,7 +607,7 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         date: day.date.toISOString().split('T')[0]
       }));
     }
-  }, [selectedPeriod, selectedDate, startDate, endDate]);
+  }, [employees.length, selectedPeriod, selectedDate, startDate, endDate]);
 
   // Iniciar operación de redimensionado
   const handleMouseDown = (e: React.MouseEvent, scheduleEntry: ScheduleEntry) => {
@@ -373,7 +633,9 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       initialLeft: rect.left - gridRect.left,
       initialWidth: rect.width,
       scheduleEntry: {
-        ...scheduleEntry
+        ...scheduleEntry,
+        // Añadir ID del empleado para que se pueda identificar correctamente en evento global
+        employeeId: scheduleEntry.employeeId
       }
     });
     
@@ -433,10 +695,11 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
     document.body.style.userSelect = '';
   };
 
-  if (!employee) {
+  // Verificar si hay empleados seleccionados
+  if (employees.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-gray-500">Seleccione un empleado para ver su horario</p>
+        <p className="text-gray-500">Seleccione uno o más empleados para ver su horario</p>
       </div>
     );
   }
@@ -458,6 +721,23 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
           {tooltip.content}
         </div>
       )}
+      
+      {/* Menú contextual */}
+      {contextMenu.show && (
+        <ContextMenu 
+          x={contextMenu.x}
+          y={contextMenu.y}
+          date={contextMenu.date}
+          hour={contextMenu.hour}
+          employeeId={contextMenu.employeeId}
+          onClose={handleCloseContextMenu}
+          workShifts={workShifts}
+          licenses={licenses}
+          onAddShift={handleAddShift}
+          onAddLicense={handleAddLicense}
+          onAddMarking={handleAddMarking}
+        />
+      )}
     
       <div 
         className="bg-white rounded-lg shadow-sm border border-gray-200" 
@@ -465,29 +745,65 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         onContextMenu={handleContextMenu}
       >
         <div className="grid grid-cols-[auto,1fr]">
-          <div className="w-20 rounded-tl-lg bg-gray-50 border-r border-gray-200"></div>
+          <div className="w-20 rounded-tl-lg bg-gray-50 border-r border-gray-200">
+            {/* Encabezado para mostrar múltiples empleados */}
+            {employees.length > 1 && (
+              <div className="p-2 font-medium text-sm text-gray-700 border-b border-gray-200">
+                Empleados
+              </div>
+            )}
+          </div>
           <TimeSlotHeader startHour={startHour} endHour={endHour} />
 
-          {weekDays.map((day) => (
-            <DayRow
-              key={day.date}
-              day={day.name}
-              date={day.date}
-              employee={employee}
-              workShifts={workShifts}
-              licenses={licenses}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              startHour={startHour}
-              endHour={endHour}
-              timeStep={timeStep}
-            />
-          ))}
+          {/* Si hay múltiples empleados, mostrar una fila por empleado */}
+          {employees.length > 1 ? (
+            // Múltiples empleados - solo día actual
+            employees.map(employee => weekDays.map(day => (
+              <DayRow
+                key={`${employee.id}-${day.date}`}
+                day={employees.length > 1 ? employee.displayName || employee.name || '' : day.name}
+                date={day.date}
+                employee={employee}
+                workShifts={workShifts}
+                licenses={licenses}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                startHour={startHour}
+                endHour={endHour}
+                timeStep={timeStep}
+                isEmployeeName={employees.length > 1}
+                onContextMenu={handleShowContextMenu}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+              />
+            )))
+          ) : (
+            // Un solo empleado - mostrar según el período seleccionado
+            weekDays.map((day) => (
+              <DayRow
+                key={day.date}
+                day={day.name}
+                date={day.date}
+                employee={employees[0]}
+                workShifts={workShifts}
+                licenses={licenses}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                startHour={startHour}
+                endHour={endHour}
+                timeStep={timeStep}
+                onContextMenu={handleShowContextMenu}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default ScheduleGrid;
