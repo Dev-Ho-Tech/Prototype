@@ -6,7 +6,7 @@ import { UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 interface FilterOption {
   id: string;
   nombre: string;
-  checked?: boolean;
+  checked: boolean;
 }
 
 interface FilterSection {
@@ -34,24 +34,22 @@ interface AdvancedFiltersProps {
   searchTerm: string;
   onClearFilters: () => void;
   employees: UnifiedEmployee[];
+  initialFilters?: FilterState; // Nuevo prop para recibir los filtros iniciales
 }
 
 const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
   onFilterChange,
   onSearchTermChange,
   onClearFilters,
-  employees
+  // searchTerm,
+  employees,
+  initialFilters = { sedes: [], departamentos: [], secciones: [], unidades: [] }
 }) => {
-  // Estado inicial de filtros
-  const [filterState, setFilterState] = useState<FilterState>({
-    sedes: [],
-    departamentos: [],
-    secciones: [],
-    unidades: []
-  });
+  // Usar los filtros iniciales si están disponibles
+  const [filterState, setFilterState] = useState<FilterState>(initialFilters);
 
-  // Extraer opciones únicas de los datos de empleados
-  const getUniqueOptions = (key: keyof UnifiedEmployee): FilterOption[] => {
+  // Función para obtener opciones únicas con selecciones aplicadas
+  const getUniqueOptions = (key: keyof UnifiedEmployee, selectedValues: string[] = []): FilterOption[] => {
     const uniqueValues = new Set<string>();
     
     employees.forEach(employee => {
@@ -63,60 +61,74 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
     return Array.from(uniqueValues).map(value => ({
       id: value,
       nombre: value,
-      checked: false
+      checked: selectedValues.includes(value)
     }));
   };
 
+  // Crear las secciones con las opciones iniciales
+  const createInitialSections = (): FilterSection[] => {
+    return [
+      {
+        id: 'sedes',
+        title: 'Sedes',
+        icon: 'building',
+        options: getUniqueOptions('location', initialFilters.sedes),
+        expanded: true
+      },
+      {
+        id: 'departamentos',
+        title: 'Departamentos',
+        icon: 'briefcase',
+        options: getUniqueOptions('department', initialFilters.departamentos),
+        expanded: true,
+        dependsOn: {
+          sectionId: 'sedes',
+          message: 'Seleccione una sede primero'
+        }
+      },
+      {
+        id: 'secciones',
+        title: 'Secciones',
+        icon: 'layers',
+        options: getUniqueOptions('section', initialFilters.secciones),
+        expanded: true,
+        dependsOn: {
+          sectionId: 'departamentos',
+          message: 'Seleccione un departamento primero'
+        }
+      },
+      {
+        id: 'unidades',
+        title: 'Unidades',
+        icon: 'users',
+        options: getUniqueOptions('unit', initialFilters.unidades),
+        expanded: true,
+        dependsOn: {
+          sectionId: 'secciones',
+          message: 'Seleccione una sección primero'
+        }
+      }
+    ];
+  };
+
   // Estado para las secciones de filtro
-  const [filterSections, setFilterSections] = useState<FilterSection[]>([
-    {
-      id: 'sedes',
-      title: 'Sedes',
-      icon: 'building',
-      options: getUniqueOptions('location'),
-      expanded: true
-    },
-    {
-      id: 'departamentos',
-      title: 'Departamentos',
-      icon: 'briefcase',
-      options: getUniqueOptions('department'),
-      expanded: true,
-      dependsOn: {
-        sectionId: 'sedes',
-        message: 'Seleccione una sede primero'
-      }
-    },
-    {
-      id: 'secciones',
-      title: 'Secciones',
-      icon: 'layers',
-      options: getUniqueOptions('section'),
-      expanded: true,
-      dependsOn: {
-        sectionId: 'departamentos',
-        message: 'Seleccione un departamento primero'
-      }
-    },
-    {
-      id: 'unidades',
-      title: 'Unidades',
-      icon: 'users',
-      options: [], // Inicialmente vacío porque dependerá de la sección
-      expanded: true,
-      dependsOn: {
-        sectionId: 'secciones',
-        message: 'Seleccione una sección primero'
-      }
-    }
-  ]);
+  const [filterSections, setFilterSections] = useState<FilterSection[]>(createInitialSections());
+
+  // Inicializar con los filtros actuales
+  useEffect(() => {
+    setFilterState(initialFilters);
+    
+    // Regenerar las secciones con los filtros iniciales
+    setFilterSections(createInitialSections());
+  }, []);
 
   // Actualizar las opciones de secciones basado en la selección de departamentos
   useEffect(() => {
     const updateFilterOptions = () => {
-      // Actualizamos las listas dependientes
+      let updatedSections = [...filterSections];
+      
+      // Filtrar departamentos basados en las sedes seleccionadas
       if (filterState.sedes.length > 0) {
-        // Filtrar departamentos basados en las sedes seleccionadas
         const filteredDepartments = new Set<string>();
         
         employees.forEach(employee => {
@@ -126,27 +138,25 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         });
         
         // Actualizar opciones de departamentos
-        setFilterSections(prevSections => 
-          prevSections.map(section => {
-            if (section.id === 'departamentos') {
-              const currentDeptOptions = Array.from(filteredDepartments).map(dept => ({
-                id: dept,
-                nombre: dept,
-                checked: filterState.departamentos.includes(dept)
-              }));
-              
-              return {
-                ...section,
-                options: currentDeptOptions
-              };
-            }
-            return section;
-          })
-        );
+        updatedSections = updatedSections.map(section => {
+          if (section.id === 'departamentos') {
+            const currentDeptOptions = Array.from(filteredDepartments).map(dept => ({
+              id: dept,
+              nombre: dept,
+              checked: filterState.departamentos.includes(dept)
+            }));
+            
+            return {
+              ...section,
+              options: currentDeptOptions
+            };
+          }
+          return section;
+        });
       }
       
+      // Filtrar secciones basadas en los departamentos seleccionados
       if (filterState.departamentos.length > 0) {
-        // Filtrar secciones basadas en los departamentos seleccionados
         const filteredSections = new Set<string>();
         
         employees.forEach(employee => {
@@ -156,28 +166,56 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         });
         
         // Actualizar opciones de secciones
-        setFilterSections(prevSections => 
-          prevSections.map(section => {
-            if (section.id === 'secciones') {
-              const currentSectionOptions = Array.from(filteredSections).map(sec => ({
-                id: sec,
-                nombre: sec,
-                checked: filterState.secciones.includes(sec)
-              }));
-              
-              return {
-                ...section,
-                options: currentSectionOptions
-              };
-            }
-            return section;
-          })
-        );
+        updatedSections = updatedSections.map(section => {
+          if (section.id === 'secciones') {
+            const currentSectionOptions = Array.from(filteredSections).map(sec => ({
+              id: sec,
+              nombre: sec,
+              checked: filterState.secciones.includes(sec)
+            }));
+            
+            return {
+              ...section,
+              options: currentSectionOptions
+            };
+          }
+          return section;
+        });
       }
+      
+      // Filtrar unidades basadas en las secciones seleccionadas
+      if (filterState.secciones.length > 0) {
+        const filteredUnits = new Set<string>();
+        
+        employees.forEach(employee => {
+          if (employee.section && filterState.secciones.includes(employee.section) && employee.unit) {
+            filteredUnits.add(employee.unit);
+          }
+        });
+        
+        // Actualizar opciones de unidades
+        updatedSections = updatedSections.map(section => {
+          if (section.id === 'unidades') {
+            const currentUnitOptions = Array.from(filteredUnits).map(unit => ({
+              id: unit,
+              nombre: unit,
+              checked: filterState.unidades.includes(unit)
+            }));
+            
+            return {
+              ...section,
+              options: currentUnitOptions
+            };
+          }
+          return section;
+        });
+      }
+      
+      setFilterSections(updatedSections);
     };
     
     updateFilterOptions();
-  }, [employees, filterState.sedes, filterState.departamentos, filterState.secciones]);
+  }, [employees, filterState]);
 
   // Función para manejar el cambio de estado de una opción de filtro
   const handleOptionChange = (sectionId: string, optionId: string, checked: boolean) => {
@@ -244,7 +282,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         const validSecciones = new Set<string>();
         
         employees.forEach(employee => {
-          if (employee.department && remainingDepartamentos.includes(employee.department)) {
+          if (employee.department && employee.section && remainingDepartamentos.includes(employee.department)) {
             validSecciones.add(employee.section);
           }
         });
@@ -258,6 +296,21 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         if (newState.secciones.length === 0) {
           newState.unidades = [];
         }
+      } else if (sectionId === 'secciones' && !checked) {
+        // Si desmarcamos una sección, verificamos si debemos limpiar unidades relacionadas
+        const remainingSecciones = newState.secciones;
+        const validUnidades = new Set<string>();
+        
+        employees.forEach(employee => {
+          if (employee.section && employee.unit && remainingSecciones.includes(employee.section)) {
+            validUnidades.add(employee.unit);
+          }
+        });
+        
+        // Filtrar las unidades que ya no son válidas
+        newState.unidades = newState.unidades.filter(unit => 
+          validUnidades.has(unit)
+        );
       }
       
       // Llamar al callback con el nuevo estado
@@ -288,12 +341,16 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
 
   // Limpiar todos los filtros
   const handleClearFilters = () => {
-    setFilterState({
+    // Crear un nuevo estado de filtros vacío
+    const emptyFilterState = {
       sedes: [],
       departamentos: [],
       secciones: [],
       unidades: []
-    });
+    };
+    
+    // Actualizar el estado de filtros
+    setFilterState(emptyFilterState);
     
     // Reiniciar las opciones de las secciones
     setFilterSections(sections => 
@@ -307,13 +364,13 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         } else if (section.id === 'departamentos') {
           return {
             ...section,
-            options: getUniqueOptions('department').map(opt => ({ ...opt, checked: false })),
+            options: [],
             expanded: true
           };
         } else if (section.id === 'secciones') {
           return {
             ...section,
-            options: getUniqueOptions('section').map(opt => ({ ...opt, checked: false })),
+            options: [],
             expanded: true
           };
         } else {
@@ -326,15 +383,15 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       })
     );
     
+    // Limpiar el término de búsqueda
     onSearchTermChange('');
+    
+    // Notificar al componente padre
     onClearFilters();
   };
 
   return (
-    // CAMBIO: Eliminada la clase w-full para no forzar el ancho ya que ahora manejamos el campo de búsqueda fuera de este componente
     <div className="p-4">
-      {/* CAMBIO: Eliminado el campo de búsqueda duplicado */}
-      
       {/* Título de Filtros y botón Limpiar */}
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-sm font-medium text-blue-900">Filtros</h2>
@@ -355,7 +412,9 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
             <div key={section.id} className="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
               {/* Cabecera de sección */}
               <button
-                className="flex items-center justify-between w-full text-left py-1"
+                className={`flex items-center justify-between w-full text-left py-1 ${
+                  isDisabled ? 'opacity-60' : ''
+                }`}
                 onClick={() => toggleSection(section.id)}
                 disabled={isDisabled}
               >
@@ -389,6 +448,10 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                     <p className="text-sm text-gray-500 italic">
                       {section.dependsOn?.message}
                     </p>
+                  ) : section.options.length === 0 ? (
+                    <p className="text-sm text-gray-500 italic">
+                      No hay opciones disponibles
+                    </p>
                   ) : (
                     section.options.map((option) => (
                       <div key={option.id} className="flex items-center">
@@ -396,7 +459,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                           id={`${section.id}-${option.id}`}
                           type="checkbox"
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          checked={!!option.checked}
+                          checked={option.checked}
                           onChange={(e) => handleOptionChange(section.id, option.id, e.target.checked)}
                         />
                         <label

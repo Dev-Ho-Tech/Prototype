@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grid, List, ArrowLeft, X, Map } from 'lucide-react';
+import { Grid, List, X, Map } from 'lucide-react';
 import { empleadosDataEnriquecida, estadoDelDiaData, tiemposData } from './temp/data_temp';
 import EmployeeListView from './components/EmployeeListView';
 import StatisticsPanels from './components/StatisticsPanels';
@@ -22,7 +22,7 @@ const DashboardScreen: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showEmployeeDetail, setShowEmployeeDetail] = useState<boolean>(false);
-  const [showOldDashboard, setShowOldDashboard] = useState<boolean>(false);
+  const [showOldDashboard, ] = useState<boolean>(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState<boolean>(false);
   
   // Estado para mostrar/ocultar filtros avanzados

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { License } from '../interfaces/types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import DraggableItem from './DraggableItem';
 
 interface LicenseLegendProps {
   licenses: License[];
@@ -13,42 +14,47 @@ const LicenseLegend: React.FC<LicenseLegendProps> = ({ licenses, visible }) => {
   if (!visible) return null;
 
   // Mostrar solo 6 licencias inicialmente a menos que se expanda
-  const displayedLicenses = showAll ? licenses : licenses.slice(0, 6);
+  const initialLicenses = 6;
+  const displayedLicenses = showAll ? licenses : licenses.slice(0, initialLicenses);
+  const hasMoreLicenses = licenses.length > initialLicenses;
 
   return (
-    <div className="flex-1 border bg-white p-4 rounded-lg mb-4 mr-4 shadow-sm">
-      <div className="flex justify-between items-center mb-4">
-        <h4 className="text-md font-medium text-gray-900">Licencias y permisos</h4>
-        {licenses.length > 6 && (
+    <div className="flex flex-wrap items-center gap-3 mt-2 mb-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm mx-4">
+      <div className="flex items-center">
+        <h4 className="text-sm font-medium text-gray-900 mr-2">Licencias y permisos:</h4>
+        
+        {hasMoreLicenses && (
           <button 
             onClick={() => setShowAll(!showAll)}
-            className="text-blue-600 text-sm flex items-center"
+            className="text-blue-600 text-xs flex items-center"
           >
             {showAll ? (
               <>
                 <span>Ver menos</span>
-                <ChevronUp className="w-4 h-4 ml-1" />
+                <ChevronUp className="w-3 h-3 ml-1" />
               </>
             ) : (
               <>
                 <span>Ver todos</span>
-                <ChevronDown className="w-4 h-4 ml-1" />
+                <ChevronDown className="w-3 h-3 ml-1" />
               </>
             )}
           </button>
         )}
       </div>
-      <div className="grid sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
-        {displayedLicenses.map(license => (
-          <div
-            key={license.code}
-            className={`px-2 py-1 rounded text-xs flex items-center ${license.color}`}
-          >
-            <span className="mr-2 font-bold">{license.code}</span>
-            <span>{license.label}</span>
-          </div>
-        ))}
-      </div>
+      
+      {/* Contenedor flexible para las licencias arrastrables */}
+      {displayedLicenses.map(license => (
+        <DraggableItem
+          key={license.code}
+          id={license.code}
+          label={license.label}
+          color={license.color || 'bg-yellow-200 text-yellow-800'}
+          type="license"
+          startTime={license.defaultStartTime || '08:00'} 
+          endTime={license.defaultEndTime || '16:00'}
+        />
+      ))}
     </div>
   );
 };

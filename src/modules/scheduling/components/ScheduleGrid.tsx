@@ -3,9 +3,11 @@ import { WorkShift, License, ScheduleEntry, DragInfo } from '../interfaces/types
 import { UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 import DayRow from './DayRow';
 import TimeSlotHeader from './TimeSlotHeader';
+import ContextMenu from './ContextMenu';
+import TimePickerModal from './TimePickerModal';
 
 interface ScheduleGridProps {
-  employee: UnifiedEmployee | null;
+  employees: UnifiedEmployee[]; 
   selectedDate: string;
   selectedPeriod: string;
   workShifts: WorkShift[];
@@ -19,7 +21,7 @@ interface ScheduleGridProps {
 }
 
 const ScheduleGrid: React.FC<ScheduleGridProps> = ({
-  employee,
+  employees,
   selectedDate,
   selectedPeriod,
   workShifts,
@@ -44,11 +46,545 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
     x: 0,
     y: 0
   });
+
+  // Estado para el menú contextual
+  const [contextMenu, setContextMenu] = useState<{
+    show: boolean;
+    x: number;
+    y: number;
+    date: string;
+    hour: number;
+    employeeId: string | null;
+  }>({
+    show: false,
+    x: 0,
+    y: 0,
+    date: '',
+    hour: 0,
+    employeeId: null
+  });
   
-  // Prevenir menú contextual (click derecho)
+  // Estado para el modal de selección de hora
+  const [timePickerModal, setTimePickerModal] = useState<{
+    isOpen: boolean;
+    type: 'entry' | 'exit';
+    date: string;
+    employeeId: string | null;
+    entryTime?: string;
+    isSecondStep?: boolean;
+  }>({
+    isOpen: false,
+    type: 'entry',
+    date: '',
+    employeeId: null,
+    entryTime: undefined,
+    isSecondStep: false
+  });
+  
+  // Estados para tracking de arrastre entre días
+  const [draggedSchedule, setDraggedSchedule] = useState<{
+    entry: ScheduleEntry | null;
+    originDate: string;
+    originEmployeeId: string | null;
+    isDraggingBetweenDays: boolean;
+  }>({
+    entry: null,
+    originDate: '',
+    originEmployeeId: null,
+    isDraggingBetweenDays: false
+  });
+  
+  // Prevenir menú contextual por defecto
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     return false;
+  };
+
+  // Manejador para mostrar menú contextual
+  const handleShowContextMenu = (e: React.MouseEvent, date: string, hour: number, employeeId: string | null) => {
+    e.preventDefault();
+    
+    setContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+      date,
+      hour,
+      employeeId
+    });
+  };
+
+  // Cerrar menú contextual
+  const handleCloseContextMenu = () => {
+    setContextMenu(prev => ({ ...prev, show: false }));
+  };
+  
+  // Manejador para abrir el modal de selección de hora
+  const handleOpenTimePicker = (type: 'entry' | 'exit', date: string, hour: number, employeeId: string | null) => {
+    const initialTime = `${hour.toString().padStart(2, '0')}:00`;
+    
+    setTimePickerModal({
+      isOpen: true,
+      type,
+      date,
+      employeeId,
+      entryTime: initialTime,
+      isSecondStep: false
+    });
+    
+    // Cerrar el menú contextual
+    handleCloseContextMenu();
+  };
+  
+  // Manejador para el primer paso (selección de hora de entrada)
+  const handleEntryTimeSelected = (time: string) => {
+    // Si es el primer paso (entrada), configurar para el segundo paso (salida)
+    if (!timePickerModal.isSecondStep) {
+      setTimePickerModal(prev => ({
+        ...prev,
+        entryTime: time,
+        type: 'exit',
+        isSecondStep: true
+      }));
+    }
+  };
+  
+  // Manejador para el segundo paso (selección de hora de salida)
+  const handleExitTimeSelected = (time: string) => {
+    if (timePickerModal.isSecondStep && timePickerModal.entryTime && timePickerModal.employeeId) {
+      // Crear un nuevo horario "manual" de color verde
+      const employee = employees.find(e => e.id === timePickerModal.employeeId);
+      
+      if (!employee) {
+        setTimePickerModal(prev => ({ ...prev, isOpen: false }));
+        return;
+      }
+      
+      // Crear entrada de horario para marcaje manual
+      const newScheduleEntry: ScheduleEntry = {
+        date: timePickerModal.date,
+        shift: 'manual',  // Identificador especial para horarios creados manualmente
+        startTime: timePickerModal.entryTime,
+        endTime: time,
+        employeeId: timePickerModal.employeeId
+      };
+      
+      // Actualizar horario en el estado global
+      if (onScheduleUpdate) {
+        onScheduleUpdate(newScheduleEntry);
+      }
+      
+      // Actualizar el horario en la copia local del empleado
+      if (!employee.schedule) {
+        employee.schedule = [];
+      }
+      
+      // Verificar si ya existe una entrada para esta fecha
+      const existingEntryIndex = employee.schedule.findIndex(s => s.date === timePickerModal.date);
+      
+      if (existingEntryIndex >= 0) {
+        // Actualizar entrada existente
+        employee.schedule[existingEntryIndex] = {
+          ...employee.schedule[existingEntryIndex],
+          shift: 'manual',
+          startTime: timePickerModal.entryTime,
+          endTime: time
+        };
+      } else {
+        // Agregar nueva entrada
+        employee.schedule.push({
+          date: timePickerModal.date,
+          shift: 'manual',
+          startTime: timePickerModal.entryTime,
+          endTime: time
+        });
+      }
+      
+      // Cerrar el modal
+      setTimePickerModal(prev => ({ ...prev, isOpen: false }));
+    }
+  };
+
+  // Manejador para cerrar el modal de selección de hora
+  const handleCloseTimePicker = () => {
+    setTimePickerModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  // Manejador para agregar un turno
+  const handleAddShift = (shiftId: string, date: string, hour: number, employeeId: string | null) => {
+    console.log('[GRID] Agregar turno:', { shiftId, date, hour, employeeId });
+    
+    if (!employeeId) return;
+    
+    // Crear entrada de horario para el turno seleccionado
+    const shift = workShifts.find(s => s.id === shiftId);
+    
+    if (!shift) return;
+    
+    // Obtener el empleado
+    const employee = employees.find(e => e.id === employeeId);
+    
+    if (!employee) return;
+    
+    // Formatear hora de inicio y fin
+    const startTime = `${hour.toString().padStart(2, '0')}:00`;
+    const defaultDuration = shift.defaultDuration ? parseInt(shift.defaultDuration) : 8;
+    let endHour = hour + defaultDuration;
+    endHour = Math.min(endHour, endHour);
+    const endTime = `${endHour.toString().padStart(2, '0')}:00`;
+    
+    // Crear entrada de horario
+    const newScheduleEntry: ScheduleEntry = {
+      date,
+      shift: shiftId,
+      startTime,
+      endTime,
+      employeeId
+    };
+    
+    // Actualizar horario
+    if (onScheduleUpdate) {
+      onScheduleUpdate(newScheduleEntry);
+    }
+    
+    // Actualizar el horario en la copia local del empleado
+    if (!employee.schedule) {
+      employee.schedule = [];
+    }
+    
+    // Verificar si ya existe una entrada para esta fecha
+    const existingEntryIndex = employee.schedule.findIndex(s => s.date === date);
+    
+    if (existingEntryIndex >= 0) {
+      // Actualizar entrada existente
+      employee.schedule[existingEntryIndex] = {
+        ...employee.schedule[existingEntryIndex],
+        shift: shiftId,
+        startTime,
+        endTime
+      };
+    } else {
+      // Agregar nueva entrada
+      employee.schedule.push({
+        date,
+        shift: shiftId,
+        startTime,
+        endTime
+      });
+    }
+    
+    // Cerrar menú contextual
+    handleCloseContextMenu();
+  };
+
+  // Manejador para agregar una licencia
+  const handleAddLicense = (licenseId: string, date: string, hour: number, employeeId: string | null) => {
+    console.log('[GRID] Agregar licencia:', { licenseId, date, hour, employeeId });
+    
+    if (!employeeId) return;
+    
+    // Crear entrada de horario para la licencia seleccionada
+    const license = licenses.find(l => l.code === licenseId);
+    
+    if (!license) return;
+    
+    // Obtener el empleado
+    const employee = employees.find(e => e.id === employeeId);
+    
+    if (!employee) return;
+    
+    // Formatear hora de inicio y fin
+    const startTime = `${hour.toString().padStart(2, '0')}:00`;
+    const defaultDuration = license.defaultDuration ? parseInt(license.defaultDuration) : 8;
+    let endHour = hour + defaultDuration;
+    endHour = Math.min(endHour, endHour);
+    const endTime = `${endHour.toString().padStart(2, '0')}:00`;
+    
+    // Crear entrada de horario
+    const newScheduleEntry: ScheduleEntry = {
+      date,
+      shift: licenseId,
+      startTime,
+      endTime,
+      employeeId
+    };
+    
+    // Actualizar horario
+    if (onScheduleUpdate) {
+      onScheduleUpdate(newScheduleEntry);
+    }
+    
+    // Actualizar el horario en la copia local del empleado
+    if (!employee.schedule) {
+      employee.schedule = [];
+    }
+    
+    // Verificar si ya existe una entrada para esta fecha
+    const existingEntryIndex = employee.schedule.findIndex(s => s.date === date);
+    
+    if (existingEntryIndex >= 0) {
+      // Actualizar entrada existente
+      employee.schedule[existingEntryIndex] = {
+        ...employee.schedule[existingEntryIndex],
+        shift: licenseId,
+        startTime,
+        endTime
+      };
+    } else {
+      // Agregar nueva entrada
+      employee.schedule.push({
+        date,
+        shift: licenseId,
+        startTime,
+        endTime
+      });
+    }
+    
+    // Cerrar menú contextual
+    handleCloseContextMenu();
+  };
+
+  // Manejador para agregar un marcaje
+  const handleAddMarking = (type: 'entry' | 'exit', date: string, hour: number, employeeId: string | null) => {
+    // Abrir el selector de hora en lugar de agregar directamente
+    handleOpenTimePicker(type, date, hour, employeeId);
+  };
+
+  // Iniciar arrastre entre días
+  const handleStartDragBetweenDays = (scheduleEntry: ScheduleEntry, date: string, employeeId: string | null) => {
+    console.log('[GRID] Iniciando arrastre entre días:', { scheduleEntry, date, employeeId });
+    
+    setDraggedSchedule({
+      entry: scheduleEntry,
+      originDate: date,
+      originEmployeeId: employeeId,
+      isDraggingBetweenDays: true
+    });
+  };
+  
+  // Finalizar arrastre entre días
+  const handleDragBetweenDaysEnd = (targetDate: string, hour: number, employeeId: string | null) => {
+    console.log('[GRID] Finalizando arrastre entre días:', { targetDate, hour, employeeId });
+    
+    if (!draggedSchedule.entry || !draggedSchedule.isDraggingBetweenDays) return;
+    
+    // Solo procesar si es el mismo empleado
+    if (draggedSchedule.originEmployeeId !== employeeId) {
+      setDraggedSchedule({
+        entry: null,
+        originDate: '',
+        originEmployeeId: null,
+        isDraggingBetweenDays: false
+      });
+      return;
+    }
+    
+    // Obtener el empleado
+    const employee = employees.find(e => e.id === employeeId);
+    
+    if (!employee) return;
+    
+    // Calcular duración del horario original en minutos
+    const startParts = draggedSchedule.entry.startTime.split(':');
+    const endParts = draggedSchedule.entry.endTime.split(':');
+    
+    const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1] || '0');
+    const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1] || '0');
+    const duration = endMinutes - startMinutes;
+    
+    // Crear nueva hora de inicio basada en donde se soltó
+    const newStartTime = `${hour.toString().padStart(2, '0')}:00`;
+    const newStartMinutes = hour * 60;
+    
+    // Calcular nueva hora de fin
+    const newEndMinutes = newStartMinutes + duration;
+    const newEndHour = Math.floor(newEndMinutes / 60);
+    const newEndMinute = newEndMinutes % 60;
+    const newEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinute.toString().padStart(2, '0')}`;
+    
+    // Crear entrada de horario para el nuevo día
+    const newScheduleEntry: ScheduleEntry = {
+      date: targetDate,
+      shift: draggedSchedule.entry.shift,
+      startTime: newStartTime,
+      endTime: newEndTime,
+      employeeId: employeeId || ''
+    };
+    
+    // Actualizar horario
+    if (onScheduleUpdate) {
+      onScheduleUpdate(newScheduleEntry);
+    }
+    
+    // Actualizar el horario en la copia local del empleado
+    if (!employee.schedule) {
+      employee.schedule = [];
+    }
+    
+    // 1. Eliminar la entrada original
+    if (draggedSchedule.originDate !== targetDate) {
+      employee.schedule = employee.schedule.filter(s => 
+        s.date !== draggedSchedule.originDate || 
+        s.shift !== draggedSchedule.entry?.shift
+      );
+    }
+    
+    // 2. Agregar/actualizar la nueva entrada
+    const existingEntryIndex = employee.schedule.findIndex(s => s.date === targetDate);
+    
+    if (existingEntryIndex >= 0) {
+      // Actualizar entrada existente
+      employee.schedule[existingEntryIndex] = {
+        ...employee.schedule[existingEntryIndex],
+        shift: draggedSchedule.entry.shift,
+        startTime: newStartTime,
+        endTime: newEndTime
+      };
+    } else {
+      // Agregar nueva entrada
+      employee.schedule.push({
+        date: targetDate,
+        shift: draggedSchedule.entry.shift,
+        startTime: newStartTime,
+        endTime: newEndTime
+      });
+    }
+    
+    // Limpiar estado de arrastre
+    setDraggedSchedule({
+      entry: null,
+      originDate: '',
+      originEmployeeId: null,
+      isDraggingBetweenDays: false
+    });
+  };
+
+  // Manejador para drop
+  const handleDrop = (e: React.DragEvent, date: string, hour: number, employeeId: string | null) => {
+    e.preventDefault();
+    
+    if (!employeeId) return;
+    
+    try {
+      // Obtener datos del elemento arrastrado
+      const dragDataJson = e.dataTransfer.getData('application/json');
+      
+      if (!dragDataJson) return;
+      
+      const dragData = JSON.parse(dragDataJson);
+      
+      console.log('[GRID] Drop:', { dragData, date, hour, employeeId });
+      
+      // Manejar terminación de arrastre entre días si está activo
+      if (draggedSchedule.isDraggingBetweenDays && draggedSchedule.entry) {
+        handleDragBetweenDaysEnd(date, hour, employeeId);
+        return;
+      }
+      
+      // Comprobar si es un horario existente que se está moviendo entre días
+      if (dragData.type === 'schedule') {
+        // Verificar que el empleado origen y destino sean los mismos
+        if (dragData.employeeId === employeeId) {
+          // Si se trata del mismo día, ignoramos - esto ya se manejará con el movimiento normal
+          if (dragData.originDate === date) {
+            console.log('[GRID] Ignorando drop en el mismo día');
+            return;
+          }
+          
+          // Obtener el empleado
+          const employee = employees.find(e => e.id === employeeId);
+          if (!employee) return;
+          
+          // Usar los datos del horario original
+          const originalEntry = dragData.entry;
+          
+          // Calcular duración del horario original en minutos
+          const startParts = originalEntry.startTime.split(':');
+          const endParts = originalEntry.endTime.split(':');
+          
+          const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1] || '0');
+          const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1] || '0');
+          const duration = endMinutes - startMinutes;
+          
+          // Crear nueva hora de inicio basada en donde se soltó
+          const newStartTime = `${hour.toString().padStart(2, '0')}:00`;
+          const newStartMinutes = hour * 60;
+          
+          // Calcular nueva hora de fin
+          const newEndMinutes = newStartMinutes + duration;
+          const newEndHour = Math.floor(newEndMinutes / 60);
+          const newEndMinute = newEndMinutes % 60;
+          const newEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinute.toString().padStart(2, '0')}`;
+          
+          // Crear entrada de horario para el nuevo día
+          const newScheduleEntry: ScheduleEntry = {
+            date,
+            shift: originalEntry.shift,
+            startTime: newStartTime,
+            endTime: newEndTime,
+            employeeId
+          };
+          
+          // Actualizar horario
+          if (onScheduleUpdate) {
+            onScheduleUpdate(newScheduleEntry);
+          }
+          
+          // Actualizar el horario en la copia local del empleado
+          if (!employee.schedule) {
+            employee.schedule = [];
+          }
+          
+          // 1. Eliminar la entrada original
+          employee.schedule = employee.schedule.filter(s => 
+            s.date !== dragData.originDate || 
+            s.shift !== originalEntry.shift
+          );
+          
+          // 2. Agregar/actualizar la nueva entrada
+          const existingEntryIndex = employee.schedule.findIndex(s => s.date === date);
+          
+          if (existingEntryIndex >= 0) {
+            // Actualizar entrada existente
+            employee.schedule[existingEntryIndex] = {
+              ...employee.schedule[existingEntryIndex],
+              shift: originalEntry.shift,
+              startTime: newStartTime,
+              endTime: newEndTime
+            };
+          } else {
+            // Agregar nueva entrada
+            employee.schedule.push({
+              date,
+              shift: originalEntry.shift,
+              startTime: newStartTime,
+              endTime: newEndTime
+            });
+          }
+          
+          console.log('[GRID] Horario movido entre días:', { 
+            from: dragData.originDate, 
+            to: date,
+            shift: originalEntry.shift,
+            startTime: newStartTime,
+            endTime: newEndTime
+          });
+        } else {
+          console.log('[GRID] No se puede mover horario entre empleados diferentes');
+        }
+      } else if (dragData.type === 'shift') {
+        handleAddShift(dragData.id, date, hour, employeeId);
+      } else if (dragData.type === 'license') {
+        handleAddLicense(dragData.id, date, hour, employeeId);
+      }
+    } catch (error) {
+      console.error('[GRID] Error al procesar drop:', error);
+    }
+  };
+  
+  // Manejador para permitir drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // Necesario para permitir el drop
   };
   
   // Efecto para manejar eventos globales durante redimensionado
@@ -74,7 +610,8 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       
       const dayDate = dragInfo.scheduleEntry.date;
       const shiftId = dragInfo.scheduleEntry.shift;
-      const entryId = `schedule-entry-${dayDate}-${shiftId}`;
+      const empId = dragInfo.scheduleEntry.employeeId || '';
+      const entryId = `schedule-entry-${dayDate}-${shiftId}-${empId}`;
       const entryElement = document.getElementById(entryId);
       
       if (!entryElement) {
@@ -96,14 +633,10 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       const endTimeHour = parseInt(endTimeParts[0]);
       const endTimeMinutes = parseInt(endTimeParts[1] || '0');
       
-      // Obtener posición del mouse relativa a la cuadrícula
-      const offsetX = e.clientX - gridRect.left - 80;
-      
-      // Factor de reducción de sensibilidad (0.5 = mitad de sensible)
+      // Factor de reducción de sensibilidad
       const sensitivityFactor = 0.6;
       
       // Aplicar el factor de sensibilidad para reducir los cambios
-      // Calculamos el movimiento relativo al punto inicial y lo reducimos
       const relativeMovement = e.clientX - dragInfo.startX;
       const adjustedMovement = relativeMovement * sensitivityFactor;
       const adjustedClientX = dragInfo.startX + adjustedMovement;
@@ -159,7 +692,8 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
             // Actualizar tooltip
             setTooltip(prev => ({
               ...prev,
-              content: `${formattedNewTime} - ${dragInfo.scheduleEntry.endTime}`
+              content: `${formattedNewTime} - ${dragInfo.scheduleEntry.endTime}`,
+              show: true
             }));
           }
         } else {
@@ -189,66 +723,119 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
             // Actualizar tooltip
             setTooltip(prev => ({
               ...prev,
-              content: `${dragInfo.scheduleEntry.startTime} - ${formattedNewTime}`
+              content: `${dragInfo.scheduleEntry.startTime} - ${formattedNewTime}`,
+              show: true
             }));
           }
         }
       } else {
-        // Mover evento completo con sensibilidad reducida
-        // Ajustar posición para centrar en el mouse
-        const eventMouseOffset = dragInfo.initialWidth / 2;
-        const adjustedOffsetX = adjustedOffsetX - eventMouseOffset;
-        const adjustedHourDecimal = startHour + (adjustedOffsetX / totalWidth) * totalHours;
-        
-        // Calcular nueva hora de inicio con snap a incrementos
-        const adjustedHour = Math.floor(adjustedHourDecimal);
-        let adjustedMinutes = Math.floor((adjustedHourDecimal - adjustedHour) * 60);
-        adjustedMinutes = Math.round(adjustedMinutes / timeStep) * timeStep;
-        
-        const newStartHour = Math.max(startHour, adjustedHour);
-        const newStartMinutes = adjustedMinutes === 60 ? 0 : adjustedMinutes;
-        
-        // Calcular nueva hora de fin basada en la duración original
-        let newEndHour = newStartHour + Math.floor(durationMinutes / 60);
-        let newEndMinutes = newStartMinutes + (durationMinutes % 60);
-        
-        if (newEndMinutes >= 60) {
-          newEndHour += 1;
-          newEndMinutes -= 60;
-        }
-        
-        // Verificar límites
-        if (newStartHour >= startHour && newEndHour <= endHour) {
-          // Calcular nueva posición
-          const newStartHourDecimal = newStartHour + (newStartMinutes / 60);
-          const newLeftPercent = ((newStartHourDecimal - startHour) / totalHours) * 100;
-          
-          // Aplicar cambios
-          console.log('[GRID] Moviendo:', { 
-            left: newLeftPercent,
-            newStart: `${newStartHour}:${newStartMinutes}`,
-            newEnd: `${newEndHour}:${newEndMinutes}`
-          });
-          
-          entryElement.style.left = `${newLeftPercent}%`;
-          
-          // Actualizar horario
-          const formattedStartTime = `${newStartHour.toString().padStart(2, '0')}:${newStartMinutes.toString().padStart(2, '0')}`;
-          const formattedEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinutes.toString().padStart(2, '0')}`;
-          
-          dragInfo.scheduleEntry.startTime = formattedStartTime;
-          dragInfo.scheduleEntry.endTime = formattedEndTime;
-          
-          // Actualizar tooltip
-          setTooltip(prev => ({
-            ...prev,
-            content: `${formattedStartTime} - ${formattedEndTime}`
-          }));
-        }
-      }
+  // Mover evento completo
+  // Obtener el desplazamiento del ratón desde el inicio de la operación
+  const mouseDeltaX = e.clientX - dragInfo.startX;
+  
+  // Solo aplicar cambios si hay un desplazamiento real (evitar movimiento al hacer clic)
+  if (Math.abs(mouseDeltaX) < 3) {
+    return; // No hacer nada si apenas se ha movido el ratón
+  }
+  
+  // Obtener datos importantes del evento original
+  const startTimeParts = dragInfo.scheduleEntry.startTime.split(':');
+  const endTimeParts = dragInfo.scheduleEntry.endTime.split(':');
+  const startTimeHour = parseInt(startTimeParts[0]);
+  const startTimeMinutes = parseInt(startTimeParts[1] || '0');
+  const endTimeHour = parseInt(endTimeParts[0]);
+  const endTimeMinutes = parseInt(endTimeParts[1] || '0');
+  
+  // Calcular duración en minutos
+  const durationMinutes = 
+    (endTimeHour * 60 + endTimeMinutes) - 
+    (startTimeHour * 60 + startTimeMinutes);
+  
+  // Calcular el ancho total de la cuadrícula de tiempo en píxeles y la duración en horas
+  const totalHoursDecimal = endHour - startHour;
+  const pixelsPerHour = totalWidth / totalHoursDecimal;
+  const pixelsPerMinute = pixelsPerHour / 60;
+  
+  // Aplicar una sensibilidad uniforme para el movimiento en ambas direcciones
+  const sensitivity = dragInfo.scheduleEntry.sensitivity || 0.1;
+  const adjustedMovement = mouseDeltaX * sensitivity;
+  
+  // Convertir el movimiento en minutos
+  const movementInMinutes = Math.round(adjustedMovement / pixelsPerMinute / timeStep) * timeStep;
+  
+  // Solo proceder si hay un movimiento real en minutos
+  if (movementInMinutes === 0) {
+    return;
+  }
+  
+  // Calcular nuevas horas de inicio y fin en minutos totales
+  const originalStartMinutesTotal = startTimeHour * 60 + startTimeMinutes;
+  const originalEndMinutesTotal = endTimeHour * 60 + endTimeMinutes;
+  
+  let newStartMinutesTotal = originalStartMinutesTotal + movementInMinutes;
+  let newEndMinutesTotal = originalEndMinutesTotal + movementInMinutes;
+  
+  // Verificar límites
+  const minStartMinutes = startHour * 60;
+  const maxEndMinutes = endHour * 60;
+  
+  // Si el nuevo inicio es menor que el tiempo mínimo permitido
+  if (newStartMinutesTotal < minStartMinutes) {
+    const adjustment = minStartMinutes - newStartMinutesTotal;
+    newStartMinutesTotal = minStartMinutes;
+    newEndMinutesTotal += adjustment;
+  }
+  
+  // Si el nuevo fin es mayor que el tiempo máximo permitido
+  if (newEndMinutesTotal > maxEndMinutes) {
+    const adjustment = newEndMinutesTotal - maxEndMinutes;
+    newEndMinutesTotal = maxEndMinutes;
+    newStartMinutesTotal -= adjustment;
+    
+    // Verificar de nuevo el límite mínimo después del ajuste
+    if (newStartMinutesTotal < minStartMinutes) {
+      newStartMinutesTotal = minStartMinutes;
+    }
+  }
+  
+  // Convertir minutos totales a horas y minutos
+  const newStartHour = Math.floor(newStartMinutesTotal / 60);
+  const newStartMinute = newStartMinutesTotal % 60;
+  const newEndHour = Math.floor(newEndMinutesTotal / 60);
+  const newEndMinute = newEndMinutesTotal % 60;
+  
+  // Calcular nueva posición como porcentaje
+  const startPosition = (newStartMinutesTotal - minStartMinutes) / (60 * totalHoursDecimal);
+  const newLeftPercent = startPosition * 100;
+  
+  // Aplicar cambios al elemento visual
+  console.log('[GRID] Moviendo:', { 
+    left: newLeftPercent,
+    delta: mouseDeltaX,
+    movementInMinutes: movementInMinutes,
+    newStart: `${newStartHour}:${newStartMinute}`,
+    newEnd: `${newEndHour}:${newEndMinute}`
+  });
+  
+  entryElement.style.left = `${newLeftPercent}%`;
+  
+  // Actualizar horario en el objeto
+  const formattedStartTime = `${newStartHour.toString().padStart(2, '0')}:${newStartMinute.toString().padStart(2, '0')}`;
+  const formattedEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinute.toString().padStart(2, '0')}`;
+  
+  dragInfo.scheduleEntry.startTime = formattedStartTime;
+  dragInfo.scheduleEntry.endTime = formattedEndTime;
+  
+  // Actualizar tooltip
+  setTooltip(prev => ({
+    ...prev,
+    content: `${formattedStartTime} - ${formattedEndTime}`,
+    show: true
+  }));
+}
     };
     
-    const handleGlobalMouseUp = (e: MouseEvent) => {
+    const handleGlobalMouseUp = () => {
       console.log('[GRID] Finalizando operación');
       
       if (dragInfo?.scheduleEntry && onScheduleUpdate) {
@@ -276,7 +863,19 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
   // Calcular los días de la semana para la fecha seleccionada
   const weekDays = React.useMemo(() => {
-    if (selectedPeriod === 'Seleccionar fechas' && startDate && endDate) {
+    // Si hay más de un empleado seleccionado, mostrar solo el día actual
+    if (employees.length > 1) {
+      // Usar la fecha seleccionada en lugar de la fecha actual
+      const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const date = new Date(selectedDate);
+      const dayOfWeek = date.getDay();
+      
+      return [{
+        name: dayNames[dayOfWeek],
+        date: selectedDate
+      }];
+    }
+    else if (selectedPeriod === 'Seleccionar fechas' && startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
       const days = [];
@@ -347,7 +946,7 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         date: day.date.toISOString().split('T')[0]
       }));
     }
-  }, [selectedPeriod, selectedDate, startDate, endDate]);
+  }, [employees.length, selectedPeriod, selectedDate, startDate, endDate]);
 
   // Iniciar operación de redimensionado
   const handleMouseDown = (e: React.MouseEvent, scheduleEntry: ScheduleEntry) => {
@@ -373,7 +972,9 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       initialLeft: rect.left - gridRect.left,
       initialWidth: rect.width,
       scheduleEntry: {
-        ...scheduleEntry
+        ...scheduleEntry,
+        // Añadir ID del empleado para que se pueda identificar correctamente en evento global
+        employeeId: scheduleEntry.employeeId
       }
     });
     
@@ -433,10 +1034,11 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
     document.body.style.userSelect = '';
   };
 
-  if (!employee) {
+  // Verificar si hay empleados seleccionados
+  if (employees.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-gray-500">Seleccione un empleado para ver su horario</p>
+        <p className="text-gray-500">Seleccione uno o más empleados para ver su horario</p>
       </div>
     );
   }
@@ -458,6 +1060,34 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
           {tooltip.content}
         </div>
       )}
+      
+      {/* Menú contextual */}
+      {contextMenu.show && (
+        <ContextMenu 
+          x={contextMenu.x}
+          y={contextMenu.y}
+          date={contextMenu.date}
+          hour={contextMenu.hour}
+          employeeId={contextMenu.employeeId}
+          onClose={handleCloseContextMenu}
+          workShifts={workShifts}
+          licenses={licenses}
+          onAddShift={handleAddShift}
+          onAddLicense={handleAddLicense}
+          onAddMarking={handleAddMarking}
+        />
+      )}
+
+      {/* Modal de selección de hora */}
+      {timePickerModal.isOpen && (
+        <TimePickerModal
+          isOpen={timePickerModal.isOpen}
+          onClose={handleCloseTimePicker}
+          onConfirm={timePickerModal.isSecondStep ? handleExitTimeSelected : handleEntryTimeSelected}
+          title={timePickerModal.isSecondStep ? "Seleccionar hora de salida" : "Seleccionar hora de entrada"}
+          initialTime={timePickerModal.isSecondStep ? undefined : timePickerModal.entryTime}
+        />
+      )}
     
       <div 
         className="bg-white rounded-lg shadow-sm border border-gray-200" 
@@ -465,25 +1095,63 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         onContextMenu={handleContextMenu}
       >
         <div className="grid grid-cols-[auto,1fr]">
-          <div className="w-20 rounded-tl-lg bg-gray-50 border-r border-gray-200"></div>
+          <div className="w-20 rounded-tl-lg bg-gray-50 border-r border-gray-200">
+            {/* Encabezado para mostrar múltiples empleados */}
+            {employees.length > 1 && (
+              <div className="p-2 font-medium text-sm text-gray-700 border-b border-gray-200">
+                Empleados
+              </div>
+            )}
+          </div>
           <TimeSlotHeader startHour={startHour} endHour={endHour} />
 
-          {weekDays.map((day) => (
-            <DayRow
-              key={day.date}
-              day={day.name}
-              date={day.date}
-              employee={employee}
-              workShifts={workShifts}
-              licenses={licenses}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              startHour={startHour}
-              endHour={endHour}
-              timeStep={timeStep}
-            />
-          ))}
+          {/* Si hay múltiples empleados, mostrar una fila por empleado */}
+          {employees.length > 1 ? (
+            // Múltiples empleados - solo día actual
+            employees.map(employee => weekDays.map(day => (
+              <DayRow
+                key={`${employee.id}-${day.date}`}
+                day={employees.length > 1 ? employee.displayName || employee.name || '' : day.name}
+                date={day.date}
+                employee={employee}
+                workShifts={workShifts}
+                licenses={licenses}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                startHour={startHour}
+                endHour={endHour}
+                timeStep={timeStep}
+                isEmployeeName={employees.length > 1}
+                onContextMenu={handleShowContextMenu}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onStartDragBetweenDays={handleStartDragBetweenDays}
+              />
+            )))
+          ) : (
+            // Un solo empleado - mostrar según el período seleccionado
+            weekDays.map((day) => (
+              <DayRow
+                key={day.date}
+                day={day.name}
+                date={day.date}
+                employee={employees[0]}
+                workShifts={workShifts}
+                licenses={licenses}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                startHour={startHour}
+                endHour={endHour}
+                timeStep={timeStep}
+                onContextMenu={handleShowContextMenu}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onStartDragBetweenDays={handleStartDragBetweenDays}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -219,11 +219,11 @@ const TopBar: React.FC<TopBarProps> = ({
             >
               Licencias y permisos
             </button>
-            <button
+            {/* <button
               className="px-3 py-1 rounded-lg text-sm border border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               Guardar cambios
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
