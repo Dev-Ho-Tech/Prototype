@@ -18,6 +18,7 @@ interface DayRowProps {
   onContextMenu?: (e: React.MouseEvent, date: string, hour: number, employeeId: string | null) => void;
   onDrop?: (e: React.DragEvent, date: string, hour: number, employeeId: string | null) => void;
   onDragOver?: (e: React.DragEvent) => void;
+  onStartDragBetweenDays?: (scheduleEntry: ScheduleEntry, date: string, employeeId: string | null) => void;
 }
 
 // Componente para las manijas de redimensionado
@@ -65,11 +66,12 @@ const DayRow: React.FC<DayRowProps> = ({
   isEmployeeName = false,
   onContextMenu,
   onDrop,
-  onDragOver
+  onDragOver,
+  onStartDragBetweenDays
 }) => {
   // Estados para manejar el redimensionado localmente
   const [isResizing, setIsResizing] = useState(false);
-  const [, setInitialPosition] = useState({ x: 0, width: 0 });
+  const [initialPosition, setInitialPosition] = useState({ x: 0, width: 0 });
   const [hoverHour, setHoverHour] = useState<number | null>(null);
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const [tooltipContent, setTooltipContent] = useState<string>('');
@@ -99,6 +101,38 @@ const DayRow: React.FC<DayRowProps> = ({
     if (onContextMenu) {
       onContextMenu(e, date, hour, employee?.id || null);
     }
+  };
+
+  // Manejador para iniciar arrastre entre días
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, scheduleEntry: ScheduleEntry) => {
+    if (!onStartDragBetweenDays || !scheduleEntry) return;
+    
+    e.stopPropagation();
+    
+    // Crear imagen personalizada para el arrastre
+    const dragImage = document.createElement('div');
+    dragImage.style.width = '100px';
+    dragImage.style.height = '30px';
+    dragImage.style.backgroundColor = 'rgba(59, 130, 246, 0.8)';
+    dragImage.style.color = 'white';
+    dragImage.style.padding = '4px 8px';
+    dragImage.style.borderRadius = '4px';
+    dragImage.style.fontSize = '12px';
+    dragImage.style.display = 'flex';
+    dragImage.style.alignItems = 'center';
+    dragImage.style.justifyContent = 'center';
+    dragImage.innerText = `${scheduleEntry.startTime} - ${scheduleEntry.endTime}`;
+    
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 50, 15);
+    
+    // Eliminar elemento auxiliar después
+    setTimeout(() => {
+      document.body.removeChild(dragImage);
+    }, 0);
+    
+    // Iniciar arrastre entre días
+    onStartDragBetweenDays(scheduleEntry, date, employee?.id || null);
   };
 
   // Manejador para drag over en la celda
@@ -208,18 +242,35 @@ const DayRow: React.FC<DayRowProps> = ({
   const getScheduleInfo = () => {
     if (!schedule) return null;
     
+    // Si es un horario manual (agregado desde el menú contextual)
+    if (schedule.shift === 'manual') {
+      return { 
+        isManual: true,
+        isLicense: false, 
+        shiftInfo: { 
+          label: 'Horario manual', 
+          color: 'bg-green-500 text-white' 
+        } 
+      };
+    }
+    
     const isLicense = licenses.some(l => l.code === schedule.shift);
     const shiftInfo = isLicense 
       ? licenses.find(l => l.code === schedule.shift) 
       : workShifts.find(s => s.id === schedule.shift);
       
-    return { isLicense, shiftInfo };
+    return { isLicense, shiftInfo, isManual: false };
   };
   
   // Obtener color de fondo
   const getBackgroundColor = () => {
     const info = getScheduleInfo();
     if (!info) return '';
+    
+    // Si es un horario manual (agregado desde el menú contextual), usar verde
+    if (info.isManual) {
+      return 'bg-green-500 text-white';
+    }
     
     if (info.isLicense) {
       return info.shiftInfo?.color || 'bg-yellow-200 text-yellow-800';
@@ -405,10 +456,12 @@ const DayRow: React.FC<DayRowProps> = ({
             onMouseDown={handleMove}
             onContextMenu={(e) => onContextMenu && onContextMenu(e, date, parseInt(schedule.startTime.split(':')[0]), employee?.id || null)}
             id={`schedule-entry-${date}-${schedule.shift}-${employee?.id}`} // Añadir ID del empleado para hacerlo único
+            draggable={!!onStartDragBetweenDays} // Hacer el elemento arrastrable si se proporcionó la función
+            onDragStart={(e) => handleDragStart(e, schedule)}
           >
             <div className="flex items-center space-x-2 text-xs overflow-hidden">
               <span className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                {getScheduleInfo()?.isLicense ? getScheduleInfo()?.shiftInfo?.label : `${schedule.shift}`}
+                {schedule.shift === 'manual' ? 'Horario manual' : (getScheduleInfo()?.isLicense ? getScheduleInfo()?.shiftInfo?.label : `${schedule.shift}`)}
               </span>
               {schedule.startTime && schedule.endTime && (
                 <span className="whitespace-nowrap">

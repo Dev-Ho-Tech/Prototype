@@ -4,6 +4,7 @@ import { UnifiedEmployee } from '../../../global/interfaces/unifiedTypes';
 import DayRow from './DayRow';
 import TimeSlotHeader from './TimeSlotHeader';
 import ContextMenu from './ContextMenu';
+import TimePickerModal from './TimePickerModal';
 
 interface ScheduleGridProps {
   employees: UnifiedEmployee[]; 
@@ -63,6 +64,36 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
     employeeId: null
   });
   
+  // Estado para el modal de selección de hora
+  const [timePickerModal, setTimePickerModal] = useState<{
+    isOpen: boolean;
+    type: 'entry' | 'exit';
+    date: string;
+    employeeId: string | null;
+    entryTime?: string;
+    isSecondStep?: boolean;
+  }>({
+    isOpen: false,
+    type: 'entry',
+    date: '',
+    employeeId: null,
+    entryTime: undefined,
+    isSecondStep: false
+  });
+  
+  // Estados para tracking de arrastre entre días
+  const [draggedSchedule, setDraggedSchedule] = useState<{
+    entry: ScheduleEntry | null;
+    originDate: string;
+    originEmployeeId: string | null;
+    isDraggingBetweenDays: boolean;
+  }>({
+    entry: null,
+    originDate: '',
+    originEmployeeId: null,
+    isDraggingBetweenDays: false
+  });
+  
   // Prevenir menú contextual por defecto
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -86,6 +117,97 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   // Cerrar menú contextual
   const handleCloseContextMenu = () => {
     setContextMenu(prev => ({ ...prev, show: false }));
+  };
+  
+  // Manejador para abrir el modal de selección de hora
+  const handleOpenTimePicker = (type: 'entry' | 'exit', date: string, hour: number, employeeId: string | null) => {
+    const initialTime = `${hour.toString().padStart(2, '0')}:00`;
+    
+    setTimePickerModal({
+      isOpen: true,
+      type,
+      date,
+      employeeId,
+      entryTime: initialTime,
+      isSecondStep: false
+    });
+    
+    // Cerrar el menú contextual
+    handleCloseContextMenu();
+  };
+  
+  // Manejador para el primer paso (selección de hora de entrada)
+  const handleEntryTimeSelected = (time: string) => {
+    // Si es el primer paso (entrada), configurar para el segundo paso (salida)
+    if (!timePickerModal.isSecondStep) {
+      setTimePickerModal(prev => ({
+        ...prev,
+        entryTime: time,
+        type: 'exit',
+        isSecondStep: true
+      }));
+    }
+  };
+  
+  // Manejador para el segundo paso (selección de hora de salida)
+  const handleExitTimeSelected = (time: string) => {
+    if (timePickerModal.isSecondStep && timePickerModal.entryTime && timePickerModal.employeeId) {
+      // Crear un nuevo horario "manual" de color verde
+      const employee = employees.find(e => e.id === timePickerModal.employeeId);
+      
+      if (!employee) {
+        setTimePickerModal(prev => ({ ...prev, isOpen: false }));
+        return;
+      }
+      
+      // Crear entrada de horario para marcaje manual
+      const newScheduleEntry: ScheduleEntry = {
+        date: timePickerModal.date,
+        shift: 'manual',  // Identificador especial para horarios creados manualmente
+        startTime: timePickerModal.entryTime,
+        endTime: time,
+        employeeId: timePickerModal.employeeId
+      };
+      
+      // Actualizar horario en el estado global
+      if (onScheduleUpdate) {
+        onScheduleUpdate(newScheduleEntry);
+      }
+      
+      // Actualizar el horario en la copia local del empleado
+      if (!employee.schedule) {
+        employee.schedule = [];
+      }
+      
+      // Verificar si ya existe una entrada para esta fecha
+      const existingEntryIndex = employee.schedule.findIndex(s => s.date === timePickerModal.date);
+      
+      if (existingEntryIndex >= 0) {
+        // Actualizar entrada existente
+        employee.schedule[existingEntryIndex] = {
+          ...employee.schedule[existingEntryIndex],
+          shift: 'manual',
+          startTime: timePickerModal.entryTime,
+          endTime: time
+        };
+      } else {
+        // Agregar nueva entrada
+        employee.schedule.push({
+          date: timePickerModal.date,
+          shift: 'manual',
+          startTime: timePickerModal.entryTime,
+          endTime: time
+        });
+      }
+      
+      // Cerrar el modal
+      setTimePickerModal(prev => ({ ...prev, isOpen: false }));
+    }
+  };
+
+  // Manejador para cerrar el modal de selección de hora
+  const handleCloseTimePicker = () => {
+    setTimePickerModal(prev => ({ ...prev, isOpen: false }));
   };
 
   // Manejador para agregar un turno
@@ -224,48 +346,117 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
   // Manejador para agregar un marcaje
   const handleAddMarking = (type: 'entry' | 'exit', date: string, hour: number, employeeId: string | null) => {
-    console.log('[GRID] Agregar marcaje:', { type, date, hour, employeeId });
+    // Abrir el selector de hora en lugar de agregar directamente
+    handleOpenTimePicker(type, date, hour, employeeId);
+  };
+
+  // Iniciar arrastre entre días
+  const handleStartDragBetweenDays = (scheduleEntry: ScheduleEntry, date: string, employeeId: string | null) => {
+    console.log('[GRID] Iniciando arrastre entre días:', { scheduleEntry, date, employeeId });
     
-    if (!employeeId) return;
+    setDraggedSchedule({
+      entry: scheduleEntry,
+      originDate: date,
+      originEmployeeId: employeeId,
+      isDraggingBetweenDays: true
+    });
+  };
+  
+  // Finalizar arrastre entre días
+  const handleDragBetweenDaysEnd = (targetDate: string, hour: number, employeeId: string | null) => {
+    console.log('[GRID] Finalizando arrastre entre días:', { targetDate, hour, employeeId });
+    
+    if (!draggedSchedule.entry || !draggedSchedule.isDraggingBetweenDays) return;
+    
+    // Solo procesar si es el mismo empleado
+    if (draggedSchedule.originEmployeeId !== employeeId) {
+      setDraggedSchedule({
+        entry: null,
+        originDate: '',
+        originEmployeeId: null,
+        isDraggingBetweenDays: false
+      });
+      return;
+    }
     
     // Obtener el empleado
     const employee = employees.find(e => e.id === employeeId);
     
     if (!employee) return;
     
-    // Formatear hora del marcaje (incluir minutos)
-    const time = `${hour.toString().padStart(2, '0')}:00`;
+    // Calcular duración del horario original en minutos
+    const startParts = draggedSchedule.entry.startTime.split(':');
+    const endParts = draggedSchedule.entry.endTime.split(':');
+    
+    const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1] || '0');
+    const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1] || '0');
+    const duration = endMinutes - startMinutes;
+    
+    // Crear nueva hora de inicio basada en donde se soltó
+    const newStartTime = `${hour.toString().padStart(2, '0')}:00`;
+    const newStartMinutes = hour * 60;
+    
+    // Calcular nueva hora de fin
+    const newEndMinutes = newStartMinutes + duration;
+    const newEndHour = Math.floor(newEndMinutes / 60);
+    const newEndMinute = newEndMinutes % 60;
+    const newEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinute.toString().padStart(2, '0')}`;
+    
+    // Crear entrada de horario para el nuevo día
+    const newScheduleEntry: ScheduleEntry = {
+      date: targetDate,
+      shift: draggedSchedule.entry.shift,
+      startTime: newStartTime,
+      endTime: newEndTime,
+      employeeId: employeeId || ''
+    };
+    
+    // Actualizar horario
+    if (onScheduleUpdate) {
+      onScheduleUpdate(newScheduleEntry);
+    }
     
     // Actualizar el horario en la copia local del empleado
     if (!employee.schedule) {
       employee.schedule = [];
     }
     
-    // Verificar si ya existe una entrada para esta fecha
-    const existingEntryIndex = employee.schedule.findIndex(s => s.date === date);
-    
-    if (existingEntryIndex >= 0) {
-      // Actualizar marcaje en entrada existente
-      if (type === 'entry') {
-        employee.schedule[existingEntryIndex].actualEntryTime = time;
-      } else {
-        employee.schedule[existingEntryIndex].actualExitTime = time;
-      }
-    } else {
-      // Crear nueva entrada solo con el marcaje
-      const newEntry: any = { date };
-      
-      if (type === 'entry') {
-        newEntry.actualEntryTime = time;
-      } else {
-        newEntry.actualExitTime = time;
-      }
-      
-      employee.schedule.push(newEntry);
+    // 1. Eliminar la entrada original
+    if (draggedSchedule.originDate !== targetDate) {
+      employee.schedule = employee.schedule.filter(s => 
+        s.date !== draggedSchedule.originDate || 
+        s.shift !== draggedSchedule.entry?.shift
+      );
     }
     
-    // Cerrar menú contextual
-    handleCloseContextMenu();
+    // 2. Agregar/actualizar la nueva entrada
+    const existingEntryIndex = employee.schedule.findIndex(s => s.date === targetDate);
+    
+    if (existingEntryIndex >= 0) {
+      // Actualizar entrada existente
+      employee.schedule[existingEntryIndex] = {
+        ...employee.schedule[existingEntryIndex],
+        shift: draggedSchedule.entry.shift,
+        startTime: newStartTime,
+        endTime: newEndTime
+      };
+    } else {
+      // Agregar nueva entrada
+      employee.schedule.push({
+        date: targetDate,
+        shift: draggedSchedule.entry.shift,
+        startTime: newStartTime,
+        endTime: newEndTime
+      });
+    }
+    
+    // Limpiar estado de arrastre
+    setDraggedSchedule({
+      entry: null,
+      originDate: '',
+      originEmployeeId: null,
+      isDraggingBetweenDays: false
+    });
   };
 
   // Manejador para drop
@@ -273,6 +464,12 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
     e.preventDefault();
     
     if (!employeeId) return;
+    
+    // Manejar terminación de arrastre entre días si está activo
+    if (draggedSchedule.isDraggingBetweenDays && draggedSchedule.entry) {
+      handleDragBetweenDaysEnd(date, hour, employeeId);
+      return;
+    }
     
     try {
       // Obtener datos del elemento arrastrado
@@ -738,6 +935,17 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
           onAddMarking={handleAddMarking}
         />
       )}
+
+      {/* Modal de selección de hora */}
+      {timePickerModal.isOpen && (
+        <TimePickerModal
+          isOpen={timePickerModal.isOpen}
+          onClose={handleCloseTimePicker}
+          onConfirm={timePickerModal.isSecondStep ? handleExitTimeSelected : handleEntryTimeSelected}
+          title={timePickerModal.isSecondStep ? "Seleccionar hora de salida" : "Seleccionar hora de entrada"}
+          initialTime={timePickerModal.isSecondStep ? undefined : timePickerModal.entryTime}
+        />
+      )}
     
       <div 
         className="bg-white rounded-lg shadow-sm border border-gray-200" 
@@ -776,6 +984,7 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                 onContextMenu={handleShowContextMenu}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
+                onStartDragBetweenDays={handleStartDragBetweenDays}
               />
             )))
           ) : (
@@ -797,6 +1006,7 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                 onContextMenu={handleShowContextMenu}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
+                onStartDragBetweenDays={handleStartDragBetweenDays}
               />
             ))
           )}
@@ -804,6 +1014,6 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       </div>
     </div>
   );
-}
+};
 
 export default ScheduleGrid;

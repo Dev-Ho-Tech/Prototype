@@ -72,20 +72,13 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
       
       <div className="p-2 border-b border-gray-200">
         <div className="text-xs font-medium text-gray-700 mb-1">Marcajes</div>
-        <div className="grid grid-cols-2 gap-1">
+        <div className="grid grid-cols-1 gap-1">
           <button
-            className="text-xs py-1 px-2 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors flex items-center"
+            className="text-xs py-2 px-3 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors flex items-center justify-center"
             onClick={() => onAddMarking('entry', date, hour, employeeId)}
           >
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
-            <span>Entrada</span>
-          </button>
-          <button
-            className="text-xs py-1 px-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors flex items-center"
-            onClick={() => onAddMarking('exit', date, hour, employeeId)}
-          >
-            <div className="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
-            <span>Salida</span>
+            <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+            <span>Registrar horario manual</span>
           </button>
         </div>
       </div>
