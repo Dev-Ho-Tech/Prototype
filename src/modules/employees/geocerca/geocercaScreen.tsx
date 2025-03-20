@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { Search, Plus, Filter, ChevronDown, Trash, List, Grid } from "lucide-react"
+import { Search, Plus, Filter, ChevronDown, Trash,} from "lucide-react"
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
 import { Card, CardContent } from "./components/ui/card"
@@ -29,7 +29,6 @@ import { ViewMode } from "./components/ViewToggleButton"
 // Importaciones para las columnas
 import { ArrowUpDown, MapPin, Edit, Eye } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { CardFooter } from "./components/CardFooter"
 import { DropdownMenuSeparator } from "./components/DropdownMenuSeparator"
 
 // Tipo de vista
@@ -169,7 +168,14 @@ export default function GeocercasPage() {
   const createGeocercaColumns = useCallback(() => [
     {
       accessorKey: "nombre",
-      header: "Nombre",
+      header: ({ column }) => {
+        return (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Nombre
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
       cell: ({ row }) => {
         return (
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleViewGeocerca(row.original)}>
@@ -195,21 +201,42 @@ export default function GeocercasPage() {
     },
     {
       accessorKey: "radio",
-      header: "Radio",
+      header: ({ column }) => {
+        return (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Radio
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
       cell: ({ row }) => {
         return <div>{row.getValue("radio")}m</div>
       },
     },
     {
       accessorKey: "empleadosAsignados",
-      header: "Empleados",
+      header: ({ column }) => {
+        return (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Empleados
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
       cell: ({ row }) => {
         return <div className="text-center">{row.getValue("empleadosAsignados")}</div>
       },
     },
     {
       accessorKey: "estado",
-      header: "Estado",
+      header: ({ column }) => {
+        return (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Estado
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
       cell: ({ row }) => {
         const estado = row.getValue("estado") as string
         return (
@@ -224,14 +251,21 @@ export default function GeocercasPage() {
     },
     {
       accessorKey: "fechaCreacion",
-      header: "Fecha de creación",
+      header: ({ column }) => {
+        return (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Fecha de creación
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
     },
     {
       header: "Acciones",
       id: "acciones",
       cell: ({ row }) => {
         const geocerca = row.original
-
+  
         return (
           <div className="flex justify-end gap-2">
             <Button

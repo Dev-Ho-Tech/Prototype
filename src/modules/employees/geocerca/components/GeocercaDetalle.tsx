@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, MapPin, Edit, Trash, Users, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Geocerca } from '../interfaces/Geocerca';
 import { Button } from './ui/button';
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 import MapComponent from './MapComponent';
+// Eliminar la importación de ConfirmModal ya que no lo usaremos aquí
 
 interface GeocercaDetalleProps {
   geocerca: Geocerca;
@@ -20,8 +21,11 @@ export const GeocercaDetalle: React.FC<GeocercaDetalleProps> = ({
   onEdit, 
   onDelete 
 }) => {
-  const [mapView, setMapView] = React.useState<"mapa" | "satelite">("mapa");
-
+  const [mapView, setMapView] = useState<"mapa" | "satelite">("mapa");
+  
+  // Ya no necesitamos el estado del modal ni los manejadores específicos
+  // porque ahora todo está centralizado en GeocercasPage
+  
   // Datos de ejemplo para mostrar estadísticas
   const estadisticas = {
     marcajesValidos: 245,
@@ -57,11 +61,8 @@ export const GeocercaDetalle: React.FC<GeocercaDetalleProps> = ({
           </Button>
           <Button 
             variant="destructive" 
-            onClick={() => {
-              if (window.confirm(`¿Está seguro de eliminar la geocerca ${geocerca.nombre}?`)) {
-                onDelete(geocerca);
-              }
-            }}
+            onClick={() => onDelete(geocerca)}
+            type="button"
           >
             <Trash className="mr-2 h-4 w-4" />
             Eliminar
@@ -264,6 +265,8 @@ export const GeocercaDetalle: React.FC<GeocercaDetalleProps> = ({
           </Card>
         </div>
       </div>
+      
+      {/* Eliminamos el modal de confirmación de aquí */}
     </div>
   );
 };
