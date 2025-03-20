@@ -1,4 +1,4 @@
-import { Employee, Marcaje, TipoVerificacion, TipoMarcaje, Dispositivo } from '../interface/types';
+import { Employee, Marcaje, TipoVerificacion, TipoMarcaje, Dispositivo, Incidencia } from '../interface/types';
 
 export const dispositivos: Dispositivo[] = [
   { id: 'disp1', nombre: 'BIO-GA-001', tipo: 'Biometric', ubicacion: 'Entrada Principal', ip: '192.168.1.100', sn: 'ZK2023120001', estado: 'online', ultimaSincronizacion: '14/2/2025, 10:30:00' },
@@ -543,5 +543,320 @@ export const marcajes: Marcaje[] = [
     usuarioRegistro: 'Sistema',
     timestampRegistro: '2025-02-14T16:00:00Z',
     resultado: "Verificado"
+  }
+];
+
+ enum TipoIncidencia {
+  TARDANZA = 'tardanzas',
+  PERMISO = 'permisos',
+  SALIDA_INTEMPESTIVA = 'salidas',
+  AUSENCIA = 'ausencias',
+  SIN_HORARIO = 'sin-horario',
+  HORAS_EXTRAS = 'horas-extras'
+}
+
+export const incidencias: Incidencia[] = [
+  // Tardanzas
+  {
+    id: 'inc-1',
+    empleadoId: '1001',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.TARDANZA,
+    estado: 'Pendiente',
+    descripcion: 'Llegó 22 minutos tarde',
+    marcajeId: '1'
+  },
+  {
+    id: 'inc-2',
+    empleadoId: '1004',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.TARDANZA,
+    estado: 'Pendiente',
+    descripcion: 'Llegó 60 minutos tarde',
+    marcajeId: '13'
+  },
+  {
+    id: 'inc-3',
+    empleadoId: '1009',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.TARDANZA,
+    estado: 'Justificada',
+    descripcion: 'Llegó 15 minutos tarde',
+    justificacion: 'Problemas con el transporte público'
+  },
+  {
+    id: 'inc-4',
+    empleadoId: '1012',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.TARDANZA,
+    estado: 'Pendiente',
+    descripcion: 'Llegó 10 minutos tarde'
+  },
+  
+  // Permisos
+  {
+    id: 'inc-5',
+    empleadoId: '1002',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.PERMISO,
+    estado: 'Justificada',
+    descripcion: 'Permiso por cita médica',
+    justificacion: 'Presentó constancia médica'
+  },
+  {
+    id: 'inc-6',
+    empleadoId: '1007',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.PERMISO,
+    estado: 'Justificada',
+    descripcion: 'Permiso por trámites personales',
+    justificacion: 'Autorizado por supervisor'
+  },
+  {
+    id: 'inc-7',
+    empleadoId: '1013',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.PERMISO,
+    estado: 'Pendiente',
+    descripcion: 'Solicita salir 2 horas antes'
+  },
+  {
+    id: 'inc-8',
+    empleadoId: '1016',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.PERMISO,
+    estado: 'Justificada',
+    descripcion: 'Permiso por emergencia familiar',
+    justificacion: 'Autorizado por gerencia'
+  },
+  
+  // Salidas intempestivas
+  {
+    id: 'inc-9',
+    empleadoId: '1003',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Pendiente',
+    descripcion: 'Salió sin autorización a las 3:15 PM',
+    marcajeId: '12'
+  },
+  {
+    id: 'inc-10',
+    empleadoId: '1005',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Injustificada',
+    descripcion: 'Salió antes del horario establecido',
+    marcajeId: '16'
+  },
+  {
+    id: 'inc-11',
+    empleadoId: '1008',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Pendiente',
+    descripcion: 'Salió sin registrar la salida'
+  },
+  {
+    id: 'inc-12',
+    empleadoId: '1010',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Pendiente',
+    descripcion: 'Salió durante el turno sin autorización'
+  },
+  {
+    id: 'inc-13',
+    empleadoId: '1014',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Pendiente',
+    descripcion: 'Salió durante el turno sin autorización'
+  },
+  {
+    id: 'inc-14',
+    empleadoId: '1015',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Pendiente',
+    descripcion: 'Salió durante el turno sin autorización'
+  },
+  {
+    id: 'inc-15',
+    empleadoId: '1017',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Pendiente',
+    descripcion: 'Salió durante el turno sin autorización'
+  },
+  {
+    id: 'inc-16',
+    empleadoId: '1018',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Pendiente',
+    descripcion: 'Salió durante el turno sin autorización'
+  },
+  {
+    id: 'inc-17',
+    empleadoId: '1019',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Pendiente',
+    descripcion: 'Salió durante el turno sin autorización'
+  },
+  {
+    id: 'inc-18',
+    empleadoId: '1020',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SALIDA_INTEMPESTIVA,
+    estado: 'Pendiente',
+    descripcion: 'Salió durante el turno sin autorización'
+  },
+  
+  // Ausencias
+  {
+    id: 'inc-19',
+    empleadoId: '1006',
+    fecha: '15-02-2025',
+    tipo: TipoIncidencia.AUSENCIA,
+    estado: 'Injustificada',
+    descripcion: 'No se presentó a trabajar'
+  },
+  {
+    id: 'inc-20',
+    empleadoId: '1011',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.AUSENCIA,
+    estado: 'Pendiente',
+    descripcion: 'No se presentó a trabajar'
+  },
+  {
+    id: 'inc-21',
+    empleadoId: '1019',
+    fecha: '15-02-2025',
+    tipo: TipoIncidencia.AUSENCIA,
+    estado: 'Justificada',
+    descripcion: 'Ausencia por enfermedad',
+    justificacion: 'Presentó constancia médica'
+  },
+  {
+    id: 'inc-22',
+    empleadoId: '1020',
+    fecha: '15-02-2025',
+    tipo: TipoIncidencia.AUSENCIA,
+    estado: 'Pendiente',
+    descripcion: 'No se presentó a trabajar'
+  },
+  {
+    id: 'inc-23',
+    empleadoId: '1018',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.AUSENCIA,
+    estado: 'Pendiente',
+    descripcion: 'No se presentó a trabajar'
+  },
+  
+  // Sin horario
+  {
+    id: 'inc-24',
+    empleadoId: '1009',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SIN_HORARIO,
+    estado: 'Pendiente',
+    descripcion: 'Empleado sin horario asignado'
+  },
+  {
+    id: 'inc-25',
+    empleadoId: '1013',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SIN_HORARIO,
+    estado: 'Pendiente',
+    descripcion: 'Empleado sin horario asignado'
+  },
+  {
+    id: 'inc-26',
+    empleadoId: '1016',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SIN_HORARIO,
+    estado: 'Pendiente',
+    descripcion: 'Empleado sin horario asignado'
+  },
+  {
+    id: 'inc-27',
+    empleadoId: '1017',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SIN_HORARIO,
+    estado: 'Pendiente',
+    descripcion: 'Empleado sin horario asignado'
+  },
+  {
+    id: 'inc-28',
+    empleadoId: '1008',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.SIN_HORARIO,
+    estado: 'Pendiente',
+    descripcion: 'Empleado sin horario asignado'
+  },
+  
+  // Horas extras
+  {
+    id: 'inc-29',
+    empleadoId: '1001',
+    fecha: '15-02-2025',
+    tipo: TipoIncidencia.HORAS_EXTRAS,
+    estado: 'Pendiente',
+    descripcion: '2 horas extras'
+  },
+  {
+    id: 'inc-30',
+    empleadoId: '1002',
+    fecha: '15-02-2025',
+    tipo: TipoIncidencia.HORAS_EXTRAS,
+    estado: 'Aprobada',
+    descripcion: '1.5 horas extras',
+    justificacion: 'Autorizado por supervisor'
+  },
+  {
+    id: 'inc-31',
+    empleadoId: '1004',
+    fecha: '15-02-2025',
+    tipo: TipoIncidencia.HORAS_EXTRAS,
+    estado: 'Pendiente',
+    descripcion: '1 hora extra'
+  },
+  {
+    id: 'inc-32',
+    empleadoId: '1006',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.HORAS_EXTRAS,
+    estado: 'Aprobada',
+    descripcion: '2 horas extras',
+    justificacion: 'Autorizado por supervisor'
+  },
+  {
+    id: 'inc-33',
+    empleadoId: '1007',
+    fecha: '15-02-2025',
+    tipo: TipoIncidencia.HORAS_EXTRAS,
+    estado: 'Pendiente',
+    descripcion: '1 hora extra'
+  },
+  {
+    id: 'inc-34',
+    empleadoId: '1010',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.HORAS_EXTRAS,
+    estado: 'Aprobada',
+    descripcion: '1.5 horas extras',
+    justificacion: 'Autorizado por supervisor'
+  },
+  {
+    id: 'inc-35',
+    empleadoId: '1012',
+    fecha: '14-02-2025',
+    tipo: TipoIncidencia.HORAS_EXTRAS,
+    estado: 'Pendiente',
+    descripcion: '2 horas extras'
   }
 ];

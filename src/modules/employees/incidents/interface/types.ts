@@ -61,16 +61,16 @@ export interface Marcaje {
   
 }
 
-export interface Incidencia {
-  id: string;
-  empleadoId: string;
-  fecha: string;
-  tipo: 'Falta' | 'Tardanza' | 'Salida Temprana' | 'Sin Marcar Salida' | 'Sin Marcar Entrada' | 'Otro';
-  estado: 'Pendiente' | 'Justificada' | 'Injustificada';
-  descripcion?: string;
-  marcajeId?: string;
-  justificacion?: string;
-}
+// export interface Incidencia {
+//   id: string;
+//   empleadoId: string;
+//   fecha: string;
+//   tipo: TipoIncidencia;
+//   estado: 'Pendiente' | 'Justificada' | 'Injustificada';
+//   descripcion?: string;
+//   marcajeId?: string;
+//   justificacion?: string;
+// }
 
 // Tipo para el formulario de nuevo marcaje
 export interface MarcajeFormData {
@@ -157,4 +157,24 @@ export interface Coordenadas {
   latitud: number;
   longitud: number;
   descripcion?: string;
+}
+
+export enum TipoIncidencia {
+  TARDANZA = 'tardanzas',
+  PERMISO = 'permisos',
+  SALIDA_INTEMPESTIVA = 'salidas',
+  AUSENCIA = 'ausencias',
+  SIN_HORARIO = 'sin-horario',
+  HORAS_EXTRAS = 'horas-extras'
+}
+
+export interface Incidencia {
+  id: string;
+  empleadoId: string;
+  fecha: string;
+  tipo: TipoIncidencia;
+  estado: 'Pendiente' | 'Justificada' | 'Injustificada' | 'Aprobada';
+  descripcion?: string;
+  marcajeId?: string;
+  justificacion?: string;
 }

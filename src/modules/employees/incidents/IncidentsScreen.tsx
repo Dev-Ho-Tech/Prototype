@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Employee, Marcaje, MarcajeFormData } from './interface/types';
-import { employees as mockEmployees, marcajes as mockMarcajes, dispositivos } from './temp/data';
+import { Employee, Marcaje, MarcajeFormData, TipoIncidencia } from './interface/types';
+import { employees as mockEmployees, marcajes as mockMarcajes, dispositivos, incidencias } from './temp/data';
 import EmployeeDetailHeader from './components/EmployeeDetailHeader';
-// import TimelineViewer from './components/TimelineViewer';
 import AddMarkModal from './components/AddMarkModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import Pagination from './components/Pagination';
 import { Calendar, Search, Filter, ChevronDown } from 'lucide-react';
 import EnhancedTimeline from './components/EnhancedTimeline';
 import AdvancedFilters from './components/AdvancedFilters';
+import KpisPanel from './components/IncidenciasKpiPanel';
 
-// Función para generar un ID único
 // Función para generar un ID único
 const generateId = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
 
@@ -20,7 +19,6 @@ enum TipoMarcaje {
   SALIDA = 'Salida'
 }
 
-// Definir interface para el estado de filtros
 interface FilterState {
   sedes: string[];
   departamentos: string[];
@@ -35,6 +33,9 @@ const IncidenciasScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [panelWidth, setPanelWidth] = useState<number>(320); // Ancho inicial del panel izquierdo
   const [isResizing, setIsResizing] = useState<boolean>(false);
+  
+  // Estado para filtros KPI
+  const [kpiFilter, setKpiFilter] = useState<string | null>(null);
   
   // Estado para filtros avanzados
   const [filters, setFilters] = useState<FilterState>({
@@ -223,6 +224,7 @@ const IncidenciasScreen: React.FC = () => {
           // Convertir a formato 24h para comparar correctamente
           const getHour24 = (timeStr: string) => {
             const [time, ampm] = timeStr.split(' ');
+            // eslint-disable-next-line prefer-const
             let [hours, minutes] = time.split(':').map(Number);
             if (ampm === 'PM' && hours < 12) hours += 12;
             if (ampm === 'AM' && hours === 12) hours = 0;
@@ -241,11 +243,12 @@ const IncidenciasScreen: React.FC = () => {
       setFilteredMarcajes([]);
       setSelectedMarcaje(null);
     }
-  }, [selectedEmployee, marcajes, dateFilter]);
+  }, [selectedEmployee, marcajes, dateFilter, selectedMarcaje]);
 
-  // Función de búsqueda avanzada
+  // Función de búsqueda avanzada con filtro por KPI
   const filterEmployees = () => {
-    return employees.filter(employee => {
+    // Primero aplicamos los filtros existentes
+    let filtered = employees.filter(employee => {
       // Filtrar por término de búsqueda en varios campos
       const searchTermLower = searchTerm.toLowerCase();
       const matchesSearchTerm = !searchTerm || 
@@ -256,7 +259,7 @@ const IncidenciasScreen: React.FC = () => {
         employee.department.toLowerCase().includes(searchTermLower) ||
         employee.location.toLowerCase().includes(searchTermLower);
       
-      // Aplicar filtros de la nueva interfaz
+      // Aplicar filtros de la interfaz
       const matchesSedes = filters.sedes.length === 0 || 
         filters.sedes.includes(employee.location);
         
@@ -272,6 +275,19 @@ const IncidenciasScreen: React.FC = () => {
       return matchesSearchTerm && matchesSedes && matchesDepartamentos && 
         matchesSecciones && matchesUnidades;
     });
+
+    // Si hay un filtro de KPI activo, filtramos por tipo de incidencia
+    if (kpiFilter) {
+      // Obtener IDs de empleados que tienen incidencias del tipo seleccionado
+      const empleadosConIncidencia = incidencias
+        .filter(inc => inc.tipo === kpiFilter as TipoIncidencia)
+        .map(inc => inc.empleadoId);
+      
+      // Filtrar los empleados que tienen la incidencia seleccionada
+      filtered = filtered.filter(emp => empleadosConIncidencia.includes(emp.id));
+    }
+    
+    return filtered;
   };
 
   // Obtener empleados filtrados
@@ -337,6 +353,7 @@ const IncidenciasScreen: React.FC = () => {
   // Limpiar todos los filtros de búsqueda
   const clearAllFilters = () => {
     setSearchTerm('');
+    setKpiFilter(null); // Limpiar también el filtro de KPI
     setFilters({
       sedes: [],
       departamentos: [],
@@ -411,8 +428,10 @@ const IncidenciasScreen: React.FC = () => {
               </div>
             ) : (
               paginatedEmployees.map((employee) => {
-                // Contar incidencias para este empleado (simulado)
-                const incidenciasCount = Math.floor(Math.random() * 3) + 1;
+                // Contar incidencias para este empleado basado en los datos reales
+                const incidenciasCount = kpiFilter 
+                  ? incidencias.filter(inc => inc.empleadoId === employee.id && inc.tipo === kpiFilter as TipoIncidencia).length
+                  : incidencias.filter(inc => inc.empleadoId === employee.id).length;
                 
                 return (
                   <button
@@ -468,6 +487,18 @@ const IncidenciasScreen: React.FC = () => {
         <div className="flex-1 overflow-auto bg-gray-100 min-w-[400px]">
           <div className="p-4">
             {/* Filtros */}
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
+              <KpisPanel 
+                empleadoId={selectedEmployee.id}
+                onFilterChange={(filterId) => {
+                  console.log(`Filtro de incidencia seleccionado: ${filterId || 'ninguno'}`);
+                  setKpiFilter(filterId);
+                  // Resetear a la primera página cuando cambia el filtro
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-lg font-medium text-gray-700">Gestión de Incidencias</h2>
@@ -539,7 +570,10 @@ const IncidenciasScreen: React.FC = () => {
             </div>
             
             {/* Información detallada del empleado */}
-            <EmployeeDetailHeader employee={selectedEmployee} />
+            <EmployeeDetailHeader 
+              employee={selectedEmployee} 
+              activeKpiFilter={kpiFilter} 
+            />
             
             {/* Fechas de incidencias */}
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
@@ -600,13 +634,6 @@ const IncidenciasScreen: React.FC = () => {
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="text-sm font-medium text-gray-700">Marcajes</h3>
                 </div>
-                {/* <TimelineViewer 
-                  marcajes={filteredMarcajes}
-                  onAddMarcaje={() => setAddModalOpen(true)}
-                  onMarkerClick={handleMarkerClick}
-                  selectedMarcajeId={selectedMarcaje?.id}
-                  employee={selectedEmployee}
-                /> */}
                 <EnhancedTimeline 
                   marcajes={filteredMarcajes}
                   onMarkerClick={handleMarkerClick}
@@ -738,6 +765,6 @@ const IncidenciasScreen: React.FC = () => {
       )}
     </div>
   );
-};
+}
 
 export default IncidenciasScreen;
