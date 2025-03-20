@@ -105,13 +105,23 @@ const DayRow: React.FC<DayRowProps> = ({
 
   // Manejador para iniciar arrastre entre días
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, scheduleEntry: ScheduleEntry) => {
-    if (!onStartDragBetweenDays || !scheduleEntry) return;
+    if (!schedule) return;
     
     e.stopPropagation();
     
+    // Guardar datos detallados del horario en el dataTransfer
+    const dragData = {
+      type: 'schedule',
+      entry: scheduleEntry,
+      employeeId: employee?.id,
+      originDate: date
+    };
+    
+    e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+    
     // Crear imagen personalizada para el arrastre
     const dragImage = document.createElement('div');
-    dragImage.style.width = '100px';
+    dragImage.style.width = '120px';
     dragImage.style.height = '30px';
     dragImage.style.backgroundColor = 'rgba(59, 130, 246, 0.8)';
     dragImage.style.color = 'white';
@@ -131,8 +141,10 @@ const DayRow: React.FC<DayRowProps> = ({
       document.body.removeChild(dragImage);
     }, 0);
     
-    // Iniciar arrastre entre días
-    onStartDragBetweenDays(scheduleEntry, date, employee?.id || null);
+    // Notificar al componente padre si está disponible
+    if (onStartDragBetweenDays) {
+      onStartDragBetweenDays(scheduleEntry, date, employee?.id || null);
+    }
   };
 
   // Manejador para drag over en la celda
@@ -170,9 +182,30 @@ const DayRow: React.FC<DayRowProps> = ({
   // Manejador para drop en la celda
   const handleCellDrop = (e: React.DragEvent, hour: number) => {
     e.preventDefault();
-    if (onDrop) {
-      onDrop(e, date, hour, employee?.id || null);
+    
+    try {
+      // Verificar si hay datos de arrastre de horario
+      const dataJson = e.dataTransfer.getData('application/json');
+      if (dataJson) {
+        const dragData = JSON.parse(dataJson);
+        
+        // Si es un horario arrastrado
+        if (dragData.type === 'schedule') {
+          if (onDrop) {
+            // Utilizar la función onDrop proporcionada por el padre
+            onDrop(e, date, hour, employee?.id || null);
+          }
+        } else if (dragData.type === 'shift' || dragData.type === 'license') {
+          // Continuar con el comportamiento existente para turnos y licencias
+          if (onDrop) {
+            onDrop(e, date, hour, employee?.id || null);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[DAY_ROW] Error al procesar drop:', error);
     }
+    
     setShowTooltip(false);
   };
 
@@ -369,20 +402,27 @@ const DayRow: React.FC<DayRowProps> = ({
     
     console.log('[DAY_ROW] Iniciando MOVIMIENTO');
     
-    // Guardar posición inicial para el cálculo de sensibilidad
+    // Obtener el elemento actual y su posición exacta
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    
+    // Guardar la posición y dimensiones iniciales para comparar
     setInitialPosition({ 
       x: e.clientX, 
-      width: (e.currentTarget as HTMLElement).getBoundingClientRect().width 
+      width: rect.width 
     });
     
+    // Crear una copia del horario con datos de posición inicial
     const newSchedule = {
       ...schedule,
       employeeId: employee?.id || '',
       isResizingStart: false,
       isResizingEnd: false,
       isMoving: true,
-      initialX: e.clientX, // Guardamos la posición inicial del mouse
-      sensitivity: 0.2 // Añadimos factor de sensibilidad para el movimiento
+      initialX: e.clientX,
+      initialTime: schedule.startTime, // Guardar el tiempo inicial para referencia
+      initialWidth: rect.width,
+      initialLeft: rect.left,
+      sensitivity: 0.10
     };
     
     setIsResizing(true);
@@ -448,15 +488,15 @@ const DayRow: React.FC<DayRowProps> = ({
               ...getScheduleStyles(),
               maxHeight: '90%',
               top: '5%',
-              zIndex: isResizing ? 30 : 10, // Aumentar z-index durante redimensionado
+              zIndex: isResizing ? 30 : 10,
               cursor: 'move',
-              transition: isResizing ? 'none' : 'box-shadow 0.1s ease', // Eliminar transición durante el arrastre
+              transition: isResizing ? 'none' : 'box-shadow 0.1s ease',
               boxShadow: isResizing ? '0 0 0 2px rgba(255,255,255,0.5), 0 4px 8px rgba(0,0,0,0.15)' : 'none'
             }}
             onMouseDown={handleMove}
             onContextMenu={(e) => onContextMenu && onContextMenu(e, date, parseInt(schedule.startTime.split(':')[0]), employee?.id || null)}
-            id={`schedule-entry-${date}-${schedule.shift}-${employee?.id}`} // Añadir ID del empleado para hacerlo único
-            draggable={!!onStartDragBetweenDays} // Hacer el elemento arrastrable si se proporcionó la función
+            id={`schedule-entry-${date}-${schedule.shift}-${employee?.id}`}
+            draggable={true}
             onDragStart={(e) => handleDragStart(e, schedule)}
           >
             <div className="flex items-center space-x-2 text-xs overflow-hidden">

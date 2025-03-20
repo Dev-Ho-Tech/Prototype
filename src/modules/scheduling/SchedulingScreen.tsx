@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useRef } from 'react';
 import { Period, DragInfo } from './interfaces/types';
+import { Calendar } from 'lucide-react';
 import { locations, departments, workShifts, licenses } from './../../global/temp/data_global_temp';
 import TopBar from './components/TopBar';
 import ScheduleGrid from './components/ScheduleGrid';
@@ -19,7 +20,7 @@ export function SchedulingScreen() {
   
   // Estados para la interfaz
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Semanal');
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Diario');
   const [selectedDate, setSelectedDate] = useState('2025-02-14');
   // Nuevos estados para el rango de fechas
   const [startDate, setStartDate] = useState('2025-02-14');
@@ -33,8 +34,12 @@ export function SchedulingScreen() {
   const [dragInfo, setDragInfo] = useState<DragInfo | null>(null);
   const [panelWidth, setPanelWidth] = useState<number>(320); // Ancho inicial del panel izquierdo
   const [isResizing, setIsResizing] = useState<boolean>(false);
+  
+  // Estados para las fechas del empleado seleccionado
+  const [employeeStartDate, setEmployeeStartDate] = useState<string>('');
+  const [employeeEndDate, setEmployeeEndDate] = useState<string>('');
 
-  // Estado para los filtros avanzados (mismo formato que en EmployeeManagementScreen)
+  // Estado para los filtros avanzados
   const [filterState, setFilterState] = useState({
     sedes: [] as string[],
     departamentos: [] as string[],
@@ -55,14 +60,28 @@ export function SchedulingScreen() {
 
   // Inicializar los empleados filtrados con todos los empleados
   useEffect(() => {
-    setFilteredEmployees(allEmployees);
+    // Ordenar alfabéticamente los empleados y establecerlos como filtrados
+    const sortedEmployees = [...allEmployees].sort((a, b) => {
+      const nameA = (a.displayName || a.name || '').toLowerCase();
+      const nameB = (b.displayName || b.name || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+    
+    setFilteredEmployees(sortedEmployees);
   }, [allEmployees]);
 
   // Aplicar filtros a los empleados
   useEffect(() => {
-    let filtered = allEmployees;
+    let filtered = [...allEmployees];
+    
+    // Primero, ordenar alfabéticamente
+    filtered.sort((a, b) => {
+      const nameA = (a.displayName || a.name || '').toLowerCase();
+      const nameB = (b.displayName || b.name || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
 
-    // Filtrar por término de búsqueda simple
+    // Luego aplicar filtros de búsqueda
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -73,7 +92,7 @@ export function SchedulingScreen() {
       );
     }
 
-    // Aplicar filtros de la misma manera que en EmployeeManagementScreen
+    // Aplicar filtros de sedes, departamentos, etc
     if (filterState.sedes.length > 0) {
       filtered = filtered.filter(emp => 
         filterState.sedes.includes(emp.location || '')
@@ -101,39 +120,70 @@ export function SchedulingScreen() {
     setFilteredEmployees(filtered);
   }, [searchTerm, filterState, allEmployees]);
 
-  // Ordenar los empleados alfabéticamente
-  useEffect(() => {
-    // Ordenar los empleados alfabéticamente
-    setFilteredEmployees(prevEmployees => {
-      return [...prevEmployees].sort((a, b) => {
-        const nameA = (a.displayName || a.name || '').toLowerCase();
-        const nameB = (b.displayName || b.name || '').toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-    });
-  }, [filteredEmployees.length]); // Solo ordenar cuando cambia la cantidad de empleados filtrados
-
   // Manejar cambios en los filtros
   const handleFilterChange = (filters: any) => {
     setFilterState(filters);
   };
 
-  // Seleccionar el empleado actual cuando cambia
+  // Actualizar las fechas cuando cambia el empleado seleccionado
+  useEffect(() => {
+    if (selectedEmployee) {
+      // Inicializar las fechas del empleado - usar valores existentes o valores por defecto
+      setEmployeeStartDate(selectedEmployee.startDate || '');
+      setEmployeeEndDate(selectedEmployee.endDate || '');
+    }
+  }, [selectedEmployee]);
+
+  // Seleccionar los primeros 9 empleados alfabéticamente al iniciar
   useEffect(() => {
     console.log('Inicializando SchedulingScreen');
     
-    // Si hay un empleado seleccionado en el contexto, usarlo
-    if (currentEmployee) {
-      console.log('Empleado encontrado en el contexto global:', currentEmployee.displayName);
-      setSelectedEmployee(currentEmployee);
-      setSelectedEmployees([currentEmployee]); // También actualizar el array de seleccionados
-    } else if (allEmployees.length > 0) {
-      // Si no hay empleado seleccionado en el contexto, usar el primero de la lista
-      console.log('No hay empleado seleccionado, usando el primero de la lista');
-      setSelectedEmployee(allEmployees[0]);
-      setSelectedEmployees([allEmployees[0]]); // También actualizar el array de seleccionados
+    if (allEmployees.length > 0) {
+      // Ordenar los empleados alfabéticamente
+      const sortedEmployees = [...allEmployees].sort((a, b) => {
+        const nameA = (a.displayName || a.name || '').toLowerCase();
+        const nameB = (b.displayName || b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+      
+      // Seleccionar los primeros 9 empleados ordenados alfabéticamente
+      const numberOfEmployeesToSelect = Math.min(9, sortedEmployees.length);
+      const initialSelected = sortedEmployees.slice(0, numberOfEmployeesToSelect);
+      
+      console.log(`Seleccionando los primeros ${numberOfEmployeesToSelect} empleados ordenados alfabéticamente`);
+      
+      // Si hay un empleado seleccionado en el contexto
+      if (currentEmployee) {
+        // Verificar si el empleado actual ya está entre los seleccionados
+        const currentEmployeeIndex = initialSelected.findIndex(emp => emp.id === currentEmployee.id);
+        
+        if (currentEmployeeIndex === -1 && initialSelected.length === 9) {
+          // Si el empleado actual no está en los primeros 9, reemplazar el último
+          initialSelected[8] = currentEmployee;
+        } else if (currentEmployeeIndex === -1) {
+          // Si no está y hay menos de 9, agregarlo
+          initialSelected.push(currentEmployee);
+        }
+        
+        setSelectedEmployee(currentEmployee);
+        
+        // Inicializar fechas del empleado actual
+        setEmployeeStartDate(currentEmployee.startDate || '');
+        setEmployeeEndDate(currentEmployee.endDate || '');
+      } else {
+        // Si no hay empleado seleccionado, usar el primero ordenado alfabéticamente
+        setSelectedEmployee(initialSelected[0]);
+        setCurrentEmployee(initialSelected[0]);
+        
+        // Inicializar fechas del primer empleado
+        setEmployeeStartDate(initialSelected[0]?.startDate || '');
+        setEmployeeEndDate(initialSelected[0]?.endDate || '');
+      }
+      
+      // Establecer los empleados seleccionados
+      setSelectedEmployees(initialSelected);
     }
-  }, [currentEmployee, allEmployees]);
+  }, [currentEmployee, allEmployees, setCurrentEmployee]);
 
   // Manejar la selección de un empleado
   const handleSelectEmployee = (employee: UnifiedEmployee, isMultiSelect: boolean) => {
@@ -148,9 +198,17 @@ export function SchedulingScreen() {
         if (selectedEmployee?.id === employee.id && newSelected.length > 0) {
           setSelectedEmployee(newSelected[0]);
           setCurrentEmployee(newSelected[0]);
+          
+          // Actualizar fechas del nuevo empleado seleccionado
+          setEmployeeStartDate(newSelected[0].startDate || '');
+          setEmployeeEndDate(newSelected[0].endDate || '');
         } else if (newSelected.length === 0) {
           setSelectedEmployee(null);
           setCurrentEmployee(null);
+          
+          // Limpiar fechas si no hay empleado seleccionado
+          setEmployeeStartDate('');
+          setEmployeeEndDate('');
         }
       } else {
         // Añadir a la selección
@@ -161,6 +219,10 @@ export function SchedulingScreen() {
         if (!selectedEmployee) {
           setSelectedEmployee(employee);
           setCurrentEmployee(employee);
+          
+          // Actualizar fechas del nuevo empleado seleccionado
+          setEmployeeStartDate(employee.startDate || '');
+          setEmployeeEndDate(employee.endDate || '');
         }
       }
     } else {
@@ -168,6 +230,10 @@ export function SchedulingScreen() {
       setSelectedEmployee(employee);
       setCurrentEmployee(employee);
       setSelectedEmployees([employee]);
+      
+      // Actualizar fechas del empleado seleccionado
+      setEmployeeStartDate(employee.startDate || '');
+      setEmployeeEndDate(employee.endDate || '');
     }
   };
 
@@ -204,6 +270,27 @@ export function SchedulingScreen() {
     // Agregar event listeners para seguir el movimiento del ratón
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+  };
+  
+  // Manejar cambios en las fechas del empleado
+  const handleEmployeeStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    setEmployeeStartDate(newDate);
+    
+    // Actualizar el empleado seleccionado con la nueva fecha
+    if (selectedEmployee) {
+      selectedEmployee.startDate = newDate;
+    }
+  };
+  
+  const handleEmployeeEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    setEmployeeEndDate(newDate);
+    
+    // Actualizar el empleado seleccionado con la nueva fecha
+    if (selectedEmployee) {
+      selectedEmployee.endDate = newDate;
+    }
   };
 
   return (
@@ -300,35 +387,62 @@ export function SchedulingScreen() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Información del empleado seleccionado */}
           {selectedEmployee && (
-            <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
-              <div className="grid grid-cols-5 gap-4">
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Código:</div>
-                  <div className="font-medium">{selectedEmployee.codigo || selectedEmployee.id}</div>
-                </div>
+          <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+              <div className="col-span-1">
+                <div className="text-xs text-gray-500 mb-1">Código:</div>
+                <div className="font-medium truncate">{selectedEmployee.codigo || selectedEmployee.id}</div>
+              </div>
                 
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Sede:</div>
-                  <div className="font-medium">{selectedEmployee.location || selectedEmployee.sede}</div>
-                </div>
-                
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Departamento:</div>
-                  <div className="font-medium">{selectedEmployee.department}</div>
-                </div>
-                
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Cargo:</div>
-                  <div className="font-medium">{selectedEmployee.position || selectedEmployee.cargo}</div>
-                </div>
-                
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Tipo De Contrato:</div>
-                  <div className="font-medium">{selectedEmployee.contractType || selectedEmployee.modalidadTiempo || 'Indefinido'}</div>
+              {/* Campos de fecha */}
+              <div className="col-span-1">
+                <div className="text-xs text-gray-500 mb-1">Fecha de Inicio:</div>
+                <div className="relative">
+                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
+                  <input
+                    type="date"
+                    value={employeeStartDate}
+                    onChange={handleEmployeeStartDateChange}
+                    className="w-full pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
               </div>
+              
+              <div className="col-span-1">
+                <div className="text-xs text-gray-500 mb-1">Fecha de Fin:</div>
+                <div className="relative">
+                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
+                  <input
+                    type="date"
+                    value={employeeEndDate}
+                    onChange={handleEmployeeEndDateChange}
+                    className="w-full pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="col-span-1">
+                <div className="text-xs text-gray-500 mb-1">Sede:</div>
+                <div className="font-medium truncate">{selectedEmployee.location || selectedEmployee.sede}</div>
+              </div>
+              
+              <div className="col-span-1">
+                <div className="text-xs text-gray-500 mb-1">Departamento:</div>
+                <div className="font-medium truncate">{selectedEmployee.department}</div>
+              </div>
+              
+              <div className="col-span-1">
+                <div className="text-xs text-gray-500 mb-1">Cargo:</div>
+                <div className="font-medium truncate">{selectedEmployee.position || selectedEmployee.cargo}</div>
+              </div>
+              
+              <div className="col-span-1">
+                <div className="text-xs text-gray-500 mb-1">Tipo De Contrato:</div>
+                <div className="font-medium truncate">{selectedEmployee.contractType || selectedEmployee.modalidadTiempo || 'Indefinido'}</div>
+              </div>
             </div>
-          )}
+          </div>
+        )}
 
           {/* Cuadrícula de horarios - Actualizada para múltiples empleados */}
           <ScheduleGrid 

@@ -465,12 +465,6 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
     
     if (!employeeId) return;
     
-    // Manejar terminación de arrastre entre días si está activo
-    if (draggedSchedule.isDraggingBetweenDays && draggedSchedule.entry) {
-      handleDragBetweenDaysEnd(date, hour, employeeId);
-      return;
-    }
-    
     try {
       // Obtener datos del elemento arrastrado
       const dragDataJson = e.dataTransfer.getData('application/json');
@@ -481,7 +475,104 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       
       console.log('[GRID] Drop:', { dragData, date, hour, employeeId });
       
-      if (dragData.type === 'shift') {
+      // Manejar terminación de arrastre entre días si está activo
+      if (draggedSchedule.isDraggingBetweenDays && draggedSchedule.entry) {
+        handleDragBetweenDaysEnd(date, hour, employeeId);
+        return;
+      }
+      
+      // Comprobar si es un horario existente que se está moviendo entre días
+      if (dragData.type === 'schedule') {
+        // Verificar que el empleado origen y destino sean los mismos
+        if (dragData.employeeId === employeeId) {
+          // Si se trata del mismo día, ignoramos - esto ya se manejará con el movimiento normal
+          if (dragData.originDate === date) {
+            console.log('[GRID] Ignorando drop en el mismo día');
+            return;
+          }
+          
+          // Obtener el empleado
+          const employee = employees.find(e => e.id === employeeId);
+          if (!employee) return;
+          
+          // Usar los datos del horario original
+          const originalEntry = dragData.entry;
+          
+          // Calcular duración del horario original en minutos
+          const startParts = originalEntry.startTime.split(':');
+          const endParts = originalEntry.endTime.split(':');
+          
+          const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1] || '0');
+          const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1] || '0');
+          const duration = endMinutes - startMinutes;
+          
+          // Crear nueva hora de inicio basada en donde se soltó
+          const newStartTime = `${hour.toString().padStart(2, '0')}:00`;
+          const newStartMinutes = hour * 60;
+          
+          // Calcular nueva hora de fin
+          const newEndMinutes = newStartMinutes + duration;
+          const newEndHour = Math.floor(newEndMinutes / 60);
+          const newEndMinute = newEndMinutes % 60;
+          const newEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinute.toString().padStart(2, '0')}`;
+          
+          // Crear entrada de horario para el nuevo día
+          const newScheduleEntry: ScheduleEntry = {
+            date,
+            shift: originalEntry.shift,
+            startTime: newStartTime,
+            endTime: newEndTime,
+            employeeId
+          };
+          
+          // Actualizar horario
+          if (onScheduleUpdate) {
+            onScheduleUpdate(newScheduleEntry);
+          }
+          
+          // Actualizar el horario en la copia local del empleado
+          if (!employee.schedule) {
+            employee.schedule = [];
+          }
+          
+          // 1. Eliminar la entrada original
+          employee.schedule = employee.schedule.filter(s => 
+            s.date !== dragData.originDate || 
+            s.shift !== originalEntry.shift
+          );
+          
+          // 2. Agregar/actualizar la nueva entrada
+          const existingEntryIndex = employee.schedule.findIndex(s => s.date === date);
+          
+          if (existingEntryIndex >= 0) {
+            // Actualizar entrada existente
+            employee.schedule[existingEntryIndex] = {
+              ...employee.schedule[existingEntryIndex],
+              shift: originalEntry.shift,
+              startTime: newStartTime,
+              endTime: newEndTime
+            };
+          } else {
+            // Agregar nueva entrada
+            employee.schedule.push({
+              date,
+              shift: originalEntry.shift,
+              startTime: newStartTime,
+              endTime: newEndTime
+            });
+          }
+          
+          console.log('[GRID] Horario movido entre días:', { 
+            from: dragData.originDate, 
+            to: date,
+            shift: originalEntry.shift,
+            startTime: newStartTime,
+            endTime: newEndTime
+          });
+        } else {
+          console.log('[GRID] No se puede mover horario entre empleados diferentes');
+        }
+      } else if (dragData.type === 'shift') {
         handleAddShift(dragData.id, date, hour, employeeId);
       } else if (dragData.type === 'license') {
         handleAddLicense(dragData.id, date, hour, employeeId);
@@ -638,59 +729,110 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
           }
         }
       } else {
-        // Mover evento completo
-        // Ajustar posición para centrar en el mouse
-        const eventMouseOffset = dragInfo.initialWidth / 2;
-        const adjustedOffsetX = adjustedOffsetX - eventMouseOffset;
-        const adjustedHourDecimal = startHour + (adjustedOffsetX / totalWidth) * totalHours;
-        
-        // Calcular nueva hora de inicio con snap a incrementos
-        const adjustedHour = Math.floor(adjustedHourDecimal);
-        let adjustedMinutes = Math.floor((adjustedHourDecimal - adjustedHour) * 60);
-        adjustedMinutes = Math.round(adjustedMinutes / timeStep) * timeStep;
-        
-        const newStartHour = Math.max(startHour, Math.min(endHour - 1, adjustedHour));
-        const newStartMinutes = adjustedMinutes === 60 ? 0 : adjustedMinutes;
-        
-        // Calcular nueva hora de fin basada en la duración original
-        let newEndHour = newStartHour + Math.floor(durationMinutes / 60);
-        let newEndMinutes = newStartMinutes + (durationMinutes % 60);
-        
-        if (newEndMinutes >= 60) {
-          newEndHour += 1;
-          newEndMinutes -= 60;
-        }
-        
-        // Verificar límites
-        if (newStartHour >= startHour && newEndHour <= endHour) {
-          // Calcular nueva posición
-          const newStartHourDecimal = newStartHour + (newStartMinutes / 60);
-          const newLeftPercent = ((newStartHourDecimal - startHour) / totalHours) * 100;
-          
-          // Aplicar cambios
-          console.log('[GRID] Moviendo:', { 
-            left: newLeftPercent,
-            newStart: `${newStartHour}:${newStartMinutes}`,
-            newEnd: `${newEndHour}:${newEndMinutes}`
-          });
-          
-          entryElement.style.left = `${newLeftPercent}%`;
-          
-          // Actualizar horario
-          const formattedStartTime = `${newStartHour.toString().padStart(2, '0')}:${newStartMinutes.toString().padStart(2, '0')}`;
-          const formattedEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinutes.toString().padStart(2, '0')}`;
-          
-          dragInfo.scheduleEntry.startTime = formattedStartTime;
-          dragInfo.scheduleEntry.endTime = formattedEndTime;
-          
-          // Actualizar tooltip
-          setTooltip(prev => ({
-            ...prev,
-            content: `${formattedStartTime} - ${formattedEndTime}`,
-            show: true
-          }));
-        }
-      }
+  // Mover evento completo
+  // Obtener el desplazamiento del ratón desde el inicio de la operación
+  const mouseDeltaX = e.clientX - dragInfo.startX;
+  
+  // Solo aplicar cambios si hay un desplazamiento real (evitar movimiento al hacer clic)
+  if (Math.abs(mouseDeltaX) < 3) {
+    return; // No hacer nada si apenas se ha movido el ratón
+  }
+  
+  // Obtener datos importantes del evento original
+  const startTimeParts = dragInfo.scheduleEntry.startTime.split(':');
+  const endTimeParts = dragInfo.scheduleEntry.endTime.split(':');
+  const startTimeHour = parseInt(startTimeParts[0]);
+  const startTimeMinutes = parseInt(startTimeParts[1] || '0');
+  const endTimeHour = parseInt(endTimeParts[0]);
+  const endTimeMinutes = parseInt(endTimeParts[1] || '0');
+  
+  // Calcular duración en minutos
+  const durationMinutes = 
+    (endTimeHour * 60 + endTimeMinutes) - 
+    (startTimeHour * 60 + startTimeMinutes);
+  
+  // Calcular el ancho total de la cuadrícula de tiempo en píxeles y la duración en horas
+  const totalHoursDecimal = endHour - startHour;
+  const pixelsPerHour = totalWidth / totalHoursDecimal;
+  const pixelsPerMinute = pixelsPerHour / 60;
+  
+  // Aplicar una sensibilidad uniforme para el movimiento en ambas direcciones
+  const sensitivity = dragInfo.scheduleEntry.sensitivity || 0.1;
+  const adjustedMovement = mouseDeltaX * sensitivity;
+  
+  // Convertir el movimiento en minutos
+  const movementInMinutes = Math.round(adjustedMovement / pixelsPerMinute / timeStep) * timeStep;
+  
+  // Solo proceder si hay un movimiento real en minutos
+  if (movementInMinutes === 0) {
+    return;
+  }
+  
+  // Calcular nuevas horas de inicio y fin en minutos totales
+  const originalStartMinutesTotal = startTimeHour * 60 + startTimeMinutes;
+  const originalEndMinutesTotal = endTimeHour * 60 + endTimeMinutes;
+  
+  let newStartMinutesTotal = originalStartMinutesTotal + movementInMinutes;
+  let newEndMinutesTotal = originalEndMinutesTotal + movementInMinutes;
+  
+  // Verificar límites
+  const minStartMinutes = startHour * 60;
+  const maxEndMinutes = endHour * 60;
+  
+  // Si el nuevo inicio es menor que el tiempo mínimo permitido
+  if (newStartMinutesTotal < minStartMinutes) {
+    const adjustment = minStartMinutes - newStartMinutesTotal;
+    newStartMinutesTotal = minStartMinutes;
+    newEndMinutesTotal += adjustment;
+  }
+  
+  // Si el nuevo fin es mayor que el tiempo máximo permitido
+  if (newEndMinutesTotal > maxEndMinutes) {
+    const adjustment = newEndMinutesTotal - maxEndMinutes;
+    newEndMinutesTotal = maxEndMinutes;
+    newStartMinutesTotal -= adjustment;
+    
+    // Verificar de nuevo el límite mínimo después del ajuste
+    if (newStartMinutesTotal < minStartMinutes) {
+      newStartMinutesTotal = minStartMinutes;
+    }
+  }
+  
+  // Convertir minutos totales a horas y minutos
+  const newStartHour = Math.floor(newStartMinutesTotal / 60);
+  const newStartMinute = newStartMinutesTotal % 60;
+  const newEndHour = Math.floor(newEndMinutesTotal / 60);
+  const newEndMinute = newEndMinutesTotal % 60;
+  
+  // Calcular nueva posición como porcentaje
+  const startPosition = (newStartMinutesTotal - minStartMinutes) / (60 * totalHoursDecimal);
+  const newLeftPercent = startPosition * 100;
+  
+  // Aplicar cambios al elemento visual
+  console.log('[GRID] Moviendo:', { 
+    left: newLeftPercent,
+    delta: mouseDeltaX,
+    movementInMinutes: movementInMinutes,
+    newStart: `${newStartHour}:${newStartMinute}`,
+    newEnd: `${newEndHour}:${newEndMinute}`
+  });
+  
+  entryElement.style.left = `${newLeftPercent}%`;
+  
+  // Actualizar horario en el objeto
+  const formattedStartTime = `${newStartHour.toString().padStart(2, '0')}:${newStartMinute.toString().padStart(2, '0')}`;
+  const formattedEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinute.toString().padStart(2, '0')}`;
+  
+  dragInfo.scheduleEntry.startTime = formattedStartTime;
+  dragInfo.scheduleEntry.endTime = formattedEndTime;
+  
+  // Actualizar tooltip
+  setTooltip(prev => ({
+    ...prev,
+    content: `${formattedStartTime} - ${formattedEndTime}`,
+    show: true
+  }));
+}
     };
     
     const handleGlobalMouseUp = () => {
