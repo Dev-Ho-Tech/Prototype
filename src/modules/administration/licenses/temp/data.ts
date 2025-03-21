@@ -1,4 +1,4 @@
-import { License } from '../../../types';
+import { License } from "../interfaces/license";
 
 export const licensesData: License[] = [
   {
