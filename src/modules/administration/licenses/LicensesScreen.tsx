@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Building2, Users, Calendar, CheckCircle2, FileEdit } from 'lucide-react';
+import { Plus, Building2, Users, Calendar, CheckCircle2, FileEdit, MoreVertical } from 'lucide-react';
 import { licensesData } from './temp/data';
 import { LicenseForm } from './LicenseForm';
 import type { License } from './interfaces/license';
@@ -10,6 +10,7 @@ import SortableTable, { ColumnDefinition } from './components/screen_components/
 import Pagination from './components/screen_components//Pagination';
 import LicenseGrid from './components/LicenseGrid';
 import LicenseContextMenu from './components/LicenseContextMenu';
+import LicensesSummary from './components/LicensesSummary';
 
 export function LicensesScreen() {
   // Estados básicos
@@ -83,20 +84,20 @@ export function LicensesScreen() {
         { value: 'inactive', label: 'Inactivo' }
       ]
     },
-    module: {
-      label: 'Módulo',
-      options: [
-        { value: 'all', label: 'Todos los módulos' },
-        { value: 'Control de Accesos', label: 'Control de Accesos' },
-        { value: 'Control de Tiempo', label: 'Control de Tiempo' },
-        { value: 'Control de Comedor', label: 'Control de Comedor' },
-        { value: 'Control de Capacitación', label: 'Control de Capacitación' }
-      ]
-    },
+    // module: {
+    //   label: 'Módulo',
+    //   options: [
+    //     { value: 'all', label: 'Todos los módulos' },
+    //     { value: 'Control de Accesos', label: 'Control de Accesos' },
+    //     { value: 'Control de Tiempo', label: 'Control de Tiempo' },
+    //     { value: 'Control de Comedor', label: 'Control de Comedor' },
+    //     { value: 'Control de Capacitación', label: 'Control de Capacitación' }
+    //   ]
+    // },
     expiration: {
       label: 'Vencimiento',
       options: [
-        { value: 'all', label: 'Todos' },
+        { value: 'all', label: 'Proximos a vencer' },
         { value: 'danger', label: 'Crítico (< 30 días)' },
         { value: 'warning', label: 'Próximo (< 90 días)' },
         { value: 'safe', label: 'Seguro (> 90 días)' }
@@ -324,11 +325,13 @@ export function LicensesScreen() {
           >
             <FileEdit className="w-5 h-5" />
           </button>
+          
           <button
-            onClick={(e) => handleOpenContextMenu(license, e)}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ···
+              onClick={(e) => handleOpenContextMenu(license, e)}
+              className="text-gray-500 hover:text-gray-700"
+              title="Más acciones"
+            >
+              <MoreVertical className="h-5 w-5" />
           </button>
           {contextMenuLicense && contextMenuLicense.id === license.id && (
             <LicenseContextMenu
@@ -370,7 +373,7 @@ export function LicensesScreen() {
   return (
     <div className="flex-1 overflow-auto bg-gray-50">
       <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Gestión de Licencias</h1>
             <p className="mt-1 text-sm text-gray-500">
@@ -385,6 +388,9 @@ export function LicensesScreen() {
             <span>Nueva Licencia</span>
           </button>
         </div>
+
+        {/* Añadimos el resumen de licencias */}
+        <LicensesSummary licenses={licensesData} />
 
         {/* Componente de filtros */}
         <Filters

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Upload } from 'lucide-react';
-import { departments, roles } from './data';
+import { departments, roles } from './temp/data';
 import type { User } from '../../../types';
 
 interface UserFormProps {

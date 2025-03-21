@@ -411,16 +411,21 @@ export const DevicesScreen: React.FC = () => {
   };
 
   return (
-    <div className="p-4 max-w-7xl mx-auto">
+    <div className="flex-1 overflow-auto bg-gray-50 p-8">
       {/* Cabecera */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Dispositivos</h1>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Dispositivos</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Administra las dispositivos de las empresas
+          </p>
+        </div>
         <button
           onClick={handleAddDevice}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
         >
-          <Plus className="mr-2 h-5 w-5" />
-          Nuevo dispositivo
+          <Plus className="w-5 h-5" />
+          <span>Nueva Licencia</span>
         </button>
       </div>
 
