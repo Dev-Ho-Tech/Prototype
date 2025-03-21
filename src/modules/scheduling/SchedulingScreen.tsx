@@ -407,45 +407,55 @@ export function SchedulingScreen() {
           </div>
 
           <div className="flex-1 overflow-auto">
-            {filteredEmployees.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No se encontraron empleados
-              </div>
-            ) : (
-              filteredEmployees.map((employee) => {
-                // Verificar si el empleado está seleccionado visualmente
-                const isSelected = visuallySelectedEmployees.some(emp => emp.id === employee.id);
-                
-                return (
-                  <button
-                    key={employee.id}
-                    onClick={(e) => handleSelectEmployee(employee, e.ctrlKey || e.metaKey)}
-                    className={`w-full text-left py-2 px-3 border-b border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-between ${
-                      isSelected ? 'bg-blue-50' : ''
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2 overflow-hidden">
-                      <div className="flex-shrink-0 w-1 h-10 rounded-full" style={{ backgroundColor: isSelected ? '#3b82f6' : 'transparent' }}></div>
-                      <div>
-                        <div className="flex items-center">
-                          <h3 className="font-medium text-gray-900 truncate mr-2">{employee.displayName || employee.name}</h3>
-                          <span className="text-xs text-gray-500 truncate">• {employee.department}</span>
-                        </div>
-                        <p className="text-xs text-gray-500 truncate">{employee.position || employee.cargo}</p>
-                      </div>
-                    </div>
-                    {/* Checkmark a la derecha */}
+          {filteredEmployees.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              No se encontraron empleados
+            </div>
+          ) : (
+            filteredEmployees.map((employee) => {
+              // Verificar si el empleado está seleccionado visualmente
+              const isSelected = visuallySelectedEmployees.some(emp => emp.id === employee.id);
+
+              // Función para obtener solo el primer nombre y primer apellido
+              const getShortName = (fullName: string) => {
+                const parts = fullName.split(' ');
+                return parts.length > 1 ? `${parts[0]} ${parts[1]}` : parts[0];
+              };
+
+              const shortName = getShortName(employee.displayName || employee.name);
+
+              return (
+                <button
+                  key={employee.id}
+                  onClick={(e) => handleSelectEmployee(employee, e.ctrlKey || e.metaKey)}
+                  className={`w-full text-left py-2 px-3 border-b border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-between ${
+                    isSelected ? 'bg-blue-50' : ''
+                  }`}
+                >
+                  <div className="flex items-center space-x-2 overflow-hidden">
+                    {/* Checkmark a la izquierda */}
                     {isSelected && (
                       <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
                         <span className="text-white text-xs">✓</span>
                       </div>
                     )}
-                  </button>
-                );
-              })
-            )}
-          </div>
-          
+
+                    <div className="flex-shrink-0 w-1 h-10 rounded-full" style={{ backgroundColor: isSelected ? '#3b82f6' : 'transparent' }}></div>
+                    <div>
+                      <div className="flex items-center">
+                        <h3 className="font-medium text-gray-900 truncate mr-2">{shortName}</h3>
+                        <span className="text-xs text-gray-500 truncate">• {employee.department}</span>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{employee.position || employee.cargo}</p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+
+ 
           <div className="p-2 border-t border-gray-200 bg-gray-50 text-xs text-center text-gray-500 rounded-b-lg">
             {visuallySelectedEmployees.length > 0 ? 
               `Seleccionados: ${visuallySelectedEmployees.length} de ${filteredEmployees.length} empleados` : 
