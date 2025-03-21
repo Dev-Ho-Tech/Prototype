@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useRef } from 'react';
 import { Period, DragInfo } from './interfaces/types';
-import { Calendar } from 'lucide-react';
 import { locations, departments, workShifts, licenses } from './../../global/temp/data_global_temp';
 import TopBar from './components/TopBar';
 import ScheduleGrid from './components/ScheduleGrid';
 import Legends from './components/Legends';
+import EmployeeInfo from './components/EmployeeInfo';
 import { useAppState } from '../../global/context/AppStateContext';
 import { UnifiedEmployee } from '../../global/interfaces/unifiedTypes';
 
@@ -25,10 +25,24 @@ export function SchedulingScreen() {
   const [startDate, setStartDate] = useState('2025-02-14');
   const [endDate, setEndDate] = useState('2025-02-14');
   const [selectedEmployee, setSelectedEmployee] = useState<UnifiedEmployee | null>(null);
-  // Marcamos los 15 primeros como seleccionados al inicio, pero sin marcas visuales
+  
+  // Estado para los filtros avanzados
+  const [filterState, setFilterState] = useState({
+    sedes: [] as string[],
+    departamentos: [] as string[],
+    secciones: [] as string[],
+    unidades: [] as string[]
+  });
+  
+  // Estado para los empleados filtrados
+  const [filteredEmployees, setFilteredEmployees] = useState<UnifiedEmployee[]>([]);
+  
+  // Estado para empleados que se muestran en el ScheduleGrid
   const [selectedEmployees, setSelectedEmployees] = useState<UnifiedEmployee[]>([]);
-  // Nuevo estado para empleados marcados visualmente
+  // Estado para empleados seleccionados visualmente
   const [visuallySelectedEmployees, setVisuallySelectedEmployees] = useState<UnifiedEmployee[]>([]);
+  // Estado para almacenar las fechas de cada empleado seleccionado
+  const [employeeDates, setEmployeeDates] = useState<{[id: string]: {startDate: string, endDate: string}}>({});
   
   const [showShifts, setShowShifts] = useState(true);
   const [showLicenses, setShowLicenses] = useState(true);
@@ -37,21 +51,6 @@ export function SchedulingScreen() {
   const [panelWidth, setPanelWidth] = useState<number>(320); // Ancho inicial del panel izquierdo
   const [isResizing, setIsResizing] = useState<boolean>(false);
   
-  // Estados para las fechas del empleado seleccionado
-  const [employeeStartDate, setEmployeeStartDate] = useState<string>('');
-  const [employeeEndDate, setEmployeeEndDate] = useState<string>('');
-
-  // Estado para los filtros avanzados
-  const [filterState, setFilterState] = useState({
-    sedes: [] as string[],
-    departamentos: [] as string[],
-    secciones: [] as string[],
-    unidades: [] as string[]
-  });
-
-  // Estado para los empleados filtrados
-  const [filteredEmployees, setFilteredEmployees] = useState<UnifiedEmployee[]>([]);
-
   // Ref para el panel
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +80,17 @@ export function SchedulingScreen() {
       // Importante: seleccionamos estos empleados para que aparezcan en el ScheduleGrid
       // pero no los marcamos visualmente en la interfaz
       setSelectedEmployees(initialEmployees);
-      setVisuallySelectedEmployees([]); // Inicialmente ninguno está marcado visualmente
+      setVisuallySelectedEmployees([]);
+      
+      // Inicializar fechas para todos los empleados cargados
+      const dates: {[id: string]: {startDate: string, endDate: string}} = {};
+      initialEmployees.forEach(emp => {
+        dates[emp.id] = {
+          startDate: emp.startDate || '',
+          endDate: emp.endDate || ''
+        };
+      });
+      setEmployeeDates(dates);
     }
   }, [allEmployees]);
 
@@ -140,15 +149,6 @@ export function SchedulingScreen() {
     setFilterState(filters);
   };
 
-  // Actualizar las fechas cuando cambia el empleado seleccionado
-  useEffect(() => {
-    if (selectedEmployee) {
-      // Inicializar las fechas del empleado - usar valores existentes o valores por defecto
-      setEmployeeStartDate(selectedEmployee.startDate || '');
-      setEmployeeEndDate(selectedEmployee.endDate || '');
-    }
-  }, [selectedEmployee]);
-
   // Manejar la selección de un empleado
   const handleSelectEmployee = (employee: UnifiedEmployee, isMultiSelect: boolean) => {
     if (isMultiSelect) {
@@ -160,29 +160,32 @@ export function SchedulingScreen() {
         const newVisuallySelected = visuallySelectedEmployees.filter(emp => emp.id !== employee.id);
         setVisuallySelectedEmployees(newVisuallySelected);
         
-        // También eliminarlo de la selección real
-        const newSelected = selectedEmployees.filter(emp => emp.id !== employee.id);
-        setSelectedEmployees(newSelected);
+        // También actualizamos los empleados que se muestran en el grid
+        setSelectedEmployees(newVisuallySelected.length > 0 ? newVisuallySelected : filteredEmployees.slice(0, 15));
         
         // Si se deseleccionó el empleado actual, seleccionar el primero de la lista (si hay alguno)
-        if (selectedEmployee?.id === employee.id && newSelected.length > 0) {
-          setSelectedEmployee(newSelected[0]);
-          setCurrentEmployee(newSelected[0]);
-          
-          // Actualizar fechas del nuevo empleado seleccionado
-          setEmployeeStartDate(newSelected[0].startDate || '');
-          setEmployeeEndDate(newSelected[0].endDate || '');
-        } else if (newSelected.length === 0) {
+        if (selectedEmployee?.id === employee.id && newVisuallySelected.length > 0) {
+          setSelectedEmployee(newVisuallySelected[0]);
+          setCurrentEmployee(newVisuallySelected[0]);
+        } else if (newVisuallySelected.length === 0) {
           setSelectedEmployee(null);
           setCurrentEmployee(null);
-          
-          // Limpiar fechas si no hay empleado seleccionado
-          setEmployeeStartDate('');
-          setEmployeeEndDate('');
           
           // Si no queda ningún empleado seleccionado, volver a mostrar los 15 primeros
           const top15 = filteredEmployees.slice(0, 15);
           setSelectedEmployees(top15);
+          
+          // Inicializar fechas para todos los empleados mostrados
+          const dates = {...employeeDates};
+          top15.forEach(emp => {
+            if (!dates[emp.id]) {
+              dates[emp.id] = {
+                startDate: emp.startDate || '',
+                endDate: emp.endDate || ''
+              };
+            }
+          });
+          setEmployeeDates(dates);
         }
         
         // Si hay un solo empleado seleccionado, cambiar a vista semanal
@@ -197,21 +200,24 @@ export function SchedulingScreen() {
         const newVisuallySelected = [...visuallySelectedEmployees, employee];
         setVisuallySelectedEmployees(newVisuallySelected);
         
-        // Añadir a la selección real (que muestra ScheduleGrid)
-        const newSelected = [...selectedEmployees.filter(emp => 
-          // Preservar solo los que ya están seleccionados visualmente
-          visuallySelectedEmployees.some(visEmp => visEmp.id === emp.id)
-        ), employee];
-        setSelectedEmployees(newSelected);
+        // Actualizamos los empleados que se muestran en el grid con los seleccionados
+        setSelectedEmployees(newVisuallySelected);
         
         // Si no había empleado seleccionado actualmente, establecer este como el actual
         if (!selectedEmployee) {
           setSelectedEmployee(employee);
           setCurrentEmployee(employee);
-          
-          // Actualizar fechas del nuevo empleado seleccionado
-          setEmployeeStartDate(employee.startDate || '');
-          setEmployeeEndDate(employee.endDate || '');
+        }
+        
+        // Inicializar fechas para el empleado si no existen
+        if (!employeeDates[employee.id]) {
+          setEmployeeDates({
+            ...employeeDates,
+            [employee.id]: {
+              startDate: employee.startDate || '',
+              endDate: employee.endDate || ''
+            }
+          });
         }
         
         // Si hay múltiples empleados seleccionados, cambiar a vista diaria
@@ -236,10 +242,6 @@ export function SchedulingScreen() {
         setSelectedEmployee(null);
         setCurrentEmployee(null);
         
-        // Limpiar fechas
-        setEmployeeStartDate('');
-        setEmployeeEndDate('');
-        
         // Volver a vista diaria
         setSelectedPeriod('Diario');
       } else {
@@ -249,9 +251,16 @@ export function SchedulingScreen() {
         setSelectedEmployees([employee]);
         setVisuallySelectedEmployees([employee]);
         
-        // Actualizar fechas del empleado seleccionado
-        setEmployeeStartDate(employee.startDate || '');
-        setEmployeeEndDate(employee.endDate || '');
+        // Inicializar fechas para el empleado si no existen
+        if (!employeeDates[employee.id]) {
+          setEmployeeDates({
+            ...employeeDates,
+            [employee.id]: {
+              startDate: employee.startDate || '',
+              endDate: employee.endDate || ''
+            }
+          });
+        }
         
         // Cambiar automáticamente a vista semanal cuando se selecciona un solo empleado
         setSelectedPeriod('Semanal');
@@ -293,25 +302,72 @@ export function SchedulingScreen() {
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   };
-  
-  // Manejar cambios en las fechas del empleado
-  const handleEmployeeStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = e.target.value;
-    setEmployeeStartDate(newDate);
-    
-    // Actualizar el empleado seleccionado con la nueva fecha
-    if (selectedEmployee) {
-      selectedEmployee.startDate = newDate;
-    }
-  };
-  
-  const handleEmployeeEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = e.target.value;
-    setEmployeeEndDate(newDate);
-    
-    // Actualizar el empleado seleccionado con la nueva fecha
-    if (selectedEmployee) {
-      selectedEmployee.endDate = newDate;
+
+  // Renderizar la cuadrícula de horarios apropiada según el estado de selección y el período
+  const renderScheduleGrid = () => {
+    // Si hay empleados seleccionados visualmente
+    if (visuallySelectedEmployees.length > 0) {
+      // Si es un solo empleado seleccionado o estamos en período semanal
+      if (visuallySelectedEmployees.length === 1 || selectedPeriod === 'Semanal') {
+        // Mostrar un grid individual para cada empleado con su info
+        return (
+          <div className="space-y-8">
+            {visuallySelectedEmployees.map(employee => (
+              <div key={employee.id} className="mb-8">
+                <EmployeeInfo 
+                  employee={employee}
+                  startDate={employeeDates[employee.id]?.startDate || '01-03-2025'}
+                  endDate={employeeDates[employee.id]?.endDate || '07-03-2025'}
+                />
+                
+                {/* Grid individual para cada empleado */}
+                <ScheduleGrid 
+                  employees={[employee]}
+                  selectedDate={selectedDate}
+                  selectedPeriod={selectedPeriod}
+                  workShifts={workShifts}
+                  licenses={licenses}
+                  dragInfo={dragInfo}
+                  setDragInfo={setDragInfo}
+                  startDate={startDate}
+                  endDate={endDate}
+                />
+              </div>
+            ))}
+          </div>
+        );
+      } else {
+        // Si estamos en período diario y hay múltiples empleados seleccionados
+        // Mostrar un solo grid con todos los empleados seleccionados (sin EmployeeInfo)
+        return (
+          <ScheduleGrid 
+            employees={visuallySelectedEmployees}
+            selectedDate={selectedDate}
+            selectedPeriod={selectedPeriod}
+            workShifts={workShifts}
+            licenses={licenses}
+            dragInfo={dragInfo}
+            setDragInfo={setDragInfo}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        );
+      }
+    } else {
+      // Si no hay empleados seleccionados visualmente, mostrar los 15 por defecto en un solo grid
+      return (
+        <ScheduleGrid 
+          employees={selectedEmployees}
+          selectedDate={selectedDate}
+          selectedPeriod={selectedPeriod}
+          workShifts={workShifts}
+          licenses={licenses}
+          dragInfo={dragInfo}
+          setDragInfo={setDragInfo}
+          startDate={startDate}
+          endDate={endDate}
+        />
+      );
     }
   };
 
@@ -378,7 +434,7 @@ export function SchedulingScreen() {
                         <p className="text-xs text-gray-500 truncate">{employee.position || employee.cargo}</p>
                       </div>
                     </div>
-                    {/* Checkmark movido a la derecha */}
+                    {/* Checkmark a la derecha */}
                     {isSelected && (
                       <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
                         <span className="text-white text-xs">✓</span>
@@ -404,78 +460,9 @@ export function SchedulingScreen() {
         />
 
         {/* Panel derecho - Información y cuadrícula - SIEMPRE VISIBLE */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Información del empleado seleccionado - solo visible cuando hay un empleado seleccionado */}
-          {selectedEmployee && (
-            <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Código:</div>
-                  <div className="font-medium truncate">{selectedEmployee.codigo || selectedEmployee.id}</div>
-                </div>
-                  
-                {/* Campos de fecha */}
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Fecha de Inicio:</div>
-                  <div className="relative">
-                    <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
-                    <input
-                      type="date"
-                      value={employeeStartDate}
-                      onChange={handleEmployeeStartDateChange}
-                      className="w-full pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-                
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Fecha de Fin:</div>
-                  <div className="relative">
-                    <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
-                    <input
-                      type="date"
-                      value={employeeEndDate}
-                      onChange={handleEmployeeEndDateChange}
-                      className="w-full pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Sede:</div>
-                  <div className="font-medium truncate">{selectedEmployee.location || selectedEmployee.sede}</div>
-                </div>
-                
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Departamento:</div>
-                  <div className="font-medium truncate">{selectedEmployee.department}</div>
-                </div>
-                
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Cargo:</div>
-                  <div className="font-medium truncate">{selectedEmployee.position || selectedEmployee.cargo}</div>
-                </div>
-                
-                <div className="col-span-1">
-                  <div className="text-xs text-gray-500 mb-1">Tipo De Contrato:</div>
-                  <div className="font-medium truncate">{selectedEmployee.contractType || selectedEmployee.modalidadTiempo || 'Indefinido'}</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Cuadrícula de horarios - Siempre visible */}
-          <ScheduleGrid 
-            employees={selectedEmployees}
-            selectedDate={selectedDate}
-            selectedPeriod={selectedPeriod}
-            workShifts={workShifts}
-            licenses={licenses}
-            dragInfo={dragInfo}
-            setDragInfo={setDragInfo}
-            startDate={startDate}
-            endDate={endDate}
-          />
+        <div className="flex-1 flex flex-col overflow-auto">
+          {/* Renderizar el grid apropiado según la selección y el período */}
+          {renderScheduleGrid()}
 
           {/* Leyendas de turnos y licencias - Siempre visibles */}
           <Legends 
