@@ -52,15 +52,35 @@ export const TurnoPermisoModal: React.FC<TurnoPermisoModalProps> = ({
   const [horaFin, setHoraFin] = useState('17:00');
   const [motivo, setMotivo] = useState('');
 
+  // Inicializa los valores por defecto cuando se abre el modal
+  useEffect(() => {
+    // Asegurarse de que estamos usando la fecha exacta seleccionada
+    setFechaInicio(fechaInicial);
+    setFechaFin(fechaInicial);
+    
+    // Seleccionar el primer turno/permiso por defecto
+    if (tabActivo === 'turno' && turnos.length > 0) {
+      setTipoSeleccionadoId(turnos[0].id);
+    } else if (tabActivo === 'permiso' && permisos.length > 0) {
+      setTipoSeleccionadoId(permisos[0].id);
+    }
+  }, [fechaInicial, isOpen, tabActivo, turnos, permisos]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Formatea la fecha para el objeto de datos
+    const formattedFechaInicio = fechaInicio.toISOString().split('T')[0];
+    const formattedFechaFin = fechaFin.toISOString().split('T')[0];
+    
+    console.log("Guardando para fecha:", formattedFechaInicio);
 
     const data = {
       empleadoId,
       tipo: tabActivo,
       tipoId: tipoSeleccionadoId,
-      fechaInicio: fechaInicio.toISOString().split('T')[0],
-      fechaFin: fechaFin.toISOString().split('T')[0],
+      fechaInicio: formattedFechaInicio,
+      fechaFin: formattedFechaFin,
       horaInicio,
       horaFin,
       motivo
@@ -75,12 +95,26 @@ export const TurnoPermisoModal: React.FC<TurnoPermisoModalProps> = ({
     if (tabActivo === 'turno' && tipoSeleccionadoId) {
       const turnoSeleccionado = turnos.find(t => t.id === tipoSeleccionadoId);
       if (turnoSeleccionado) {
-        // Extraemos solo la hora del formato "08:00 am"
-        setHoraInicio(turnoSeleccionado.horaInicio.split(' ')[0]);
-        setHoraFin(turnoSeleccionado.horaFin.split(' ')[0]);
+        // Extraemos solo la hora del formato "08:00 am" o "08:00"
+        const inicioPartes = turnoSeleccionado.horaInicio.split(' ');
+        const finPartes = turnoSeleccionado.horaFin.split(' ');
+        
+        setHoraInicio(inicioPartes[0]);
+        setHoraFin(finPartes[0]);
       }
     }
   }, [tabActivo, tipoSeleccionadoId, turnos]);
+
+  // Actualiza el tipo seleccionado cuando cambiamos de tab
+  useEffect(() => {
+    if (tabActivo === 'turno' && turnos.length > 0) {
+      setTipoSeleccionadoId(turnos[0].id);
+    } else if (tabActivo === 'permiso' && permisos.length > 0) {
+      setTipoSeleccionadoId(permisos[0].id);
+    } else {
+      setTipoSeleccionadoId('');
+    }
+  }, [tabActivo, turnos, permisos]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -90,6 +124,10 @@ export const TurnoPermisoModal: React.FC<TurnoPermisoModalProps> = ({
             <DialogTitle>Agregar {tabActivo === 'turno' ? 'Turno' : 'Permiso'}</DialogTitle>
             <DialogDescription>
               Para el empleado: <span className="font-medium">{empleadoNombre}</span>
+              <br />
+              <span className="text-sm text-blue-600">
+                Fecha seleccionada: {format(fechaInicial, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+              </span>
             </DialogDescription>
           </DialogHeader>
 
@@ -252,7 +290,11 @@ export const TurnoPermisoModal: React.FC<TurnoPermisoModalProps> = ({
             <Button type="button" variant="outline" onClick={onClose} className="bg-white">
               Cancelar
             </Button>
-            <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
+            <Button 
+              type="submit" 
+              className="bg-blue-500 hover:bg-blue-600"
+              disabled={!tipoSeleccionadoId}
+            >
               Guardar
             </Button>
           </DialogFooter>

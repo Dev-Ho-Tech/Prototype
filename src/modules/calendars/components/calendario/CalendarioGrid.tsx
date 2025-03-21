@@ -159,8 +159,8 @@ export const CalendarioGrid: React.FC<CalendarioGridProps> = ({
         </thead>
         <tbody>
           {empleados.map((empleado) => (
-            <tr key={empleado.id} className="hover:bg-gray-50">
-              <td className="border p-2">
+            <tr key={empleado.id} className="group hover:bg-blue-100 transition-colors duration-150">
+              <td className="border p-2 group-hover:bg-blue-100">
                 <div className="font-medium">
                   {empleado.nombre} {empleado.apellidos}
                 </div>
@@ -174,13 +174,26 @@ export const CalendarioGrid: React.FC<CalendarioGridProps> = ({
                   <td 
                     key={index} 
                     className={cn(
-                      "border p-2 align-top relative cursor-pointer min-h-16",
-                      isToday(dia) && "bg-blue-50",
-                      (getDay(dia) === 0 || getDay(dia) === 6) && "bg-gray-50"
+                      "border p-2 align-top relative cursor-pointer min-h-16 group-hover:bg-blue-100",
+                      isToday(dia) && "bg-blue-50 group-hover:bg-blue-100",
+                      (getDay(dia) === 0 || getDay(dia) === 6) && "bg-gray-50 group-hover:bg-blue-100"
                     )}
                     onClick={() => onCeldaClick(empleado.id, dia)}
                   >
                     {renderizarAsignaciones(empleado.id, fechaStr)}
+                    
+                    {/* Indicador de que se puede añadir un turno */}
+                    <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 hover:opacity-100">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className="h-4 w-4 text-blue-500" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
                   </td>
                 );
               })}
