@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useRef } from 'react';
 import { Period, DragInfo } from './interfaces/types';
-import { Calendar } from 'lucide-react';
 import { locations, departments, workShifts, licenses } from './../../global/temp/data_global_temp';
 import TopBar from './components/TopBar';
 import ScheduleGrid from './components/ScheduleGrid';
 import Legends from './components/Legends';
+import EmployeeInfo from './components/EmployeeInfo';
 import { useAppState } from '../../global/context/AppStateContext';
 import { UnifiedEmployee } from '../../global/interfaces/unifiedTypes';
 
@@ -13,7 +13,6 @@ export function SchedulingScreen() {
   // Usar el contexto global
   const { 
     allEmployees, 
-    currentEmployee, 
     setCurrentEmployee,
     setCurrentScreen
   } = useAppState();
@@ -26,19 +25,7 @@ export function SchedulingScreen() {
   const [startDate, setStartDate] = useState('2025-02-14');
   const [endDate, setEndDate] = useState('2025-02-14');
   const [selectedEmployee, setSelectedEmployee] = useState<UnifiedEmployee | null>(null);
-  // Nuevo estado para selección múltiple
-  const [selectedEmployees, setSelectedEmployees] = useState<UnifiedEmployee[]>([]);
-  const [showShifts, setShowShifts] = useState(true);
-  const [showLicenses, setShowLicenses] = useState(true);
-  const [editMode] = useState(false);
-  const [dragInfo, setDragInfo] = useState<DragInfo | null>(null);
-  const [panelWidth, setPanelWidth] = useState<number>(320); // Ancho inicial del panel izquierdo
-  const [isResizing, setIsResizing] = useState<boolean>(false);
   
-  // Estados para las fechas del empleado seleccionado
-  const [employeeStartDate, setEmployeeStartDate] = useState<string>('');
-  const [employeeEndDate, setEmployeeEndDate] = useState<string>('');
-
   // Estado para los filtros avanzados
   const [filterState, setFilterState] = useState({
     sedes: [] as string[],
@@ -46,10 +33,24 @@ export function SchedulingScreen() {
     secciones: [] as string[],
     unidades: [] as string[]
   });
-
+  
   // Estado para los empleados filtrados
   const [filteredEmployees, setFilteredEmployees] = useState<UnifiedEmployee[]>([]);
-
+  
+  // Estado para empleados que se muestran en el ScheduleGrid
+  const [selectedEmployees, setSelectedEmployees] = useState<UnifiedEmployee[]>([]);
+  // Estado para empleados seleccionados visualmente
+  const [visuallySelectedEmployees, setVisuallySelectedEmployees] = useState<UnifiedEmployee[]>([]);
+  // Estado para almacenar las fechas de cada empleado seleccionado
+  const [employeeDates, setEmployeeDates] = useState<{[id: string]: {startDate: string, endDate: string}}>({});
+  
+  const [showShifts, setShowShifts] = useState(true);
+  const [showLicenses, setShowLicenses] = useState(true);
+  const [editMode] = useState(false);
+  const [dragInfo, setDragInfo] = useState<DragInfo | null>(null);
+  const [panelWidth, setPanelWidth] = useState<number>(320); // Ancho inicial del panel izquierdo
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+  
   // Ref para el panel
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -58,16 +59,39 @@ export function SchedulingScreen() {
     setCurrentScreen('scheduling');
   }, [setCurrentScreen]);
 
-  // Inicializar los empleados filtrados con todos los empleados
+  // IMPORTANTE: Inicializar los primeros 15 empleados al cargar la pantalla
   useEffect(() => {
-    // Ordenar alfabéticamente los empleados y establecerlos como filtrados
-    const sortedEmployees = [...allEmployees].sort((a, b) => {
-      const nameA = (a.displayName || a.name || '').toLowerCase();
-      const nameB = (b.displayName || b.name || '').toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
-    
-    setFilteredEmployees(sortedEmployees);
+    if (allEmployees.length > 0) {
+      console.log('Inicializando SchedulingScreen - cargando los primeros 15 empleados');
+      
+      // Ordenar alfabéticamente los empleados
+      const sortedEmployees = [...allEmployees].sort((a, b) => {
+        const nameA = (a.displayName || a.name || '').toLowerCase();
+        const nameB = (b.displayName || b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+      
+      setFilteredEmployees(sortedEmployees);
+      
+      // Seleccionar los primeros 15 empleados ordenados alfabéticamente
+      const numberOfEmployeesToShow = Math.min(15, sortedEmployees.length);
+      const initialEmployees = sortedEmployees.slice(0, numberOfEmployeesToShow);
+      
+      // Importante: seleccionamos estos empleados para que aparezcan en el ScheduleGrid
+      // pero no los marcamos visualmente en la interfaz
+      setSelectedEmployees(initialEmployees);
+      setVisuallySelectedEmployees([]);
+      
+      // Inicializar fechas para todos los empleados cargados
+      const dates: {[id: string]: {startDate: string, endDate: string}} = {};
+      initialEmployees.forEach(emp => {
+        dates[emp.id] = {
+          startDate: emp.startDate || '',
+          endDate: emp.endDate || ''
+        };
+      });
+      setEmployeeDates(dates);
+    }
   }, [allEmployees]);
 
   // Aplicar filtros a los empleados
@@ -125,115 +149,122 @@ export function SchedulingScreen() {
     setFilterState(filters);
   };
 
-  // Actualizar las fechas cuando cambia el empleado seleccionado
-  useEffect(() => {
-    if (selectedEmployee) {
-      // Inicializar las fechas del empleado - usar valores existentes o valores por defecto
-      setEmployeeStartDate(selectedEmployee.startDate || '');
-      setEmployeeEndDate(selectedEmployee.endDate || '');
-    }
-  }, [selectedEmployee]);
-
-  // Seleccionar los primeros 9 empleados alfabéticamente al iniciar
-  useEffect(() => {
-    console.log('Inicializando SchedulingScreen');
-    
-    if (allEmployees.length > 0) {
-      // Ordenar los empleados alfabéticamente
-      const sortedEmployees = [...allEmployees].sort((a, b) => {
-        const nameA = (a.displayName || a.name || '').toLowerCase();
-        const nameB = (b.displayName || b.name || '').toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-      
-      // Seleccionar los primeros 9 empleados ordenados alfabéticamente
-      const numberOfEmployeesToSelect = Math.min(9, sortedEmployees.length);
-      const initialSelected = sortedEmployees.slice(0, numberOfEmployeesToSelect);
-      
-      console.log(`Seleccionando los primeros ${numberOfEmployeesToSelect} empleados ordenados alfabéticamente`);
-      
-      // Si hay un empleado seleccionado en el contexto
-      if (currentEmployee) {
-        // Verificar si el empleado actual ya está entre los seleccionados
-        const currentEmployeeIndex = initialSelected.findIndex(emp => emp.id === currentEmployee.id);
-        
-        if (currentEmployeeIndex === -1 && initialSelected.length === 9) {
-          // Si el empleado actual no está en los primeros 9, reemplazar el último
-          initialSelected[8] = currentEmployee;
-        } else if (currentEmployeeIndex === -1) {
-          // Si no está y hay menos de 9, agregarlo
-          initialSelected.push(currentEmployee);
-        }
-        
-        setSelectedEmployee(currentEmployee);
-        
-        // Inicializar fechas del empleado actual
-        setEmployeeStartDate(currentEmployee.startDate || '');
-        setEmployeeEndDate(currentEmployee.endDate || '');
-      } else {
-        // Si no hay empleado seleccionado, usar el primero ordenado alfabéticamente
-        setSelectedEmployee(initialSelected[0]);
-        setCurrentEmployee(initialSelected[0]);
-        
-        // Inicializar fechas del primer empleado
-        setEmployeeStartDate(initialSelected[0]?.startDate || '');
-        setEmployeeEndDate(initialSelected[0]?.endDate || '');
-      }
-      
-      // Establecer los empleados seleccionados
-      setSelectedEmployees(initialSelected);
-    }
-  }, [currentEmployee, allEmployees, setCurrentEmployee]);
-
   // Manejar la selección de un empleado
   const handleSelectEmployee = (employee: UnifiedEmployee, isMultiSelect: boolean) => {
     if (isMultiSelect) {
       // Si se está presionando Ctrl/Cmd, alternar la selección
-      if (selectedEmployees.some(emp => emp.id === employee.id)) {
-        // Eliminar si ya está seleccionado
-        const newSelected = selectedEmployees.filter(emp => emp.id !== employee.id);
-        setSelectedEmployees(newSelected);
+      const isAlreadySelected = visuallySelectedEmployees.some(emp => emp.id === employee.id);
+      
+      if (isAlreadySelected) {
+        // Eliminar si ya está seleccionado visualmente
+        const newVisuallySelected = visuallySelectedEmployees.filter(emp => emp.id !== employee.id);
+        setVisuallySelectedEmployees(newVisuallySelected);
+        
+        // También actualizamos los empleados que se muestran en el grid
+        setSelectedEmployees(newVisuallySelected.length > 0 ? newVisuallySelected : filteredEmployees.slice(0, 15));
         
         // Si se deseleccionó el empleado actual, seleccionar el primero de la lista (si hay alguno)
-        if (selectedEmployee?.id === employee.id && newSelected.length > 0) {
-          setSelectedEmployee(newSelected[0]);
-          setCurrentEmployee(newSelected[0]);
-          
-          // Actualizar fechas del nuevo empleado seleccionado
-          setEmployeeStartDate(newSelected[0].startDate || '');
-          setEmployeeEndDate(newSelected[0].endDate || '');
-        } else if (newSelected.length === 0) {
+        if (selectedEmployee?.id === employee.id && newVisuallySelected.length > 0) {
+          setSelectedEmployee(newVisuallySelected[0]);
+          setCurrentEmployee(newVisuallySelected[0]);
+        } else if (newVisuallySelected.length === 0) {
           setSelectedEmployee(null);
           setCurrentEmployee(null);
           
-          // Limpiar fechas si no hay empleado seleccionado
-          setEmployeeStartDate('');
-          setEmployeeEndDate('');
+          // Si no queda ningún empleado seleccionado, volver a mostrar los 15 primeros
+          const top15 = filteredEmployees.slice(0, 15);
+          setSelectedEmployees(top15);
+          
+          // Inicializar fechas para todos los empleados mostrados
+          const dates = {...employeeDates};
+          top15.forEach(emp => {
+            if (!dates[emp.id]) {
+              dates[emp.id] = {
+                startDate: emp.startDate || '',
+                endDate: emp.endDate || ''
+              };
+            }
+          });
+          setEmployeeDates(dates);
+        }
+        
+        // Si hay un solo empleado seleccionado, cambiar a vista semanal
+        if (newVisuallySelected.length === 1) {
+          setSelectedPeriod('Semanal');
+        } else {
+          // Si hay múltiples o ninguno, cambiar a vista diaria
+          setSelectedPeriod('Diario');
         }
       } else {
-        // Añadir a la selección
-        const newSelected = [...selectedEmployees, employee];
-        setSelectedEmployees(newSelected);
+        // Añadir a la selección visual
+        const newVisuallySelected = [...visuallySelectedEmployees, employee];
+        setVisuallySelectedEmployees(newVisuallySelected);
+        
+        // Actualizamos los empleados que se muestran en el grid con los seleccionados
+        setSelectedEmployees(newVisuallySelected);
         
         // Si no había empleado seleccionado actualmente, establecer este como el actual
         if (!selectedEmployee) {
           setSelectedEmployee(employee);
           setCurrentEmployee(employee);
-          
-          // Actualizar fechas del nuevo empleado seleccionado
-          setEmployeeStartDate(employee.startDate || '');
-          setEmployeeEndDate(employee.endDate || '');
+        }
+        
+        // Inicializar fechas para el empleado si no existen
+        if (!employeeDates[employee.id]) {
+          setEmployeeDates({
+            ...employeeDates,
+            [employee.id]: {
+              startDate: employee.startDate || '',
+              endDate: employee.endDate || ''
+            }
+          });
+        }
+        
+        // Si hay múltiples empleados seleccionados, cambiar a vista diaria
+        if (newVisuallySelected.length > 1) {
+          setSelectedPeriod('Diario');
+        } else {
+          // Si solo hay uno, cambiar a vista semanal
+          setSelectedPeriod('Semanal');
         }
       }
     } else {
       // Selección simple (sin Ctrl/Cmd)
-      setSelectedEmployee(employee);
-      setCurrentEmployee(employee);
-      setSelectedEmployees([employee]);
+      const isVisuallySelected = visuallySelectedEmployees.length === 1 && 
+                              visuallySelectedEmployees[0].id === employee.id;
       
-      // Actualizar fechas del empleado seleccionado
-      setEmployeeStartDate(employee.startDate || '');
-      setEmployeeEndDate(employee.endDate || '');
+      if (isVisuallySelected) {
+        // Si ya está seleccionado solo este empleado, deseleccionarlo y volver a mostrar los 15 primeros
+        setVisuallySelectedEmployees([]);
+        
+        const top15 = filteredEmployees.slice(0, 15);
+        setSelectedEmployees(top15);
+        setSelectedEmployee(null);
+        setCurrentEmployee(null);
+        
+        // Volver a vista diaria
+        setSelectedPeriod('Diario');
+      } else {
+        // Selección de un solo empleado, cambiar a vista semanal
+        setSelectedEmployee(employee);
+        setCurrentEmployee(employee);
+        setSelectedEmployees([employee]);
+        setVisuallySelectedEmployees([employee]);
+        
+        // Inicializar fechas para el empleado si no existen
+        if (!employeeDates[employee.id]) {
+          setEmployeeDates({
+            ...employeeDates,
+            [employee.id]: {
+              startDate: employee.startDate || '',
+              endDate: employee.endDate || ''
+            }
+          });
+        }
+        
+        // Cambiar automáticamente a vista semanal cuando se selecciona un solo empleado
+        setSelectedPeriod('Semanal');
+      }
     }
   };
 
@@ -271,25 +302,72 @@ export function SchedulingScreen() {
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   };
-  
-  // Manejar cambios en las fechas del empleado
-  const handleEmployeeStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = e.target.value;
-    setEmployeeStartDate(newDate);
-    
-    // Actualizar el empleado seleccionado con la nueva fecha
-    if (selectedEmployee) {
-      selectedEmployee.startDate = newDate;
-    }
-  };
-  
-  const handleEmployeeEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = e.target.value;
-    setEmployeeEndDate(newDate);
-    
-    // Actualizar el empleado seleccionado con la nueva fecha
-    if (selectedEmployee) {
-      selectedEmployee.endDate = newDate;
+
+  // Renderizar la cuadrícula de horarios apropiada según el estado de selección y el período
+  const renderScheduleGrid = () => {
+    // Si hay empleados seleccionados visualmente
+    if (visuallySelectedEmployees.length > 0) {
+      // Si es un solo empleado seleccionado o estamos en período semanal
+      if (visuallySelectedEmployees.length === 1 || selectedPeriod === 'Semanal') {
+        // Mostrar un grid individual para cada empleado con su info
+        return (
+          <div className="space-y-8">
+            {visuallySelectedEmployees.map(employee => (
+              <div key={employee.id} className="mb-8">
+                <EmployeeInfo 
+                  employee={employee}
+                  startDate={employeeDates[employee.id]?.startDate || '01-03-2025'}
+                  endDate={employeeDates[employee.id]?.endDate || '07-03-2025'}
+                />
+                
+                {/* Grid individual para cada empleado */}
+                <ScheduleGrid 
+                  employees={[employee]}
+                  selectedDate={selectedDate}
+                  selectedPeriod={selectedPeriod}
+                  workShifts={workShifts}
+                  licenses={licenses}
+                  dragInfo={dragInfo}
+                  setDragInfo={setDragInfo}
+                  startDate={startDate}
+                  endDate={endDate}
+                />
+              </div>
+            ))}
+          </div>
+        );
+      } else {
+        // Si estamos en período diario y hay múltiples empleados seleccionados
+        // Mostrar un solo grid con todos los empleados seleccionados (sin EmployeeInfo)
+        return (
+          <ScheduleGrid 
+            employees={visuallySelectedEmployees}
+            selectedDate={selectedDate}
+            selectedPeriod={selectedPeriod}
+            workShifts={workShifts}
+            licenses={licenses}
+            dragInfo={dragInfo}
+            setDragInfo={setDragInfo}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        );
+      }
+    } else {
+      // Si no hay empleados seleccionados visualmente, mostrar los 15 por defecto en un solo grid
+      return (
+        <ScheduleGrid 
+          employees={selectedEmployees}
+          selectedDate={selectedDate}
+          selectedPeriod={selectedPeriod}
+          workShifts={workShifts}
+          licenses={licenses}
+          dragInfo={dragInfo}
+          setDragInfo={setDragInfo}
+          startDate={startDate}
+          endDate={endDate}
+        />
+      );
     }
   };
 
@@ -322,142 +400,81 @@ export function SchedulingScreen() {
         {/* Panel izquierdo - Lista de empleados adaptada para usar el modelo unificado */}
         <div 
           ref={panelRef}
-          className={`border border-gray-200 rounded-lg bg-white flex flex-col mr-4 ml-4 shadow-sm ${selectedEmployee ? '' : 'w-full'}`}
-          style={selectedEmployee ? { width: `${panelWidth}px` } : {}}
+          className="border border-gray-200 rounded-lg bg-white flex flex-col mr-4 ml-4 shadow-sm w-80"
         >
           <div className="p-2 bg-blue-600 border-b border-gray-200 flex justify-center rounded-t-lg">
             <h3 className="font-medium text-white text-md">Empleados</h3>
           </div>
 
           <div className="flex-1 overflow-auto">
-            {filteredEmployees.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No se encontraron empleados
-              </div>
-            ) : (
-              filteredEmployees.map((employee) => {
-                const isSelected = selectedEmployees.some(emp => emp.id === employee.id);
-                return (
-                  <button
-                    key={employee.id}
-                    onClick={(e) => handleSelectEmployee(employee, e.ctrlKey || e.metaKey)}
-                    className={`w-full text-left py-2 px-3 border-b border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-between ${
-                      isSelected ? 'bg-blue-50' : ''
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2 overflow-hidden">
-                      <div className="flex-shrink-0 w-1 h-10 rounded-full" style={{ backgroundColor: isSelected ? '#3b82f6' : 'transparent' }}></div>
-                      <div>
-                        <div className="flex items-center">
-                          <h3 className="font-medium text-gray-900 truncate mr-2">{employee.displayName || employee.name}</h3>
-                          <span className="text-xs text-gray-500 truncate">• {employee.department}</span>
-                        </div>
-                        <p className="text-xs text-gray-500 truncate">{employee.position || employee.cargo}</p>
+          {filteredEmployees.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              No se encontraron empleados
+            </div>
+          ) : (
+            filteredEmployees.map((employee) => {
+              // Verificar si el empleado está seleccionado visualmente
+              const isSelected = visuallySelectedEmployees.some(emp => emp.id === employee.id);
+
+              // Función para obtener solo el primer nombre y primer apellido
+              const getShortName = (fullName: string) => {
+                const parts = fullName.split(' ');
+                return parts.length > 1 ? `${parts[0]} ${parts[1]}` : parts[0];
+              };
+
+              const shortName = getShortName(employee.displayName || employee.name);
+
+              return (
+                <button
+                  key={employee.id}
+                  onClick={(e) => handleSelectEmployee(employee, e.ctrlKey || e.metaKey)}
+                  className={`w-full text-left py-2 px-3 border-b border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-between ${
+                    isSelected ? 'bg-blue-50' : ''
+                  }`}
+                >
+                  <div className="flex items-center space-x-2 overflow-hidden">
+                    {/* Checkmark a la izquierda */}
+                    {isSelected && (
+                      <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
+                        <span className="text-white text-xs">✓</span>
                       </div>
+                    )}
+
+                    <div className="flex-shrink-0 w-1 h-10 rounded-full" style={{ backgroundColor: isSelected ? '#3b82f6' : 'transparent' }}></div>
+                    <div>
+                      <div className="flex items-center">
+                        <h3 className="font-medium text-gray-900 truncate mr-2">{shortName}</h3>
+                        <span className="text-xs text-gray-500 truncate">• {employee.department}</span>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{employee.position || employee.cargo}</p>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      {isSelected && (
-                        <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
-                          <span className="text-white text-xs">✓</span>
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                );
-              })
-            )}
-          </div>
-          
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+
+ 
           <div className="p-2 border-t border-gray-200 bg-gray-50 text-xs text-center text-gray-500 rounded-b-lg">
-            {selectedEmployees.length > 0 ? 
-              `Seleccionados: ${selectedEmployees.length} de ${filteredEmployees.length} empleados` : 
+            {visuallySelectedEmployees.length > 0 ? 
+              `Seleccionados: ${visuallySelectedEmployees.length} de ${filteredEmployees.length} empleados` : 
               `Total: ${filteredEmployees.length} empleados`}
           </div>
         </div>
 
-        {/* Divisor redimensionable */}
-        {selectedEmployee && (
-          <div 
-            className={`w-1 bg-gray-100 hover:bg-blue-300 cursor-col-resize ${isResizing ? 'bg-blue-400' : ''}`}
-            onMouseDown={handleResizeStart}
-          />
-        )}
+        {/* Divisor redimensionable - siempre visible */}
+        <div 
+          className={`w-1 bg-gray-100 hover:bg-blue-300 cursor-col-resize ${isResizing ? 'bg-blue-400' : ''}`}
+          onMouseDown={handleResizeStart}
+        />
 
-        {/* Panel derecho - Información y cuadrícula */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Información del empleado seleccionado */}
-          {selectedEmployee && (
-          <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-              <div className="col-span-1">
-                <div className="text-xs text-gray-500 mb-1">Código:</div>
-                <div className="font-medium truncate">{selectedEmployee.codigo || selectedEmployee.id}</div>
-              </div>
-                
-              {/* Campos de fecha */}
-              <div className="col-span-1">
-                <div className="text-xs text-gray-500 mb-1">Fecha de Inicio:</div>
-                <div className="relative">
-                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
-                  <input
-                    type="date"
-                    value={employeeStartDate}
-                    onChange={handleEmployeeStartDateChange}
-                    className="w-full pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-              
-              <div className="col-span-1">
-                <div className="text-xs text-gray-500 mb-1">Fecha de Fin:</div>
-                <div className="relative">
-                  <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
-                  <input
-                    type="date"
-                    value={employeeEndDate}
-                    onChange={handleEmployeeEndDateChange}
-                    className="w-full pl-7 pr-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
+        {/* Panel derecho - Información y cuadrícula - SIEMPRE VISIBLE */}
+        <div className="flex-1 flex flex-col overflow-auto">
+          {/* Renderizar el grid apropiado según la selección y el período */}
+          {renderScheduleGrid()}
 
-              <div className="col-span-1">
-                <div className="text-xs text-gray-500 mb-1">Sede:</div>
-                <div className="font-medium truncate">{selectedEmployee.location || selectedEmployee.sede}</div>
-              </div>
-              
-              <div className="col-span-1">
-                <div className="text-xs text-gray-500 mb-1">Departamento:</div>
-                <div className="font-medium truncate">{selectedEmployee.department}</div>
-              </div>
-              
-              <div className="col-span-1">
-                <div className="text-xs text-gray-500 mb-1">Cargo:</div>
-                <div className="font-medium truncate">{selectedEmployee.position || selectedEmployee.cargo}</div>
-              </div>
-              
-              <div className="col-span-1">
-                <div className="text-xs text-gray-500 mb-1">Tipo De Contrato:</div>
-                <div className="font-medium truncate">{selectedEmployee.contractType || selectedEmployee.modalidadTiempo || 'Indefinido'}</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-          {/* Cuadrícula de horarios - Actualizada para múltiples empleados */}
-          <ScheduleGrid 
-            employees={selectedEmployees}
-            selectedDate={selectedDate}
-            selectedPeriod={selectedPeriod}
-            workShifts={workShifts}
-            licenses={licenses}
-            dragInfo={dragInfo}
-            setDragInfo={setDragInfo}
-            startDate={startDate}
-            endDate={endDate}
-          />
-
-          {/* Leyendas de turnos y licencias */}
+          {/* Leyendas de turnos y licencias - Siempre visibles */}
           <Legends 
             workShifts={workShifts}
             licenses={licenses}
@@ -471,7 +488,9 @@ export function SchedulingScreen() {
       <div className="p-2 bg-white border-t border-gray-200 text-xs text-gray-500 flex justify-between items-center">
         <div>
           Total empleados: {filteredEmployees.length} / {allEmployees.length}
-          {selectedEmployees.length > 0 && ` | Seleccionados: ${selectedEmployees.length}`}
+          {visuallySelectedEmployees.length > 0 ? 
+           ` | Seleccionados: ${visuallySelectedEmployees.length}` : 
+           selectedEmployees.length > 0 && ` | Mostrando: ${selectedEmployees.length}`}
         </div>
         <div>
           {editMode ? (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MoreVertical, RefreshCw, Power, AlertCircle, CheckCircle, Clock, Activity, X } from 'lucide-react';
+import { Plus, AlertCircle, CheckCircle, X, RefreshCw, Power, Clock, Activity, MoreVertical } from 'lucide-react';
 import { devicesData } from './data';
 import { Device } from './interfaces/device';
 import { DeviceForm } from './components/DeviceForm';
@@ -9,9 +9,13 @@ import { RestartModal } from './components/RestartModal';
 import { DeleteDeviceModal } from './components/DeleteDeviceModal';
 import { DeviceContextMenu } from './components/DeviceContextMenu';
 import DevicesSummary from './components/DevicesSummaryProps';
+import Pagination from './components/screen_components/Pagination';
+import SortableTable, { ColumnDefinition } from './components/screen_components/SortableTable';
+import Filters from './components/screen_components/Filters';
+import DeviceGrid from './components/screen_components/DeviceGrid';
 
 export const DevicesScreen: React.FC = () => {
-  const [devices, setDevices] = useState<Device[]>(devicesData);
+  const [allDevices, setAllDevices] = useState<Device[]>(devicesData);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
@@ -24,6 +28,18 @@ export const DevicesScreen: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null);
   const [contextMenuDevice, setContextMenuDevice] = useState<Device | null>(null);
+  
+  // Estados para la paginación de la tabla
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [paginatedDevices, setPaginatedDevices] = useState<Device[]>([]);
+  
+  // Estado para el ordenamiento
+  const [sortKey, setSortKey] = useState<string>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  
+  // Estado para el modo de visualización (lista o cuadrícula)
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   // Filtrar dispositivos
   useEffect(() => {
@@ -33,8 +49,8 @@ export const DevicesScreen: React.FC = () => {
     if (searchTerm) {
       filtered = filtered.filter(device => 
         device.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        device.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        device.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
+        device.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        device.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -48,8 +64,54 @@ export const DevicesScreen: React.FC = () => {
       filtered = filtered.filter(device => device.type === filterType);
     }
 
-    setDevices(filtered);
+    setAllDevices(filtered);
+    setCurrentPage(1); // Resetear a la primera página cuando cambian los filtros
   }, [searchTerm, filterStatus, filterType]);
+
+  // Actualizar dispositivos paginados cuando cambie la página o los elementos por página
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    setPaginatedDevices(allDevices.slice(startIndex, endIndex));
+  }, [allDevices, currentPage, itemsPerPage]);
+
+  // Función para cambiar de página
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Función para cambiar elementos por página
+  const handleItemsPerPageChange = (items: number) => {
+    setItemsPerPage(items);
+    setCurrentPage(1); // Resetear a la primera página cuando cambia el número de elementos por página
+  };
+
+  // Función para manejar el ordenamiento
+  const handleSort = (key: string, direction: 'asc' | 'desc') => {
+    setSortKey(key);
+    setSortDirection(direction);
+  };
+
+  // Función para cambiar el modo de visualización
+  const handleViewModeChange = (mode: 'list' | 'grid') => {
+    setViewMode(mode);
+  };
+
+  // Función para restablecer los filtros
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setFilterStatus('all');
+    setFilterType('all');
+  };
+
+  // Función para manejar cambios en los filtros
+  const handleFilterChange = (filterName: string, value: string) => {
+    if (filterName === 'status') {
+      setFilterStatus(value);
+    } else if (filterName === 'type') {
+      setFilterType(value);
+    }
+  };
 
   // Función para abrir el formulario en modo edición
   const handleEditDevice = (device: Device) => {
@@ -100,9 +162,8 @@ export const DevicesScreen: React.FC = () => {
     
     // Actualizar la lista (simulación)
     if (selectedDevice) {
-      setDevices(currentDevices => 
-        currentDevices.filter(device => device.id !== selectedDevice.id)
-      );
+      const updatedDevices = allDevices.filter(device => device.id !== selectedDevice.id);
+      setAllDevices(updatedDevices);
     }
     
     // Mostrar notificación
@@ -116,7 +177,7 @@ export const DevicesScreen: React.FC = () => {
     setSelectedDevice(null);
   };
 
-  // Función para manejar clic en fila
+  // Función para manejar clic en fila o tarjeta
   const handleRowClick = (device: Device) => {
     handleOpenEventos(device);
   };
@@ -136,6 +197,20 @@ export const DevicesScreen: React.FC = () => {
   const handleCloseContextMenu = () => {
     setContextMenuDevice(null);
   };
+
+  // Función para renderizar el menú contextual (usado en vista de cuadrícula)
+  const renderContextMenu = (device: Device) => (
+    <DeviceContextMenu
+      device={device}
+      isOpen={true}
+      onClose={handleCloseContextMenu}
+      onEdit={handleEditDevice}
+      onOpenOperations={handleOpenOperations}
+      onOpenEventos={handleOpenEventos}
+      onRestart={handleRestart}
+      onDelete={handleDeleteDevice}
+    />
+  );
 
   // Obtener la clase CSS para el estado del dispositivo
   const getStatusClass = (status: string) => {
@@ -169,238 +244,249 @@ export const DevicesScreen: React.FC = () => {
     }
   };
 
+  // Definir las columnas para la tabla
+  const columns: ColumnDefinition<Device>[] = [
+    {
+      key: 'name',
+      header: 'Nombre',
+      sortable: true,
+      render: (device) => (
+        <div className="flex items-center">
+          <div className="flex-shrink-0 h-10 w-10">
+            {device.brand === 'zkteco' && (
+              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold">
+                ZK
+              </div>
+            )}
+            {device.brand === 'suprema' && (
+              <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-800 font-bold">
+                SP
+              </div>
+            )}
+            {device.brand === 'hikvision' && (
+              <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-800 font-bold">
+                HK
+              </div>
+            )}
+            {device.brand === 'dahua' && (
+              <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-800 font-bold">
+                DH
+              </div>
+            )}
+          </div>
+          <div className="ml-4">
+            <div className="text-sm font-medium text-gray-900">{device.name}</div>
+            <div className="text-sm text-gray-500">SN: {device.serialNumber}</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'type',
+      header: 'Tipo/Modelo',
+      sortable: true,
+      render: (device) => (
+        <>
+          <div className="text-sm text-gray-900 capitalize">{device.type}</div>
+          <div className="text-sm text-gray-500">{device.model}</div>
+        </>
+      )
+    },
+    {
+      key: 'location',
+      header: 'Ubicación',
+      sortable: true,
+      render: (device) => (
+        <div className="text-sm text-gray-500">{device.location}</div>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Estado',
+      sortable: true,
+      render: (device) => (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClass(device.status || '')}`}>
+          {getStatusIcon(device.status || '')}
+          {device.status}
+        </span>
+      )
+    },
+    {
+      key: 'lastSync',
+      header: 'Última sincronización',
+      sortable: true,
+      cellClassName: 'stopPropagation',
+      render: (device) => (
+        <span className="text-sm text-gray-500">
+          {device.lastSync ? new Date(device.lastSync).toLocaleString() : 'Sin sincronizar'}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Acciones',
+      sortable: false,
+      align: 'right',
+      cellClassName: 'stopPropagation',
+      render: (device) => (
+        <div className="flex space-x-2 justify-end">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenOperations(device);
+            }}
+            className="text-blue-600 hover:text-blue-900"
+            title="Operaciones biométricas"
+          >
+            <Activity className="h-5 w-5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenEventos(device);
+            }}
+            className="text-green-600 hover:text-green-900"
+            title="Ver eventos"
+          >
+            <Clock className="h-5 w-5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRestart(device);
+            }}
+            className="text-orange-600 hover:text-orange-900"
+            title="Reiniciar dispositivo"
+          >
+            <RefreshCw className="h-5 w-5" />
+          </button>
+          <div className="relative" style={{ position: "relative" }}>
+            <button
+              onClick={(e) => handleOpenContextMenu(device, e)}
+              className="text-gray-500 hover:text-gray-700"
+              title="Más acciones"
+            >
+              <MoreVertical className="h-5 w-5" />
+            </button>
+            
+            {contextMenuDevice && contextMenuDevice.id === device.id && (
+              <DeviceContextMenu
+                device={device}
+                isOpen={true}
+                onClose={handleCloseContextMenu}
+                onEdit={handleEditDevice}
+                onOpenOperations={handleOpenOperations}
+                onOpenEventos={handleOpenEventos}
+                onRestart={handleRestart}
+                onDelete={handleDeleteDevice}
+              />
+            )}
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  // Opciones de filtro para el componente de filtros
+  const filterOptions = {
+    status: {
+      label: 'Estado',
+      options: [
+        { value: 'all', label: 'Todos los estados' },
+        { value: 'online', label: 'En línea' },
+        { value: 'offline', label: 'Fuera de línea' },
+        { value: 'warning', label: 'Advertencia' },
+        { value: 'maintenance', label: 'Mantenimiento' }
+      ]
+    },
+    type: {
+      label: 'Tipo',
+      options: [
+        { value: 'all', label: 'Todos los tipos' },
+        { value: 'biometric', label: 'Biométrico' },
+        { value: 'access', label: 'Control de Acceso' },
+        { value: 'dining', label: 'Comedor' }
+      ]
+    }
+  };
+
   return (
-    <div className="p-4 max-w-7xl mx-auto">
+    <div className="flex-1 overflow-auto bg-gray-50 p-8">
       {/* Cabecera */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Dispositivos</h1>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Dispositivos</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Administra las dispositivos de las empresas
+          </p>
+        </div>
         <button
           onClick={handleAddDevice}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
         >
-          <Plus className="mr-2 h-5 w-5" />
-          Nuevo dispositivo
+          <Plus className="w-5 h-5" />
+          <span>Nueva Licencia</span>
         </button>
       </div>
 
       {/* Resumen de dispositivos */}
-      <DevicesSummary devices={devices} />
+      <DevicesSummary devices={allDevices} />
 
-      {/* Filtros y búsqueda */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por nombre, ubicación o serie"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      {/* Componente de filtros */}
+      <Filters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar por nombre, ubicación o serie"
+        filterValues={{
+          status: filterStatus,
+          type: filterType
+        }}
+        onFilterChange={handleFilterChange}
+        filterOptions={filterOptions}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        onResetFilters={handleResetFilters}
+      />
+
+      {/* Lista de dispositivos - Condicional según el modo de visualización */}
+      {viewMode === 'list' ? (
+        <div className="bg-white rounded-lg shadow">
+          <SortableTable
+            data={paginatedDevices}
+            columns={columns}
+            keyExtractor={(device) => device.id || ''}
+            emptyMessage="No se encontraron dispositivos con los filtros seleccionados."
+            onRowClick={handleRowClick}
+            initialSortKey={sortKey}
+            initialSortDirection={sortDirection}
+            onSort={handleSort}
+          />
+          
+          {/* Paginación para la vista de lista */}
+          <div className="p-4 border-t border-gray-200">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={allDevices.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+              onItemsPerPageChange={handleItemsPerPageChange}
+              itemsPerPageOptions={[10, 25, 50, 100]}
             />
           </div>
-          <div className="flex space-x-4">
-            <div>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">Todos los estados</option>
-                <option value="online">En línea</option>
-                <option value="offline">Fuera de línea</option>
-                <option value="warning">Advertencia</option>
-                <option value="maintenance">Mantenimiento</option>
-              </select>
-            </div>
-            <div>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">Todos los tipos</option>
-                <option value="biometric">Biométrico</option>
-                <option value="access">Control de Acceso</option>
-                <option value="dining">Comedor</option>
-              </select>
-            </div>
-            <button
-              className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg flex items-center hover:bg-gray-200"
-            >
-              <Filter className="mr-2 h-5 w-5" />
-              Más filtros
-            </button>
-          </div>
         </div>
-      </div>
-
-      {/* Lista de dispositivos */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="overflow-x-auto" style={{ overflowY: "visible" }}>
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nombre
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tipo/Modelo
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ubicación
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Última sincronización
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {devices.map((device) => (
-                <tr 
-                  key={device.id} 
-                  className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => handleRowClick(device)}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        {device.brand === 'zkteco' && (
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold">
-                            ZK
-                          </div>
-                        )}
-                        {device.brand === 'suprema' && (
-                          <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-800 font-bold">
-                            SP
-                          </div>
-                        )}
-                        {device.brand === 'hikvision' && (
-                          <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-800 font-bold">
-                            HK
-                          </div>
-                        )}
-                        {device.brand === 'dahua' && (
-                          <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-800 font-bold">
-                            DH
-                          </div>
-                        )}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{device.name}</div>
-                        <div className="text-sm text-gray-500">SN: {device.serialNumber}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 capitalize">{device.type}</div>
-                    <div className="text-sm text-gray-500">{device.model}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {/* <div className="text-sm text-gray-900">{device.ip}</div> */}
-                    <div className="text-sm text-gray-500">{device.location}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClass(device.status || '')}`}>
-                      {getStatusIcon(device.status || '')}
-                      {device.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>
-                    {device.lastSync ? new Date(device.lastSync).toLocaleString() : 'Sin sincronizar'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex space-x-2 justify-end">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenOperations(device);
-                        }}
-                        className="text-blue-600 hover:text-blue-900"
-                        title="Operaciones biométricas"
-                      >
-                        <Activity className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenEventos(device);
-                        }}
-                        className="text-green-600 hover:text-green-900"
-                        title="Ver eventos"
-                      >
-                        <Clock className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRestart(device);
-                        }}
-                        className="text-orange-600 hover:text-orange-900"
-                        title="Reiniciar dispositivo"
-                      >
-                        <RefreshCw className="h-5 w-5" />
-                      </button>
-                      <div className="relative" style={{ position: "relative" }}>
-                        <button
-                          onClick={(e) => handleOpenContextMenu(device, e)}
-                          className="text-gray-500 hover:text-gray-700"
-                          title="Más acciones"
-                        >
-                          <MoreVertical className="h-5 w-5" />
-                        </button>
-                        
-                        {contextMenuDevice && contextMenuDevice.id === device.id && (
-                          <DeviceContextMenu
-                            device={device}
-                            isOpen={true}
-                            onClose={handleCloseContextMenu}
-                            onEdit={handleEditDevice}
-                            onOpenOperations={handleOpenOperations}
-                            onOpenEventos={handleOpenEventos}
-                            onRestart={handleRestart}
-                            onDelete={handleDeleteDevice}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        
-        {devices.length === 0 && (
-          <div className="py-8 text-center">
-            <p className="text-gray-500">No se encontraron dispositivos con los filtros seleccionados.</p>
-          </div>
-        )}
-      </div>
-
-      {/* Paginación */}
-      <div className="mt-4 flex justify-between items-center">
-        <p className="text-sm text-gray-500">
-          Mostrando {devices.length} de {devicesData.length} dispositivos
-        </p>
-        <div className="flex space-x-2">
-          <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700">
-            Anterior
-          </button>
-          <button className="px-3 py-1 bg-blue-50 border border-blue-300 rounded-lg text-sm text-blue-700">
-            1
-          </button>
-          <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700">
-            Siguiente
-          </button>
-        </div>
-      </div>
+      ) : (
+        <DeviceGrid
+          devices={allDevices}
+          onCardClick={handleRowClick}
+          onMenuClick={handleOpenContextMenu}
+          onOperationsClick={handleOpenOperations}
+          onEventsClick={handleOpenEventos}
+          onRestartClick={handleRestart}
+          contextMenuDevice={contextMenuDevice}
+          renderContextMenu={renderContextMenu}
+          emptyMessage="No se encontraron dispositivos con los filtros seleccionados."
+        />
+      )}
 
       {/* Modal de formulario */}
       {showDeviceForm && (
@@ -466,7 +552,7 @@ export const DevicesScreen: React.FC = () => {
         >
           {toast.type === 'success' && <CheckCircle className="w-5 h-5" />}
           {toast.type === 'error' && <AlertCircle className="w-5 h-5" />}
-          {toast.type === 'warning' && <AlertCircle className="w-5 h-5" />}
+          {toast.type === 'warning' && <AlertCircle className="w-5 w-5" />}
           <p className="text-sm font-medium">{toast.message}</p>
           <button
             onClick={() => setToast(null)}

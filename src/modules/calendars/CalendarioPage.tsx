@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { EmpleadosList } from './components/calendario/EmpleadosList';
 import { CalendarioHeader } from './components/calendario/CalendarioHeader';
 import { CalendarioGrid } from './components/calendario/CalendarioGrid';
+import { ListadoTurnos } from './components/calendario/ListadoTurnos';
 import { TurnoPermisoModal } from './components/calendario/TurnoPermisoModal';
 import { VistaSelector } from './components/calendario/VistaSelector';
 import { PeriodoTipo, AsignacionTurno, AsignacionPermiso } from './interfaces/Calendario';
@@ -11,6 +12,9 @@ import { empleados } from './temp/mock-empleados';
 import { turnos } from './temp/mock-turnos';
 import { permisos } from './temp/mock-permisos';
 import { asignacionesTurnos, asignacionesPermisos } from './temp/mock-asignaciones';
+import { DeleteHorarioModal } from './components/calendario/DeleteHorarioModal';
+import { DetalleHorarioModal } from './components/calendario/DetalleHorarioModal';
+import { TabsFiltros } from './components/calendario/TabsFiltros';
 
 type TipoVista = 'calendario' | 'lista' | 'tarjetas';
 
@@ -36,9 +40,11 @@ const CalendarioPage: React.FC = () => {
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState<{id: string, nombre: string} | null>(null);
   const [fechaSeleccionada, setFechaSeleccionada] = useState<Date | null>(null);
   
-  // Estado para copiar/pegar asignaciones
-  // const [asignacionCopiada, setAsignacionCopiada] = useState<any | null>(null);
-
+  // Estado para modales adicionales
+  const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
+  const [mostrarModalDetalle, setMostrarModalDetalle] = useState(false);
+  const [asignacionSeleccionada] = useState<any>(null);
+  
   // Filtrar empleados cuando cambia el término de búsqueda
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -86,6 +92,16 @@ const CalendarioPage: React.FC = () => {
     }
   }, []);
 
+  // Manejador para cuando se selecciona un empleado desde la lista
+  const handleEmpleadoClick = useCallback((empleado: Empleado) => {
+    setEmpleadoSeleccionado({
+      id: empleado.id,
+      nombre: `${empleado.nombre} ${empleado.apellidos}`
+    });
+    setFechaSeleccionada(new Date()); // Por defecto usamos la fecha actual
+    setModalAbierto(true);
+  }, []);
+
   // Manejador para guardar asignación
   const handleGuardarAsignacion = useCallback((data: any) => {
     if (data.tipo === 'turno') {
@@ -100,6 +116,8 @@ const CalendarioPage: React.FC = () => {
       };
       
       setAsignacionesT(prev => [...prev, nuevaAsignacion]);
+      
+      console.log("Turno guardado para fecha:", data.fechaInicio);
     } else if (data.tipo === 'permiso') {
       // Crear nueva asignación de permiso
       const nuevaAsignacion: AsignacionPermiso = {
@@ -114,8 +132,31 @@ const CalendarioPage: React.FC = () => {
       };
       
       setAsignacionesP(prev => [...prev, nuevaAsignacion]);
+      
+      console.log("Permiso guardado para fecha:", data.fechaInicio, "hasta", data.fechaFin);
     }
+
+    // Cerramos el modal después de guardar
+    setModalAbierto(false);
   }, []);
+
+  // Manejador para eliminar asignación
+  const handleEliminarAsignacion = useCallback((id: string) => {
+    // Verificar si es un turno o un permiso
+    if (id.startsWith('t')) {
+      setAsignacionesT(prev => prev.filter(asig => asig.id !== id));
+    } else if (id.startsWith('p')) {
+      setAsignacionesP(prev => prev.filter(asig => asig.id !== id));
+    }
+    
+    setMostrarModalEliminar(false);
+  }, []);
+
+  // Manejador para ver detalle de asignación
+  // const handleVerDetalle = useCallback((asignacion: any) => {
+  //   setAsignacionSeleccionada(asignacion);
+  //   setMostrarModalDetalle(true);
+  // }, []);
 
   // Manejador para copiar
   const handleCopiar = useCallback(() => {
@@ -129,6 +170,24 @@ const CalendarioPage: React.FC = () => {
     alert("Función de pegar activada - Seleccione donde desea pegar las asignaciones");
   }, []);
 
+  // Determina si mostrar o no el panel de empleados
+  // Se oculta en caso de:
+  // 1. Vista en modo "lista"
+  // 2. Periodo seleccionado es "quincenal" o "mensual"
+  const mostrarPanelEmpleados = tipoVista !== 'lista' && 
+    (periodoSeleccionado === 'diario' || periodoSeleccionado === 'semanal');
+
+  // Layout dinámico basado en la visibilidad del panel de empleados
+  const layoutClases = mostrarPanelEmpleados 
+    ? "grid grid-cols-1 md:grid-cols-4 gap-6" 
+    : "grid grid-cols-1 gap-6";
+  
+  const contenidoPrincipalClases = mostrarPanelEmpleados 
+    ? "md:col-span-3" 
+    : "md:col-span-1";
+
+  const mostrarLeyenda = tipoVista !== 'lista';
+
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold tracking-tight mb-6">Calendario de Turnos y Permisos</h1>
@@ -140,25 +199,22 @@ const CalendarioPage: React.FC = () => {
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Panel lateral de empleados - visible en todas las vistas */}
-        <div className="md:col-span-1">
-          <div className="bg-white p-4 rounded-lg shadow-sm border h-full">
-            <h2 className="font-semibold text-lg mb-4">Empleados</h2>
-            <EmpleadosList 
-              empleados={empleadosFiltrados} 
-              onEmpleadoClick={(empleado) => {
-                setEmpleadoSeleccionado({
-                  id: empleado.id,
-                  nombre: `${empleado.nombre} ${empleado.apellidos}`
-                });
-              }}
-            />
+      <div className={layoutClases}>
+        {/* Panel lateral de empleados - solo visible en ciertas vistas y periodos */}
+        {mostrarPanelEmpleados && (
+          <div className="md:col-span-1">
+            <div className="bg-white p-4 rounded-lg shadow-sm border h-full">
+              <h2 className="font-semibold text-lg mb-4">Empleados</h2>
+              <EmpleadosList 
+                empleados={empleadosFiltrados} 
+                onEmpleadoClick={handleEmpleadoClick}
+              />
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Panel principal - cambia según la vista seleccionada */}
-        <div className="md:col-span-3">
+        <div className={contenidoPrincipalClases}>
           <div className="bg-white p-4 rounded-lg shadow-sm border">
             <CalendarioHeader 
               periodoSeleccionado={periodoSeleccionado}
@@ -188,9 +244,16 @@ const CalendarioPage: React.FC = () => {
             )}
             
             {tipoVista === 'lista' && (
-              <div className="p-8 text-center text-gray-500">
-                Vista de lista - En desarrollo
-              </div>
+              <ListadoTurnos
+                empleados={empleadosFiltrados}
+                turnos={turnos}
+                permisos={permisos}
+                asignacionesTurnos={asignacionesT}
+                asignacionesPermisos={asignacionesP}
+                fechaActual={fechaActual}
+                onEmpleadoClick={handleEmpleadoClick}
+                onCeldaClick={handleCeldaClick}
+              />
             )}
             
             {tipoVista === 'tarjetas' && (
@@ -202,42 +265,15 @@ const CalendarioPage: React.FC = () => {
         </div>
       </div>
       
-      {/* Panel de información sobre turnos y permisos */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <h2 className="font-semibold text-lg mb-4">Turnos de Trabajo</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {turnos.map(turno => (
-              <div key={turno.id} className="flex items-center">
-                <span className={`w-4 h-4 rounded-full mr-2 ${turno.color.split(' ')[0]}`}></span>
-                <div>
-                  <div className="font-semibold">{turno.codigo} - {turno.nombre}</div>
-                  <div className="text-xs text-gray-500">
-                    {turno.horaInicio} - {turno.horaFin}
-                  </div>
-                </div>
-              </div>
-            ))}
+      {/* Panel de información sobre turnos y permisos - solo visible en ciertas vistas */}
+      {mostrarLeyenda && (
+        <div className="mt-6">
+          {/* Tabs de filtros */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <TabsFiltros turnos={turnos} permisos={permisos} />
           </div>
         </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <h2 className="font-semibold text-lg mb-4">Permisos</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {permisos.map(permiso => (
-              <div key={permiso.id} className="flex items-center">
-                <span className={`w-4 h-4 rounded-full mr-2 ${permiso.color.split(' ')[0]}`}></span>
-                <div>
-                  <div className="font-semibold">{permiso.codigo} - {permiso.nombre}</div>
-                  {permiso.descripcion && (
-                    <div className="text-xs text-gray-500">{permiso.descripcion}</div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
       
       {/* Modal para agregar/editar turnos y permisos */}
       {empleadoSeleccionado && fechaSeleccionada && (
@@ -250,6 +286,29 @@ const CalendarioPage: React.FC = () => {
           empleadoNombre={empleadoSeleccionado.nombre}
           fechaInicial={fechaSeleccionada}
           onGuardar={handleGuardarAsignacion}
+        />
+      )}
+      
+      {/* Modal para eliminación */}
+      {mostrarModalEliminar && asignacionSeleccionada && (
+        <DeleteHorarioModal 
+          tipoAsignacion={asignacionSeleccionada.tipo === 'turno' ? 'Turno' : 'Permiso'}
+          nombreEmpleado={asignacionSeleccionada.empleado}
+          fechaAsignacion={asignacionSeleccionada.fechaStr}
+          onDelete={() => handleEliminarAsignacion(asignacionSeleccionada.id)}
+          onCancel={() => setMostrarModalEliminar(false)}
+        />
+      )}
+      
+      {/* Modal para ver detalles */}
+      {mostrarModalDetalle && asignacionSeleccionada && (
+        <DetalleHorarioModal 
+          asignacion={asignacionSeleccionada}
+          onClose={() => setMostrarModalDetalle(false)}
+          onEdit={() => {
+            setMostrarModalDetalle(false);
+            handleCeldaClick(asignacionSeleccionada.empleadoId, asignacionSeleccionada.fecha);
+          }}
         />
       )}
     </div>
